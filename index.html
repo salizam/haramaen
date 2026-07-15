@@ -991,8 +991,28 @@ const CITY={me:{t:'Lokasi Saya'}, makkah:{t:'Makkah',lat:21.4225,lng:39.8262,met
 /* Pilih kaedah pengiraan waktu solat ikut zon waktu peranti (JAKIM utk Malaysia, dll) */
 const TZ_METHOD={'Asia/Kuala_Lumpur':17,'Asia/Kuching':17,'Asia/Singapore':11,'Asia/Brunei':17,'Asia/Jakarta':20,'Asia/Pontianak':20,'Asia/Makassar':20,'Asia/Jayapura':20,'Asia/Riyadh':4,'Asia/Mecca':4,'Asia/Dubai':16,'Asia/Qatar':10,'Asia/Kuwait':9,'Asia/Bahrain':8,'Asia/Karachi':1,'Asia/Dhaka':1,'Asia/Tehran':7,'Africa/Cairo':5,'Europe/Istanbul':13,'Africa/Tunis':18,'Africa/Algiers':19,'Africa/Casablanca':21,'America/New_York':2,'America/Chicago':2,'America/Denver':2,'America/Los_Angeles':2,'America/Toronto':2};
 function localMethod(){ try{ return TZ_METHOD[Intl.DateTimeFormat().resolvedOptions().timeZone]||3; }catch(e){ return 3; } }
-function locName(){ if(state.solCity!=='me') return CITY[state.solCity].t; if(prayerData&&prayerData.meta&&prayerData.meta.timezone) return prayerData.meta.timezone.split('/').pop().replace(/_/g,' '); return 'Lokasi Saya'; }
-let prayerTimings=null, prayerData=null, prayerTimer=null;
+let prayerTimings=null, prayerData=null, prayerTimer=null, prayLoc='Lokasi Saya', praySrc='';
+const MY_TZ=['Asia/Kuala_Lumpur','Asia/Kuching'];
+function isMY(){ try{ return MY_TZ.includes(Intl.DateTimeFormat().resolvedOptions().timeZone); }catch(e){ return false; } }
+/* GPS -> zon JAKIM (mirror CORS bagi data rasmi JAKIM) */
+async function jakimZone(lat,lng){
+  try{ const j=await fetch('https://api.waktusolat.app/zones/'+lat+'/'+lng,{cache:'no-store'}).then(r=>r.json());
+    if(j&&j.zone) return {zone:j.zone, name:(j.district||j.zone)}; }catch(e){}
+  return null;
+}
+/* Waktu solat RASMI JAKIM (e-Solat) utk sesuatu zon -> format serasi + label tarikh */
+async function jakimTimes(zone){
+  try{ const j=await fetch('https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=today&zone='+zone,{cache:'no-store'}).then(r=>r.json());
+    const t=j&&j.prayerTime&&j.prayerTime[0];
+    if(t&&t.isha) return {Fajr:t.fajr.slice(0,5),Sunrise:t.syuruk.slice(0,5),Dhuhr:t.dhuhr.slice(0,5),Asr:t.asr.slice(0,5),Maghrib:t.maghrib.slice(0,5),Isha:t.isha.slice(0,5),_label:t.date+' · '+t.hijri+'H',_src:'JAKIM e-Solat'};
+  }catch(e){}
+  try{ const j=await fetch('https://api.waktusolat.app/v2/solat/'+zone,{cache:'no-store'}).then(r=>r.json());
+    const d=(j.prayers||[]).find(p=>p.day===new Date().getDate());
+    if(d){ const f=ts=>new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kuala_Lumpur',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(ts*1000));
+      return {Fajr:f(d.fajr),Sunrise:f(d.syuruk),Dhuhr:f(d.dhuhr),Asr:f(d.asr),Maghrib:f(d.maghrib),Isha:f(d.isha),_label:(d.hijri||''),_src:'JAKIM'}; }
+  }catch(e){}
+  return null;
+}
 async function loadPrayerTimes(){ await fetchSolah('me', true); }
 async function fetchSolah(city, silent){
   state.solCity=city;
@@ -1002,13 +1022,25 @@ async function fetchSolah(city, silent){
   if(city==='me'){
     try{ const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:8000,maximumAge:3600000}));
       lat=pos.coords.latitude; lng=pos.coords.longitude; }
-    catch(e){ if(!silent) toast('Lokasi tidak dibenarkan — papar waktu Makkah.'); state.solCity='makkah'; lat=CITY.makkah.lat; lng=CITY.makkah.lng; method=4; renderSolCity(); }
+    catch(e){ if(!silent) toast('Lokasi tidak dibenarkan — papar waktu Makkah.'); state.solCity='makkah'; city='makkah'; lat=CITY.makkah.lat; lng=CITY.makkah.lng; method=4; renderSolCity(); }
   } else { lat=CITY[city].lat; lng=CITY[city].lng; }
-  try{
-    const ts=Math.floor(Date.now()/1000);
-    const r=await fetch('https://api.aladhan.com/v1/timings/'+ts+'?latitude='+lat+'&longitude='+lng+'&method='+method);
-    const j=await r.json(); prayerData=j.data; prayerTimings=j.data.timings;
-  }catch(e){ prayerTimings=null; prayerData=null; }
+  prayerTimings=null; prayerData=null; let done=false;
+  /* Malaysia: guna waktu solat RASMI JAKIM ikut zon GPS (padan e-Solat) */
+  if(city==='me' && isMY()){
+    try{ const z=await jakimZone(lat,lng);
+      if(z){ const t=await jakimTimes(z.zone);
+        if(t){ prayerTimings=t; prayerData={dateLabel:t._label}; prayLoc=z.name; praySrc=t._src; done=true; } } }catch(e){}
+  }
+  if(!done){
+    try{
+      const ts=Math.floor(Date.now()/1000);
+      const r=await fetch('https://api.aladhan.com/v1/timings/'+ts+'?latitude='+lat+'&longitude='+lng+'&method='+method);
+      const j=await r.json(); prayerTimings=j.data.timings;
+      const g=j.data.date.gregorian, hj=j.data.date.hijri;
+      prayerData={dateLabel:g.weekday.en+', '+g.day+' '+g.month.en+' '+g.year+' · '+hj.day+' '+hj.month.en+' '+hj.year+'H'};
+      praySrc='Aladhan'; prayLoc=(city==='me')?(j.data.meta.timezone.split('/').pop().replace(/_/g,' ')):CITY[city].t;
+    }catch(e){ prayerTimings=null; prayerData=null; }
+  }
   renderPrayer(); renderSolList();
   if(prayerTimer) clearInterval(prayerTimer);
   prayerTimer=setInterval(()=>{renderPrayer();renderSolList();},30000);
@@ -1038,14 +1070,14 @@ function renderSolList(){
   const dEl=document.getElementById('solDate'), nEl=document.getElementById('solNext'), lEl=document.getElementById('solList');
   if(!lEl) return;
   if(!prayerTimings){ lEl.innerHTML='<div class="empty">Gagal memuat waktu solat. Semak sambungan.</div>'; if(nEl)nEl.innerHTML=''; return; }
-  if(dEl && prayerData){ const g=prayerData.date.gregorian, hj=prayerData.date.hijri;
-    dEl.textContent=`${g.weekday.en}, ${g.day} ${g.month.en} ${g.year} · ${hj.day} ${hj.month.en} ${hj.year}H`; }
+  if(dEl && prayerData){ dEl.textContent=prayerData.dateLabel||''; }
   const next=nextPrayer();
-  if(nEl) nEl.innerHTML=`<div class="sol-next"><small>Solat seterusnya di ${locName()}</small><b>${next.name} · ${fmtT(next.dt)}</b><small style="opacity:.85">${document.getElementById('pCount').textContent}</small></div>`;
+  if(nEl) nEl.innerHTML=`<div class="sol-next"><small>Solat seterusnya di ${prayLoc}</small><b>${next.name} · ${fmtT(next.dt)}</b><small style="opacity:.85">${document.getElementById('pCount').textContent}</small></div>`;
   const rows=[['Fajr','Subuh'],['Sunrise','Syuruk'],['Dhuhr','Zohor'],['Asr','Asar'],['Maghrib','Maghrib'],['Isha','Isyak']];
   lEl.innerHTML=rows.map(r=>{ const t=prayerTimings[r[0]]; if(!t) return '';
     const on=(r[1]===next.name); const d=parseT(t.slice(0,5));
-    return `<div class="sol-row ${on?'on':''}"><div class="nm"><span class="di">${svg(PICON[r[1]]||'mosque')}</span> ${r[1]}</div><div class="tm">${fmtT(d)}</div></div>`;}).join('');
+    return `<div class="sol-row ${on?'on':''}"><div class="nm"><span class="di">${svg(PICON[r[1]]||'mosque')}</span> ${r[1]}</div><div class="tm">${fmtT(d)}</div></div>`;}).join('')
+    + (praySrc?`<div class="tag" style="text-align:center;margin-top:10px;opacity:.8">Sumber: ${praySrc}</div>`:'');
 }
 
 /* ============ HELPERS ============ */
