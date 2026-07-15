@@ -638,17 +638,24 @@ async function showApp(user){
   }
 }
 async function initAuth(){
-  const returning = isReturningFromOAuth();
+  const hasToken = /access_token=|[?&]code=/.test(location.hash + location.search);
+  const hasError = /error=/.test(location.hash + location.search);
+  if(hasError){
+    let desc='Log masuk Google gagal. Sila cuba lagi.';
+    try{ const p=new URLSearchParams((location.search+'&'+location.hash.replace(/^#/,'')).replace(/^&/,'')); desc=(p.get('error_description')||p.get('error')||desc).replace(/\+/g,' '); }catch(e){}
+    try{ history.replaceState(null,'',location.origin+location.pathname); }catch(e){}
+    showLogin(); setMsg(desc);
+  }
   try{
     const {data:{session}} = await sb.auth.getSession();
     if(session) showApp(session.user);
-    else if(!returning) showLogin();
+    else if(!hasToken && !hasError) showLogin();
     sb.auth.onAuthStateChange((event,sess)=>{
       if(sess && sess.user) showApp(sess.user);
       else if(event==='SIGNED_OUT'){ appReady=false; state.user=null; showLogin(); }
     });
-    if(returning){ setTimeout(async()=>{ const {data:{session:s}}=await sb.auth.getSession(); if(!s) showLogin(); }, 4000); }
-  }catch(e){ if(!returning) showLogin(); setMsg('Tak dapat sambung ke pelayan.'); }
+    if(hasToken && !hasError){ setTimeout(async()=>{ const {data:{session:s}}=await sb.auth.getSession(); if(!s){ showLogin(); setMsg('Log masuk tak selesai. Sila cuba lagi.'); } }, 5000); }
+  }catch(e){ showLogin(); setMsg('Tak dapat sambung ke pelayan.'); }
 }
 
 /* ============ HOME ============ */
