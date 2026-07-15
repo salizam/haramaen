@@ -529,7 +529,7 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY, {
 
 /* ============ STATE ============ */
 const MASJIDIL_HARAM = {lat:21.4225, lng:39.8262};
-const state = { user:null, myHotel:null, agRating:0, agPrice:null, hoBudget:null, duas:[], solCity:'makkah' };
+const state = { user:null, myHotel:null, agRating:0, agPrice:null, hoBudget:null, duas:[], solCity:'me' };
 
 /* ============ ICONS (inline SVG) ============ */
 const SVG={
@@ -709,7 +709,7 @@ const MENU=[
   {t:'Kirim Doa',          s:'Hantar doa anda ke Tanah Suci',            c:'#6d4bb0', i:'dua',    v:'dua'},
   {t:'Agensi Umrah',       s:'Cari & pilih agensi berdaftar',            c:'#10808e', i:'plane',  v:'agency'},
   {t:'Direktori Perubatan',s:'Senarai klinik & hospital Makkah/Madinah', c:'#a56a2e', i:'med',    v:'dir'},
-  {t:'Waktu Solat',        s:'Waktu solat tepat Makkah & Madinah',       c:'#2f74c0', i:'mosque', v:'solah'},
+  {t:'Waktu Solat',        s:'Waktu solat tempatan ikut lokasi anda',       c:'#2f74c0', i:'mosque', v:'solah'},
   {t:'Penginapan',         s:'Hotel & penginapan pilihan terbaik',       c:'#d99a2b', i:'bed',    v:'stay'},
   {t:'Orang Hilang',       s:'Pusat maklumat & bantuan',                 c:'#2f9e57', i:'pin',    v:'lost'},
   {t:'Berita Umrah',       s:'Berita & info terkini umrah & haji',       c:'#2d63b8', i:'book',   v:'news'},
@@ -979,21 +979,26 @@ function reportLost(){
 /* ============ WAKTU SOLAT ============ */
 const PRAYERS=[['Fajr','Subuh'],['Dhuhr','Zohor'],['Asr','Asar'],['Maghrib','Maghrib'],['Isha','Isyak']];
 const PICON={Subuh:'mosque',Syuruk:'clock',Zohor:'mosque',Asar:'mosque',Maghrib:'mosque',Isyak:'mosque'};
-const CITY={me:{t:'Lokasi Saya'}, makkah:{t:'Makkah',lat:21.4225,lng:39.8262}, madinah:{t:'Madinah',lat:24.4672,lng:39.6111}};
+const CITY={me:{t:'Lokasi Saya'}, makkah:{t:'Makkah',lat:21.4225,lng:39.8262,method:4}, madinah:{t:'Madinah',lat:24.4672,lng:39.6111,method:4}};
+/* Pilih kaedah pengiraan waktu solat ikut zon waktu peranti (JAKIM utk Malaysia, dll) */
+const TZ_METHOD={'Asia/Kuala_Lumpur':17,'Asia/Kuching':17,'Asia/Singapore':11,'Asia/Brunei':17,'Asia/Jakarta':20,'Asia/Pontianak':20,'Asia/Makassar':20,'Asia/Jayapura':20,'Asia/Riyadh':4,'Asia/Mecca':4,'Asia/Dubai':16,'Asia/Qatar':10,'Asia/Kuwait':9,'Asia/Bahrain':8,'Asia/Karachi':1,'Asia/Dhaka':1,'Asia/Tehran':7,'Africa/Cairo':5,'Europe/Istanbul':13,'Africa/Tunis':18,'Africa/Algiers':19,'Africa/Casablanca':21,'America/New_York':2,'America/Chicago':2,'America/Denver':2,'America/Los_Angeles':2,'America/Toronto':2};
+function localMethod(){ try{ return TZ_METHOD[Intl.DateTimeFormat().resolvedOptions().timeZone]||3; }catch(e){ return 3; } }
+function locName(){ if(state.solCity!=='me') return CITY[state.solCity].t; if(prayerData&&prayerData.meta&&prayerData.meta.timezone) return prayerData.meta.timezone.split('/').pop().replace(/_/g,' '); return 'Lokasi Saya'; }
 let prayerTimings=null, prayerData=null, prayerTimer=null;
-async function loadPrayerTimes(){ await fetchSolah('makkah', true); }
+async function loadPrayerTimes(){ await fetchSolah('me', true); }
 async function fetchSolah(city, silent){
   state.solCity=city;
   renderSolCity();
   let lat=CITY.makkah.lat, lng=CITY.makkah.lng;
+  let method=(city==='me')?localMethod():(CITY[city].method||4);
   if(city==='me'){
-    try{ const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:6000,maximumAge:3600000}));
+    try{ const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:8000,maximumAge:3600000}));
       lat=pos.coords.latitude; lng=pos.coords.longitude; }
-    catch(e){ if(!silent) toast('Lokasi tidak dibenarkan — papar Makkah.'); state.solCity='makkah'; lat=CITY.makkah.lat; lng=CITY.makkah.lng; renderSolCity(); }
+    catch(e){ if(!silent) toast('Lokasi tidak dibenarkan — papar waktu Makkah.'); state.solCity='makkah'; lat=CITY.makkah.lat; lng=CITY.makkah.lng; method=4; renderSolCity(); }
   } else { lat=CITY[city].lat; lng=CITY[city].lng; }
   try{
     const ts=Math.floor(Date.now()/1000);
-    const r=await fetch('https://api.aladhan.com/v1/timings/'+ts+'?latitude='+lat+'&longitude='+lng+'&method=4');
+    const r=await fetch('https://api.aladhan.com/v1/timings/'+ts+'?latitude='+lat+'&longitude='+lng+'&method='+method);
     const j=await r.json(); prayerData=j.data; prayerTimings=j.data.timings;
   }catch(e){ prayerTimings=null; prayerData=null; }
   renderPrayer(); renderSolList();
@@ -1028,7 +1033,7 @@ function renderSolList(){
   if(dEl && prayerData){ const g=prayerData.date.gregorian, hj=prayerData.date.hijri;
     dEl.textContent=`${g.weekday.en}, ${g.day} ${g.month.en} ${g.year} · ${hj.day} ${hj.month.en} ${hj.year}H`; }
   const next=nextPrayer();
-  if(nEl) nEl.innerHTML=`<div class="sol-next"><small>Solat seterusnya di ${CITY[state.solCity].t}</small><b>${next.name} · ${fmtT(next.dt)}</b><small style="opacity:.85">${document.getElementById('pCount').textContent}</small></div>`;
+  if(nEl) nEl.innerHTML=`<div class="sol-next"><small>Solat seterusnya di ${locName()}</small><b>${next.name} · ${fmtT(next.dt)}</b><small style="opacity:.85">${document.getElementById('pCount').textContent}</small></div>`;
   const rows=[['Fajr','Subuh'],['Sunrise','Syuruk'],['Dhuhr','Zohor'],['Asr','Asar'],['Maghrib','Maghrib'],['Isha','Isyak']];
   lEl.innerHTML=rows.map(r=>{ const t=prayerTimings[r[0]]; if(!t) return '';
     const on=(r[1]===next.name); const d=parseT(t.slice(0,5));
