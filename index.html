@@ -103,6 +103,9 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .seg button{flex:1; border:0; background:none; padding:9px; border-radius:9px; font-weight:700;
     font-size:12.5px; color:var(--muted); cursor:pointer}
   .seg button.on{background:#fff; color:var(--green); box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  .dir-filter{display:flex; align-items:center; gap:10px; margin-bottom:14px}
+  .dir-filter label{font-size:12.5px; font-weight:700; color:var(--muted); flex:none}
+  .dir-filter select{max-width:280px}
   .list-row{display:flex; gap:12px; align-items:flex-start}
   .thumb{width:52px;height:52px;border-radius:12px;flex:none;display:grid;place-items:center;font-size:24px;background:#eef4f1}
   .row-between{display:flex; justify-content:space-between; align-items:center; gap:8px}
@@ -262,10 +265,12 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     /* Bottom nav */
     .bottomnav{display:flex; position:fixed; bottom:0; left:0; right:0; background:#fff;
       border-top:1px solid var(--line); z-index:60; padding-bottom:env(safe-area-inset-bottom)}
-    .bn{flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 2px 7px;
+    .bn{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 2px 7px;
       border:0; background:none; color:var(--muted); font-family:inherit; cursor:pointer}
-    .bn svg{width:22px;height:22px} .bn span{font-size:10px; font-weight:600}
-    .bn.active{color:var(--green)}
+    .bn .bnfi{width:33px;height:33px;border-radius:10px;display:grid;place-items:center;color:#fff;transition:transform .12s,box-shadow .12s}
+    .bn .bnfi img{width:20px;height:20px;object-fit:contain} .bn .bnfi svg{width:18px;height:18px}
+    .bn:not(.active) .bnfi{opacity:.58} .bn span{font-size:10px; font-weight:600; white-space:nowrap}
+    .bn.active{color:var(--green)} .bn.active .bnfi{transform:translateY(-1px); box-shadow:0 4px 11px rgba(0,0,0,.2)}
   }
   @media(max-width:400px){
     .feat-grid{grid-template-columns:repeat(3,1fr)}
@@ -449,7 +454,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div class="section-title">Direktori &amp; Servis<span class="u"></span></div>
         <div class="seg">
           <button class="on" onclick="dirTab('med',this)">Perubatan</button>
-          <button onclick="dirTab('svc',this)">Servis Jemaah</button>
+          <button onclick="dirTab('svc',this)">Servis</button>
         </div>
         <div id="dir-med"></div>
         <div id="dir-svc" style="display:none"></div>
@@ -538,7 +543,7 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY, {
 
 /* ============ STATE ============ */
 const MASJIDIL_HARAM = {lat:21.4225, lng:39.8262};
-const state = { user:null, myHotel:null, agRating:0, agPrice:null, hoBudget:null, duas:[], solCity:'me' };
+const state = { user:null, myHotel:null, agRating:0, agPrice:null, hoBudget:null, duas:[], solCity:'me', medFilter:'all', svcFilter:'all' };
 
 /* ============ ICONS (inline SVG) ============ */
 const SVG={
@@ -573,8 +578,8 @@ const NAV=[
   {v:'solah',  t:'Waktu Solat',        i:'mosque'},
 ];
 const BOTTOM=[
-  {v:'home',t:'Utama',i:'home'},{v:'agency',t:'Agensi',i:'plane'},
-  {v:'dua',t:"Du'a",i:'dua'},{v:'solah',t:'Solat',i:'mosque'},{v:'stay',t:'Nginap',i:'bed'},
+  {v:'home',t:'Utama',i:'home',c:'#0d5c46'},{v:'agency',t:'Agensi',i:'plane',c:'#10808e'},
+  {v:'dua',t:"Du'a",i:'dua',c:'#6d4bb0'},{v:'solah',t:'Solat',i:'mosque',c:'#2f74c0'},{v:'stay',t:'Penginapan',i:'bed',c:'#d99a2b'},
 ];
 const TITLES={home:"HARAMAEN",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
   dir:"Direktori & Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat"};
@@ -582,7 +587,7 @@ function buildNav(){
   document.getElementById('sbNav').innerHTML=NAV.map(n=>
     `<button class="sb-link" data-v="${n.v}" onclick="go('${n.v}')"><span class="ico" data-i="${n.i}"></span> ${n.t}</button>`).join('');
   document.getElementById('bottomNav').innerHTML=BOTTOM.map(n=>
-    `<button class="bn" data-v="${n.v}" onclick="go('${n.v}')"><span class="ico" data-i="${n.i}"></span><span>${n.t}</span></button>`).join('');
+    `<button class="bn" data-v="${n.v}" onclick="go('${n.v}')"><span class="bnfi" style="background:${n.c}">${ICONS[n.i]?`<img src="${ICONS[n.i]}" alt="" draggable="false">`:`<span class="ico" data-i="${n.i}"></span>`}</span><span>${n.t}</span></button>`).join('');
   paintIcons();
 }
 function go(v){
@@ -882,32 +887,43 @@ function dirTab(t,el){
   el.classList.add('on');
 }
 function renderMed(){
+  const types=[...new Set(HOSPITALS.map(h=>h.type))];
+  const sel=state.medFilter||'all';
+  const list=HOSPITALS.filter(h=>sel==='all'||h.type===sel);
+  const opts=`<option value="all"${sel==='all'?' selected':''}>Semua jenis</option>`+types.map(t=>`<option value="${t}"${sel===t?' selected':''}>${t}</option>`).join('');
   document.getElementById('dir-med').innerHTML=
+    `<div class="dir-filter"><label>Jenis</label><select onchange="state.medFilter=this.value;renderMed()">${opts}</select></div>`+
     `<div class="muted" style="font-size:12.5px;margin-bottom:10px">Sumber perubatan & kecemasan — berguna untuk jemaah DIY Umrah. 🚑</div>`+
-    HOSPITALS.map(h=>`<div class="card"><div class="list-row">
+    (list.map(h=>`<div class="card"><div class="list-row">
       <div class="thumb">${h.icon}</div><div style="flex:1">
       <div class="row-between"><b>${h.name}</b><span class="pill ${h.type==='Insurans'?'blue':(h.type==='Farmasi'?'gold':'red')}">${h.type}</span></div>
       <div class="tag">${h.tag}${h.dist!==null?' · 📍 '+h.dist+' km':''}</div>
       <div class="row-between" style="margin-top:8px">
         <span class="tag">☎ ${h.tel}</span>
         <button class="btn ghost sm" onclick="toast('Menghubungi ${h.name}…')">Hubungi</button>
-      </div></div></div></div>`).join('');
+      </div></div></div></div>`).join('') || `<div class="empty">Tiada rekod untuk jenis ini.</div>`);
 }
 function renderSvc(){
   const cats=[
-    {key:['Mutawwif','Mutawwifah'], title:'🧕 Mutawwif / Mutawwifah'},
-    {key:['Dobi'], title:'🧺 Dobi (Laundry)'},
-    {key:['Teksi','Pengangkutan','e-Hailing'], title:'🚕 Pengangkutan & Teksi'},
-    {key:['Marketplace'], title:'🛍️ Beli-belah / Marketplace'},
+    {id:'mutawwif', key:['Mutawwif','Mutawwifah'], title:'🧕 Mutawwif / Mutawwifah', label:'Mutawwif / Mutawwifah'},
+    {id:'dobi', key:['Dobi'], title:'🧺 Dobi (Laundry)', label:'Dobi'},
+    {id:'transport', key:['Teksi','Pengangkutan','e-Hailing'], title:'🚕 Pengangkutan & Teksi', label:'Pengangkutan & Teksi'},
+    {id:'market', key:['Marketplace'], title:'🛍️ Beli-belah / Marketplace', label:'Marketplace'},
   ];
-  let html=`<div class="card" style="background:linear-gradient(120deg,#fbf3d8,#fff);border-color:#f0e2b8">
+  const sel=state.svcFilter||'all';
+  const opts=`<option value="all"${sel==='all'?' selected':''}>Semua kategori</option>`+cats.map(c=>`<option value="${c.id}"${sel===c.id?' selected':''}>${c.label}</option>`).join('');
+  let html=`<div class="dir-filter"><label>Kategori</label><select onchange="state.svcFilter=this.value;renderSvc()">${opts}</select></div>`;
+  html+=`<div class="card" style="background:linear-gradient(120deg,#fbf3d8,#fff);border-color:#f0e2b8">
       <div class="row-between"><b>💱 Kadar Tukaran (SAR)</b><span class="pill gold">Anggaran</span></div>
       <div class="kv"><span>1 SAR (Riyal Saudi)</span><b>RM ${SAR_RATE.toFixed(2)}</b></div>
       <div class="kv"><span>RM 1,000 ≈</span><b>SAR ${(1000/SAR_RATE).toFixed(0)}</b></div>
     </div>`;
+  let shown=0;
   cats.forEach(c=>{
+    if(sel!=='all'&&sel!==c.id) return;
     const items=SERVICES.filter(s=>c.key.includes(s.tag));
     if(!items.length) return;
+    shown+=items.length;
     html+=`<div class="section-title" style="font-size:15px;margin-top:6px">${c.title}</div>`;
     html+=items.map(s=>`<div class="card"><div class="list-row">
       <div class="thumb">${s.icon}</div><div style="flex:1">
@@ -915,6 +931,7 @@ function renderSvc(){
       <div class="tag">${s.desc}</div>
       </div></div></div>`).join('');
   });
+  if(!shown) html+=`<div class="empty">Tiada rekod untuk kategori ini.</div>`;
   document.getElementById('dir-svc').innerHTML=html;
 }
 
