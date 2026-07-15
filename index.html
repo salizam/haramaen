@@ -478,10 +478,9 @@
 
     </main>
   </div>
+  <!-- BOTTOM NAV (mobile) -->
+  <nav class="bottomnav" id="bottomNav"></nav>
 </div>
-
-<!-- BOTTOM NAV (mobile) -->
-<nav class="bottomnav" id="bottomNav"></nav>
 
 <div class="toast" id="toast"></div>
 
@@ -611,7 +610,7 @@ async function authPrimary(){
 async function signInGoogle(){
   setMsg('Membuka log masuk Google…');
   try{
-    const {error}=await sb.auth.signInWithOAuth({provider:'google', options:{redirectTo:location.href.split('#')[0]}});
+    const {error}=await sb.auth.signInWithOAuth({provider:'google', options:{redirectTo:location.origin+location.pathname}});
     if(error) setMsg('Log masuk Google belum disediakan. Guna emel & kata laluan buat masa ini.');
   }catch(e){ setMsg('Log masuk Google belum disediakan. Guna emel & kata laluan buat masa ini.'); }
 }
@@ -621,8 +620,12 @@ function showLogin(){
   document.getElementById('login').style.display='';
   document.getElementById('app').style.display='none';
 }
+function isReturningFromOAuth(){
+  return /access_token=|[?&]code=|error=/.test(location.hash + location.search);
+}
 async function showApp(user){
   state.user=user;
+  if(isReturningFromOAuth()){ try{ history.replaceState(null,'',location.origin+location.pathname); }catch(e){} }
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='';
   const md=user.user_metadata||{};
@@ -635,14 +638,17 @@ async function showApp(user){
   }
 }
 async function initAuth(){
+  const returning = isReturningFromOAuth();
   try{
     const {data:{session}} = await sb.auth.getSession();
-    if(session) showApp(session.user); else showLogin();
+    if(session) showApp(session.user);
+    else if(!returning) showLogin();
     sb.auth.onAuthStateChange((event,sess)=>{
       if(sess && sess.user) showApp(sess.user);
       else if(event==='SIGNED_OUT'){ appReady=false; state.user=null; showLogin(); }
     });
-  }catch(e){ showLogin(); setMsg('Tak dapat sambung ke pelayan.'); }
+    if(returning){ setTimeout(async()=>{ const {data:{session:s}}=await sb.auth.getSession(); if(!s) showLogin(); }, 4000); }
+  }catch(e){ if(!returning) showLogin(); setMsg('Tak dapat sambung ke pelayan.'); }
 }
 
 /* ============ HOME ============ */
