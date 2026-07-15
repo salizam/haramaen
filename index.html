@@ -116,17 +116,16 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
 
   /* ---------- Hero (prayer) ---------- */
   .hero{position:relative; overflow:hidden; border-radius:22px; margin-bottom:26px;
-    background:linear-gradient(115deg,#0c5340 0%,#0a3b2d 60%,#0d4a38 100%); color:#fff;
-    min-height:158px; display:flex; align-items:center; padding:26px 30px}
+    background:linear-gradient(100deg,rgba(8,50,38,.92) 0%,rgba(8,50,38,.58) 50%,rgba(9,58,44,.28) 100%), url('https://images.unsplash.com/photo-1579305796288-c534f6cf17ab?w=1200&q=68&auto=format&fit=crop') center/cover, #0c5340; color:#fff;
+    min-height:172px; display:flex; align-items:center; padding:26px 30px}
   .hero .h-info{z-index:2}
   .hero .h-info small{opacity:.82; font-size:13px}
   .hero .h-info b{display:block; font-size:34px; font-weight:800; line-height:1.1; margin:3px 0}
   .hero .h-time{font-size:20px; font-weight:700; opacity:.95}
   .hero .h-count{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;opacity:.85}
-  .hero .h-kaaba{position:absolute; right:0; top:0; bottom:0; width:46%; z-index:1; opacity:.9}
+  .hero .h-kaaba{display:none}
   .hero .h-kaaba svg{position:absolute; right:0; bottom:0; height:100%; width:auto}
-  .hero:after{content:""; position:absolute; inset:0; z-index:1;
-    background:radial-gradient(circle at 88% 24%, rgba(255,255,255,.14) 0 1px, transparent 1px) 0 0/18px 18px; opacity:.5}
+  .hero:after{display:none}
 
   /* ---------- Brand block ---------- */
   .brandblock{margin:0 0 22px}
@@ -157,6 +156,12 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .pkg-head .u{display:block;width:52px;height:4px;background:var(--gold);border-radius:2px;margin-top:8px}
   .pkg-head .sub{font-size:12.5px; color:var(--muted); margin-top:3px}
   .pkg-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+  .ktable-wrap{overflow-x:auto; border-radius:14px; border:1px solid var(--line); box-shadow:var(--shadow); -webkit-overflow-scrolling:touch}
+  .ktable{width:100%; border-collapse:collapse; font-size:13.5px; background:#fff; min-width:560px}
+  .ktable th{background:#7a1f3d; color:#fff; font-weight:700; padding:12px 14px; text-align:left; white-space:nowrap}
+  .ktable td{padding:11px 14px; border-top:1px solid var(--line); color:var(--ink); vertical-align:top}
+  .ktable tbody tr:nth-child(even) td{background:#faf6f7}
+  .ktable td[data-l="Hubungi"]{white-space:nowrap; font-variant-numeric:tabular-nums}
   .pkgcard{position:relative; overflow:hidden; border-radius:18px; padding:20px; min-height:214px;
     display:flex; flex-direction:column; justify-content:flex-end; border:1px solid var(--line);
     background:linear-gradient(160deg,#fbfcfb,#eef1ee); box-shadow:var(--shadow)}
@@ -361,13 +366,17 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div class="pkg-sec">
           <div class="pkg-head">
             <div>
-              <h3>Haji &amp; Umrah 2026</h3>
+              <h3>Kursus Umrah</h3>
               <div class="u"></div>
-              <div class="sub">Perjalanan ke Tanah Suci</div>
+              <div class="sub">Jadual kursus &amp; kelas persediaan umrah</div>
             </div>
-            <button class="btn sm" style="width:auto" onclick="jump('agency')">Lihat semua pakej →</button>
           </div>
-          <div class="pkg-grid" id="pkgGrid"></div>
+          <div class="ktable-wrap">
+            <table class="ktable">
+              <thead><tr><th>Tarikh</th><th>Masa</th><th>Lokasi</th><th>Hubungi</th></tr></thead>
+              <tbody id="kursusBody"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -714,11 +723,16 @@ const MENU=[
   {t:'Orang Hilang',       s:'Pusat maklumat & bantuan',                 c:'#2f9e57', i:'pin',    v:'lost'},
   {t:'Berita Umrah',       s:'Berita & info terkini umrah & haji',       c:'#2d63b8', i:'book',   v:'news'},
 ];
-const PKGS=[
-  {b:'EKONOMI', c:'#1c7d54', amt:'RM6,800'},
-  {b:'STANDARD',c:'#6d4bb0', amt:'RM8,700'},
-  {b:'PREMIUM', c:'#b5843a', amt:'RM11,800'},
+const KURSUS=[
+  {tarikh:'1 Ogos 2026 (Sabtu)',      masa:'8:00 pagi - 12:00 tengahari', lokasi:'Masjid Bandar Baru Bangi, Selangor', hubungi:'012-345 6789'},
+  {tarikh:'15 Ogos 2026 (Sabtu)',     masa:'9:00 pagi - 1:00 petang',     lokasi:'Masjid Al-Falah USJ 9, Subang Jaya', hubungi:'013-222 3344'},
+  {tarikh:'6 September 2026 (Ahad)',  masa:'8:30 pagi - 12:30 tengahari', lokasi:'Surau Taman Melati, Kuala Lumpur',   hubungi:'019-876 5432'},
 ];
+function renderKursus(){
+  const b=document.getElementById('kursusBody'); if(!b) return;
+  b.innerHTML=KURSUS.map(k=>`<tr><td>${k.tarikh}</td><td>${k.masa}</td><td>${k.lokasi}</td><td data-l="Hubungi">${k.hubungi}</td></tr>`).join('')
+    || `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px">Tiada kursus dijadualkan buat masa ini.</td></tr>`;
+}
 function renderHome(){
   document.getElementById('featGrid').innerHTML = MENU.map(m=>`
     <button class="feat" onclick="jump('${m.v}')">
@@ -726,13 +740,7 @@ function renderHome(){
       <span class="ft"><b>${m.t}</b><small>${m.s}</small></span>
       <span class="chev">${svg('chev')}</span>
     </button>`).join('');
-  document.getElementById('pkgGrid').innerHTML = PKGS.map(p=>`
-    <div class="pkgcard">
-      <span class="badge" style="background:${p.c}">${p.b}</span>
-      <div class="amt">${p.amt}</div>
-      <div class="per">/ pax</div>
-      <button class="pbtn" style="background:${p.c}" onclick="jump('agency')">Lihat Pakej</button>
-    </div>`).join('');
+  renderKursus();
 }
 
 /* ============ AGENCY ============ */
