@@ -201,6 +201,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .toast.show{opacity:1; bottom:38px}
 
   /* ---------- Login ---------- */
+  /* Auth splash — prevents login-screen flash while session resolves */
   html.auth-pending #login{display:none!important}
   #authSplash{display:none; position:fixed; inset:0; z-index:150; align-items:center; justify-content:center;
     background:radial-gradient(120% 90% at 50% 0%,#14785a,#083c2d 72%)}
@@ -376,8 +377,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
           <input id="agQuery" placeholder="🔍 Cari nama agensi…" oninput="renderAgencies()">
           <label class="f">Rating Google minimum</label>
           <div class="chips" id="agRating"></div>
-          <label class="f">Julat harga pakej</label>
-          <div class="chips" id="agPrice"></div>
+          <div class="chips" id="agPrice" style="display:none"></div>
           <label class="f" style="display:flex;align-items:center;gap:8px;margin-top:12px">
             <input type="checkbox" id="agMotac" style="width:auto" onchange="renderAgencies()">
             Berlesen MOTAC sahaja
@@ -429,8 +429,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
           <button class="btn gold" style="margin-top:12px" onclick="findWayBack()">Bawa saya balik ke hotel 🧭</button>
           <div style="font-size:11px;color:rgba(255,255,255,.8);text-align:center;margin-top:8px">Guna GPS peranti anda + Google Maps.</div>
         </div>
-        <label class="f">Bajet semalam (maks)</label>
-        <div class="chips" id="hoBudget"></div>
+        <div class="chips" id="hoBudget" style="display:none"></div>
         <div class="section-title" style="font-size:15px;margin-top:6px">Hotel berhampiran Masjidil Haram</div>
         <div id="hotelList"></div>
       </section>
@@ -590,7 +589,7 @@ document.addEventListener('click', function(e){ const m=document.getElementById(
 /* ============ LIVE DATA (Supabase) ============ */
 let AGENCIES=[], HOTELS=[], VOLUNTEERS=[], HOSPITALS=[], SERVICES=[], SAR_RATE=1.27;
 const MED_MAP={hospital:{t:'Hospital',i:'🏥'}, pharmacy:{t:'Farmasi',i:'💊'}, insurance:{t:'Insurans',i:'🛡️'}};
-const SVC_ICON={wheelchair:'♿', kaaba:'🕋', guide:'🧕', exchange:'💱'};
+const SVC_ICON={wheelchair:'♿', kaaba:'🕋', guide:'🧕', exchange:'💱', laundry:'🧺', car:'🚕', shop:'🛍️'};
 async function loadData(){
   const [ag,ho,vo,me,sv,cr] = await Promise.all([
     sb.from('agencies').select('*'),
@@ -603,7 +602,7 @@ async function loadData(){
   AGENCIES=(ag.data||[]).map(a=>({name:a.name, rating:Number(a.rating), reviews:Number(a.reviews_count||0),
     motac:a.motac_licensed, lic:a.motac_license||'—', price:Number(a.price), tier:a.tier, note:a.note||''}));
   HOTELS=(ho.data||[]).map(h=>({name:h.name, dist:Number(h.distance_km), price:Number(h.price_per_night),
-    stars:Number(h.stars), icon:h.type==='homestay'?'🏠':'🏨', lat:Number(h.lat), lng:Number(h.lng)}));
+    stars:Number(h.stars), icon:h.type==='homestay'?'🏠':'🏨', lat:Number(h.lat), lng:Number(h.lng), note:h.note||''}));
   VOLUNTEERS=(vo.data||[]).map(v=>({name:v.name, loc:v.location, done:Number(v.duas_delivered||0), note:v.note||''}));
   HOSPITALS=(me.data||[]).map(m=>{const k=MED_MAP[m.type]||{t:m.type,i:'🏥'};
     return {name:m.name, type:k.t, icon:k.i, dist:m.distance_km===null?null:Number(m.distance_km), tel:m.phone, tag:m.tag||''};});
@@ -657,6 +656,7 @@ function isReturningFromOAuth(){
 async function showApp(user){
   state.user=user;
   document.documentElement.classList.remove('auth-pending');
+  // Clean OAuth tokens/code from the URL after a successful login
   if(isReturningFromOAuth()){ try{ history.replaceState(null,'',location.origin+location.pathname); }catch(e){} }
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='';
@@ -728,9 +728,7 @@ function renderAgencyFilters(){
   const R=[0,4,4.5,4.8];
   document.getElementById('agRating').innerHTML=R.map(r=>`
     <button class="chip ${state.agRating===r?'on':''}" onclick="setAgRating(${r})">${r===0?'Semua':'⭐ '+r+'+'}</button>`).join('');
-  const P=[{l:'Semua',v:null},{l:'< RM8k',v:8000},{l:'RM8–10k',v:10000},{l:'RM10k+',v:99999}];
-  document.getElementById('agPrice').innerHTML=P.map((p,i)=>`
-    <button class="chip ${state.agPrice===p.v?'on':''}" onclick="setAgPrice(${p.v})">${p.l}</button>`).join('');
+  document.getElementById('agPrice').innerHTML='';
 }
 function setAgRating(r){state.agRating=r; renderAgencyFilters(); renderAgencies();}
 function setAgPrice(v){state.agPrice=(state.agPrice===v?null:v); renderAgencyFilters(); renderAgencies();}
@@ -739,32 +737,27 @@ function renderAgencies(){
   const q=(document.getElementById('agQuery').value||'').toLowerCase();
   const motac=document.getElementById('agMotac').checked;
   let list=AGENCIES.filter(a=>
-    a.name.toLowerCase().includes(q) && a.rating>=state.agRating && (!motac || a.motac) &&
-    (state.agPrice===null ||
-      (state.agPrice===8000 && a.price<8000) ||
-      (state.agPrice===10000 && a.price>=8000 && a.price<10000) ||
-      (state.agPrice===99999 && a.price>=10000))
-  ).sort((a,b)=>b.rating-a.rating);
+    a.name.toLowerCase().includes(q) && (a.rating||0)>=state.agRating && (!motac || a.motac)
+  ).sort((a,b)=>(b.rating||0)-(a.rating||0));
   document.getElementById('agCount').textContent=list.length;
   const el=document.getElementById('agencyList');
   if(!list.length){el.innerHTML='<div class="empty">Tiada agensi sepadan dengan tapisan anda.</div>';return;}
-  el.innerHTML=list.map(a=>`
-    <div class="card"><div class="list-row">
+  el.innerHTML=list.map(a=>{
+    const parts=(a.note||'').split('•').map(s=>s.trim());
+    const hq=parts[0]||''; const contact=parts[1]||'';
+    const isUrl=/^https?:\/\//.test(contact);
+    return `<div class="card"><div class="list-row">
       <div class="thumb">✈️</div>
       <div style="flex:1">
         <div class="row-between"><b style="font-size:14.5px">${a.name}</b>
-          ${a.motac?'<span class="badge-motac">✓ MOTAC</span>':'<span class="pill red">Tiada lesen</span>'}</div>
-        <div style="margin:3px 0"><span class="stars">${stars(a.rating)}</span>
-          <span class="tag">${a.rating} · ${a.reviews.toLocaleString()} ulasan</span></div>
-        <div class="tag">${a.note}</div>
+          ${a.motac?'<span class="badge-motac">✓ MOTAC'+(a.lic&&a.lic!=='—'?' '+a.lic:'')+'</span>':''}</div>
+        ${a.rating?`<div style="margin:3px 0"><span class="stars">${stars(a.rating)}</span> <span class="tag">${a.rating} · Google</span></div>`:''}
+        ${hq?`<div class="tag">📍 ${hq}</div>`:''}
         <div class="row-between" style="margin-top:9px">
-          <div><span class="pill ${a.tier==='Premium'?'gold':''}">${a.tier}</span></div>
-          <div class="price">RM ${a.price.toLocaleString()}</div>
+          ${contact?(isUrl?`<a class="btn ghost sm" style="text-decoration:none;width:auto" href="${contact}" target="_blank" rel="noopener">🌐 Laman web</a>`:`<span class="tag">☎ ${contact}</span>`):'<span></span>'}
         </div>
-        <button class="btn ghost sm" style="width:100%;margin-top:10px"
-          onclick="toast('Butiran pakej — akan datang di versi penuh')">Lihat pakej</button>
       </div>
-    </div></div>`).join('');
+    </div></div>`;}).join('');
 }
 
 /* ============ DU'A ============ */
@@ -824,29 +817,29 @@ async function loadFeed(){
 }
 
 /* ============ STAY ============ */
-function renderHotelFilters(){
-  const B=[{l:'Semua',v:null},{l:'≤ RM300',v:300},{l:'≤ RM600',v:600},{l:'≤ RM1000',v:1000}];
-  document.getElementById('hoBudget').innerHTML=B.map(b=>`
-    <button class="chip ${state.hoBudget===b.v?'on':''}" onclick="setHoBudget(${b.v})">${b.l}</button>`).join('');
-}
+function renderHotelFilters(){ const el=document.getElementById('hoBudget'); if(el) el.innerHTML=''; }
 function setHoBudget(v){state.hoBudget=v; renderHotelFilters(); renderHotels();}
 function renderHotels(){
-  let list=HOTELS.filter(h=>state.hoBudget===null||h.price<=state.hoBudget).sort((a,b)=>a.dist-b.dist);
+  let list=HOTELS.slice().sort((a,b)=>a.dist-b.dist);
   const el=document.getElementById('hotelList');
-  if(!list.length){el.innerHTML='<div class="empty">Tiada hotel dalam bajet ini. Cuba naikkan bajet.</div>';return;}
+  if(!list.length){el.innerHTML='<div class="empty">Tiada hotel.</div>';return;}
   el.innerHTML=list.map(h=>{
     const mine=state.myHotel&&state.myHotel.name===h.name;
+    const web=/^https?:\/\//.test(h.note)?h.note:'';
+    const distTxt=h.dist>=1?h.dist+' km':Math.round(h.dist*1000)+' m';
     return `<div class="card"><div class="list-row">
       <div class="thumb">${h.icon}</div>
       <div style="flex:1">
         <div class="row-between"><b style="font-size:14px">${h.name}</b><span class="stars">${'★'.repeat(h.stars)}</span></div>
-        <div class="tag">📍 ${h.dist} km dari Masjidil Haram</div>
+        <div class="tag">📍 ${distTxt} dari Masjidil Haram</div>
+        ${h.note?`<div class="tag" style="margin-top:2px">${web?'<a href="'+web+'" target="_blank" rel="noopener">🌐 Laman web</a>':h.note}</div>`:''}
         <div class="row-between" style="margin-top:9px">
-          <div class="price">RM ${h.price}<span class="tag"> /malam</span></div>
+          <button class="btn ghost sm" onclick="mapHotel('${h.name.replace(/'/g,"\\'")}')">🗺️ Peta</button>
           <button class="btn ${mine?'gold':'ghost'} sm" onclick="setMyHotel('${h.name.replace(/'/g,"\\'")}')">${mine?'✓ Hotel saya':'Jadikan hotel saya'}</button>
         </div>
       </div></div></div>`;}).join('');
 }
+function mapHotel(name){ window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(name+' Makkah'),'_blank'); }
 function setMyHotel(name){
   state.myHotel=HOTELS.find(h=>h.name===name);
   document.getElementById('myHotelLabel').textContent="Hotel anda: "+name;
@@ -855,16 +848,10 @@ function setMyHotel(name){
 }
 function findWayBack(){
   if(!state.myHotel){toast('Pilih "Jadikan hotel saya" di Penginapan dulu 🏨');return;}
-  const dest=state.myHotel.lat+","+state.myHotel.lng;
-  toast('Mengesan lokasi anda… 🧭');
-  if(!navigator.geolocation){ window.open('https://www.google.com/maps/dir/?api=1&destination='+dest,'_blank');return; }
-  navigator.geolocation.getCurrentPosition(
-    pos=>{ const o=pos.coords.latitude+","+pos.coords.longitude;
-      window.open('https://www.google.com/maps/dir/?api=1&origin='+o+'&destination='+dest+'&travelmode=walking','_blank'); },
-    err=>{ toast('GPS tak dibenarkan — buka arah ke hotel sahaja.');
-      window.open('https://www.google.com/maps/dir/?api=1&destination='+dest+'&travelmode=walking','_blank'); },
-    {enableHighAccuracy:true,timeout:8000}
-  );
+  const h=state.myHotel;
+  const dest=(h.lat&&h.lng)?(h.lat+','+h.lng):encodeURIComponent(h.name+' Makkah');
+  toast('Membuka arah ke hotel… 🧭');
+  window.open('https://www.google.com/maps/dir/?api=1&destination='+dest+'&travelmode=walking','_blank');
 }
 
 /* ============ DIRECTORY ============ */
@@ -887,20 +874,28 @@ function renderMed(){
       </div></div></div></div>`).join('');
 }
 function renderSvc(){
-  document.getElementById('dir-svc').innerHTML=
-    `<div class="card" style="background:linear-gradient(120deg,#fbf3d8,#fff);border-color:#f0e2b8">
-      <div class="row-between"><b>💱 Kadar Tukaran (SAR)</b><span class="pill gold">Live · mock</span></div>
+  const cats=[
+    {key:['Mutawwif','Mutawwifah'], title:'🧕 Mutawwif / Mutawwifah'},
+    {key:['Dobi'], title:'🧺 Dobi (Laundry)'},
+    {key:['Teksi','Pengangkutan','e-Hailing'], title:'🚕 Pengangkutan & Teksi'},
+    {key:['Marketplace'], title:'🛍️ Beli-belah / Marketplace'},
+  ];
+  let html=`<div class="card" style="background:linear-gradient(120deg,#fbf3d8,#fff);border-color:#f0e2b8">
+      <div class="row-between"><b>💱 Kadar Tukaran (SAR)</b><span class="pill gold">Anggaran</span></div>
       <div class="kv"><span>1 SAR (Riyal Saudi)</span><b>RM ${SAR_RATE.toFixed(2)}</b></div>
       <div class="kv"><span>RM 1,000 ≈</span><b>SAR ${(1000/SAR_RATE).toFixed(0)}</b></div>
-    </div>`+
-    SERVICES.map(s=>`<div class="card"><div class="list-row">
+    </div>`;
+  cats.forEach(c=>{
+    const items=SERVICES.filter(s=>c.key.includes(s.tag));
+    if(!items.length) return;
+    html+=`<div class="section-title" style="font-size:15px;margin-top:6px">${c.title}</div>`;
+    html+=items.map(s=>`<div class="card"><div class="list-row">
       <div class="thumb">${s.icon}</div><div style="flex:1">
-      <div class="row-between"><b>${s.name}</b><span class="pill">${s.tag}</span></div>
+      <div class="row-between"><b>${s.name}</b>${s.price?`<span class="pill gold">${s.price}</span>`:''}</div>
       <div class="tag">${s.desc}</div>
-      <div class="row-between" style="margin-top:8px">
-        <span class="price" style="font-size:13.5px">${s.price}</span>
-        <button class="btn ghost sm" onclick="toast('Tempahan ${s.name} — akan datang')">Tempah</button>
-      </div></div></div></div>`).join('');
+      </div></div></div>`).join('');
+  });
+  document.getElementById('dir-svc').innerHTML=html;
 }
 
 /* ============ PANDUAN UMRAH ============ */
@@ -910,13 +905,20 @@ const GUIDE=[
   {t:'3. Sa’ie', d:'Berjalan antara bukit Safa dan Marwah sebanyak 7 kali (Safa→Marwah = 1). Bermula di Safa, berakhir di Marwah. Lelaki berlari-lari anak di kawasan lampu hijau.'},
   {t:'4. Tahallul', d:'Bercukur (tahliq) atau menggunting rambut (taqsir). Lelaki digalakkan bercukur, wanita menggunting hujung rambut sekadar seruas jari. Dengan ini selesai umrah & larangan ihram tamat.'},
 ];
-const CHECK=['Pasport sah ≥ 6 bulan & visa umrah','Suntikan meningitis (ACWY) & sijil','Kain ihram / telekung + pakaian selesa','Ubat peribadi & first-aid','Salinan dokumen + gambar','Duit Riyal (SAR) & kad bank','Simkad / roaming data','Buku doa & panduan umrah','Beg galas ringan & kasut selipar','Kad hotel & nombor rombongan'];
+const KIT_L=['Kain Ihram (2 pasang)','Cawat Ihram (2 helai)','Tali Pinggang Ihram','Botol Spray Wuduk','Beg Uncang Kasut','Selipar Jepun','Kopiah','Kemeja / Kurta (3 pasang)','Seluar (3 pasang)','Kain Pelikat (2 pasang)','Baju Tidur / Singlet (2 pasang)','Set Toiletries / Mandian','Buku Panduan Umrah','Buku Doa Kecil (Tawaf & Saie)','Mangga Kecil Kunci Luggage (2-3 biji)','Sarung Luggage','Tag Luggage','Gunting Kecil (Tahalul)','Pemotong Kuku'];
+const KIT_W=['Telekung (2 pasang)','Mini Telekung (2 pasang)','T-shirt Lengan Panjang / Inner (2)','Handsock (2 pasang)','Stokin Wudhuk (2 pasang)','Stokin Biasa (2 pasang)','Jubah Seluar (2 pasang)','Baju Tidur (2 pasang)','Kasut Tawaf','Set Toiletries / Mandian','Buku Panduan Umrah','Buku Doa Kecil (Tawaf & Saie)','Mangga Kecil Kunci Luggage (2-3 biji)','Sarung Luggage','Tag Luggage','Gunting Kecil (Tahalul)','Pakaian Santai bersesuaian','Pad Wanita','Pemotong Kuku'];
+const KIT_UBAT=['Paracetamol 650 — demam & sakit kepala','Betadine Sore Throat Spray — sakit tekak','Yoko Yoko — sakit otot & kepala','Yuyee Oil — sakit otot & kepala','Panadol Soluble — selesema','Cool Fever — demam panas','Difflam — sakit tekak','Pil Chi Kit Teck Aun — cirit-birit','Pelembap Bibir','Losyen kulit kering','Panadol Extend — sengal badan/otot','Mini Iron Steam — seterika pakaian'];
+function checkList(arr){return arr.map(c=>`
+    <label style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13.5px">
+      <input type="checkbox" style="width:auto;margin-top:2px"> <span>${c}</span></label>`).join('');}
 function renderGuide(){
   document.getElementById('guideSteps').innerHTML=GUIDE.map((g,i)=>`
     <div class="step"><div class="n">${i+1}</div><div class="sc"><b>${g.t.replace(/^\d+\.\s*/,'')}</b><p>${g.d}</p></div></div>`).join('');
-  document.getElementById('guideCheck').innerHTML=CHECK.map(c=>`
-    <label style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13.5px">
-      <input type="checkbox" style="width:auto;margin-top:2px"> <span>${c}</span></label>`).join('');
+  document.getElementById('guideCheck').innerHTML=
+    `<b style="font-size:13.5px;color:var(--green)">👳 Kelengkapan Lelaki</b>${checkList(KIT_L)}`+
+    `<b style="font-size:13.5px;color:var(--green);display:block;margin-top:14px">🧕 Kelengkapan Wanita</b>${checkList(KIT_W)}`+
+    `<b style="font-size:13.5px;color:var(--green);display:block;margin-top:14px">💊 Ubat & Lain-lain</b>`+
+    `<div class="tag" style="margin:4px 0 2px">Nota: ubat di Saudi agak mahal — bawa bekalan secukupnya.</div>${checkList(KIT_UBAT)}`;
 }
 
 /* ============ BERITA / INFO UMRAH ============ */
