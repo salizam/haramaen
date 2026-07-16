@@ -312,6 +312,11 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .modal-actions button{flex:1;border:0;border-radius:12px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit}
   .m-cancel{background:var(--line);color:var(--ink)}
   .m-save{background:var(--green);color:#fff}
+  .masa-grp{display:flex; flex-direction:column; gap:8px}
+  .masa-row{display:flex; align-items:center; gap:6px}
+  .masa-lbl{font-size:12px; color:var(--muted); min-width:48px; font-weight:600}
+  .masa-sel{width:auto !important; min-width:56px; padding:9px 8px !important}
+  .masa-sel:last-of-type{min-width:80px}
   /* Admin stats */
   .adm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
   .adm-stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
@@ -622,14 +627,17 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <input id="cfNama" placeholder="cth: Al-Falah Travel">
       </div>
     </div>
-    <div class="modal-row">
-      <div>
-        <label class="fl">Tarikh</label>
-        <input id="cfTarikhDate" type="date">
+    <label class="fl">Tarikh</label>
+    <input id="cfTarikhDate" type="date">
+    <label class="fl">Masa</label>
+    <div class="masa-grp">
+      <div class="masa-row"><span class="masa-lbl">Dari</span>
+        <select id="cfJamA" class="masa-sel"></select><span>:</span><select id="cfMinitA" class="masa-sel"></select>
+        <select id="cfAmpmA" class="masa-sel"><option value="">—</option><option>pagi</option><option>petang</option></select>
       </div>
-      <div>
-        <label class="fl">Masa</label>
-        <input id="cfMasa" placeholder="cth: 8:00 pagi - 12:00 tgh">
+      <div class="masa-row"><span class="masa-lbl">Hingga</span>
+        <select id="cfJamB" class="masa-sel"></select><span>:</span><select id="cfMinitB" class="masa-sel"></select>
+        <select id="cfAmpmB" class="masa-sel"><option value="">—</option><option>pagi</option><option>petang</option></select>
       </div>
     </div>
     <label class="fl">Lokasi / Tempat</label>
@@ -927,14 +935,29 @@ function renderKursus(){
 }
 
 /* ---- Daftar Kursus (modal) ---- */
+function fillMasa(){
+  const jamOpts='<option value="">—</option>'+Array.from({length:12},(_,i)=>`<option>${i+1}</option>`).join('');
+  const minOpts='<option value="">—</option>'+['00','15','30','45'].map(m=>`<option>${m}</option>`).join('');
+  ['cfJamA','cfJamB'].forEach(id=>{const e=document.getElementById(id); if(e&&!e.dataset.f){e.innerHTML=jamOpts; e.dataset.f=1;}});
+  ['cfMinitA','cfMinitB'].forEach(id=>{const e=document.getElementById(id); if(e&&!e.dataset.f){e.innerHTML=minOpts; e.dataset.f=1;}});
+}
 function openCourseForm(){
   const sel=document.getElementById('cfNegeri');
   if(sel && !sel.dataset.filled){ sel.innerHTML='<option value="">— Pilih negeri —</option>'+MY_NEGERI.map(n=>`<option>${n}</option>`).join(''); sel.dataset.filled=1; }
-  ['cfNama','cfTarikhDate','cfMasa','cfLokasi','cfHubungi'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
-  const j=document.getElementById('cfJenis'); if(j) j.value='';
+  fillMasa();
+  ['cfNama','cfTarikhDate','cfLokasi','cfHubungi'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['cfJenis','cfJamA','cfMinitA','cfAmpmA','cfJamB','cfMinitB','cfAmpmB'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   if(sel) sel.value='';
   const dd=document.getElementById('cfDaerah'); if(dd) dd.innerHTML='<option value="">— Pilih negeri dahulu —</option>';
   document.getElementById('courseModal').classList.add('open');
+}
+function buildMasa(){
+  const g=id=>{const e=document.getElementById(id);return e?e.value:'';};
+  const jA=g('cfJamA'); if(!jA) return '';
+  let s=`${jA}:${g('cfMinitA')||'00'} ${g('cfAmpmA')||''}`.trim();
+  const jB=g('cfJamB');
+  if(jB) s+=' - '+`${jB}:${g('cfMinitB')||'00'} ${g('cfAmpmB')||''}`.trim();
+  return s;
 }
 function onCfNegeri(){
   const neg=document.getElementById('cfNegeri').value;
@@ -956,7 +979,7 @@ async function submitCourse(){
   const jenis=document.getElementById('cfJenis').value;
   const nama=document.getElementById('cfNama').value.trim();
   const dateISO=document.getElementById('cfTarikhDate').value;
-  const masa=document.getElementById('cfMasa').value.trim();
+  const masa=buildMasa();
   const lokasi=document.getElementById('cfLokasi').value.trim();
   const negeri=document.getElementById('cfNegeri').value;
   const daerah=document.getElementById('cfDaerah').value;

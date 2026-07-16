@@ -1,7 +1,7 @@
 // Haramaen Umrah — service worker
 // Network-first for the page (HTML) so updates always show after a refresh;
 // cache-first for other assets; cache as offline fallback.
-const CACHE = 'haramaen-umrah-v10';
+const CACHE = 'haramaen-umrah-v11';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
@@ -17,6 +17,11 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  // Only manage same-origin requests. Cross-origin (Supabase API, prayer-time APIs,
+  // image CDNs) go straight to the network and are NEVER cached, so live data stays fresh.
+  let url;
+  try { url = new URL(e.request.url); } catch (_) { return; }
+  if (url.origin !== self.location.origin) return;
   const isDoc = e.request.mode === 'navigate' ||
                 (e.request.destination === 'document') ||
                 e.request.url.endsWith('/index.html');
