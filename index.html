@@ -116,6 +116,16 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .kv:last-child{border-bottom:0}
   .empty{text-align:center; color:var(--muted); padding:26px 10px; font-size:13px}
   .divider{height:1px;background:var(--line); margin:12px 0}
+  .dua-foot{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-top:4px}
+  .dua-acts{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  .amiin-btn,.deliver-btn{border:1px solid var(--line); background:#fff; border-radius:999px; padding:7px 13px;
+    font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; color:var(--ink); white-space:nowrap}
+  .amiin-btn:hover,.deliver-btn:hover{background:#f3f6f4}
+  .amiin-btn.on{background:#e7f4ee; border-color:var(--green-l); color:var(--green)}
+  .amiin-n{font-variant-numeric:tabular-nums; margin-left:2px}
+  .deliver-box{display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap}
+  .deliver-sel{flex:1; min-width:190px}
+  .deliver-list{margin-top:9px; font-size:12px; color:var(--muted); line-height:1.5}
 
   /* ---------- Hero (prayer) ---------- */
   .hero{position:relative; overflow:hidden; border-radius:22px; margin-bottom:26px;
@@ -497,13 +507,12 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div class="section-title">Kirim Doa<span class="u"></span></div>
         <div class="seg">
           <button class="on" onclick="duaTab('submit',this)">Hantar</button>
-          <button onclick="duaTab('vol',this)">Sukarelawan</button>
-          <button onclick="duaTab('feed',this)">Komuniti</button>
+          <button onclick="duaTab('feed',this)">Kiriman Doa</button>
         </div>
         <div id="dua-submit">
           <div class="card">
             <div class="muted" style="font-size:12.5px;margin-bottom:4px">
-              Hantar du'a anda. Sukarelawan kami di Mekah akan bantu bacakan &amp; doakan di tempat-tempat mustajab. 🕋
+              Hantar doa anda. Mudah-mudahan ada sahabat Haramaen yang sudi memanjatkan doa anda khususnya di tempat-tempat mustajab. 🕋
             </div>
             <label class="f">Nama (pilihan)</label>
             <input id="duaName" placeholder="cth: Hamba Allah">
@@ -512,12 +521,11 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
               <option>Kesihatan</option><option>Rezeki</option><option>Keluarga</option>
               <option>Jodoh</option><option>Arwah</option><option>Umum</option>
             </select>
-            <label class="f">Du'a anda</label>
-            <textarea id="duaText" placeholder="Tuliskan hajat &amp; du'a anda di sini…"></textarea>
+            <label class="f">Doa anda</label>
+            <textarea id="duaText" placeholder="Tuliskan hajat &amp; doa anda di sini…"></textarea>
             <button class="btn" style="margin-top:12px" onclick="submitDua()">Kirim Doa 🤲</button>
           </div>
         </div>
-        <div id="dua-vol" style="display:none"></div>
         <div id="dua-feed" style="display:none"></div>
       </section>
 
@@ -727,7 +735,7 @@ function paintIcons(root){ (root||document).querySelectorAll('.ico[data-i]').for
 const NAV=[
   {v:'home',   t:'Utama',              i:'home'},
   {v:'agency', t:'Agensi Umrah',       i:'plane'},
-  {v:'dua',    t:"Du'a",               i:'dua'},
+  {v:'dua',    t:"Doa",                i:'dua'},
   {v:'stay',   t:'Penginapan',         i:'bed'},
   {v:'med',    t:'Perubatan', i:'med'},
   {v:'svc',    t:'Servis',              i:'bell'},
@@ -738,7 +746,7 @@ const NAV=[
 ];
 const BOTTOM=[
   {v:'home',t:'Utama',i:'home',c:'#0d5c46'},{v:'agency',t:'Agensi',i:'plane',c:'#10808e'},
-  {v:'dua',t:"Du'a",i:'dua',c:'#6d4bb0'},{v:'solah',t:'Solat',i:'mosque',c:'#2f74c0'},{v:'stay',t:'Penginapan',i:'bed',c:'#d99a2b'},
+  {v:'dua',t:"Doa",i:'dua',c:'#6d4bb0'},{v:'solah',t:'Solat',i:'mosque',c:'#2f74c0'},{v:'stay',t:'Penginapan',i:'bed',c:'#d99a2b'},
 ];
 const TITLES={home:"HARAMAEN",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
   med:"Perubatan",svc:"Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",admin:"Statistik Pelawat"};
@@ -1157,23 +1165,22 @@ function renderAgencies(){
 
 /* ============ DU'A ============ */
 function duaTab(t,el){
-  ['submit','vol','feed'].forEach(x=>document.getElementById('dua-'+x).style.display='none');
+  ['submit','feed'].forEach(x=>document.getElementById('dua-'+x).style.display='none');
   document.getElementById('dua-'+t).style.display='';
   el.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));
   el.classList.add('on');
-  if(t==='vol') renderVolunteers();
   if(t==='feed') loadFeed();
 }
 async function submitDua(){
   const text=document.getElementById('duaText').value.trim();
-  if(!text){toast('Sila tulis du\'a anda dulu 🤲');return;}
+  if(!text){toast('Sila tulis doa anda dulu 🤲');return;}
   const name=document.getElementById('duaName').value.trim()||'Hamba Allah';
   const cat=document.getElementById('duaCat').value;
   const uid = state.user ? state.user.id : null;
   const {error}=await sb.from('duas').insert({name, category:cat, dua_text:text, user_id:uid});
-  if(error){toast('Gagal hantar du\'a. Cuba lagi.');return;}
+  if(error){toast('Gagal hantar doa. Cuba lagi.');return;}
   document.getElementById('duaText').value=''; document.getElementById('duaName').value='';
-  toast('Du\'a dihantar. Semoga dimakbulkan 🤍');
+  toast('Doa dihantar. Semoga dimakbulkan 🤍');
 }
 function relTime(iso){
   const s=(Date.now()-new Date(iso).getTime())/1000;
@@ -1182,33 +1189,69 @@ function relTime(iso){
   if(s<86400) return Math.floor(s/3600)+' jam lalu';
   return Math.floor(s/86400)+' hari lalu';
 }
-function renderVolunteers(){
-  document.getElementById('dua-vol').innerHTML=
-    `<div class="muted" style="font-size:12.5px;margin-bottom:10px">Sukarelawan di Tanah Suci yang membantu menyampaikan du'a. Anda juga boleh mendaftar.</div>`+
-    VOLUNTEERS.map(v=>`<div class="card"><div class="list-row">
-      <div class="thumb">🧕</div><div style="flex:1">
-      <div class="row-between"><b>${v.name}</b><span class="pill">${v.loc}</span></div>
-      <div class="tag">${v.note}</div>
-      <div class="tag" style="margin-top:4px">✅ ${v.done} du'a disampaikan</div>
-      </div></div></div>`).join('')+
-    `<button class="btn gold" onclick="toast('Pendaftaran sukarelawan — akan datang')">Daftar jadi sukarelawan</button>`;
+const MUSTAJAB=[
+  ['Makkah',['Multazam','Hijr Ismail (Hatim)','Belakang Maqam Ibrahim','Rukun Yamani','Ketika minum air Zamzam','Bukit Safa','Bukit Marwah','Depan Kaabah','Semasa Tawaf']],
+  ['Madinah',['Raudhah','Depan Makam Rasulullah ﷺ','Masjid Quba','Masjid Nabawi']]
+];
+function mustajabOpts(){
+  return '<option value="">— Pilih tempat mustajab —</option>'+
+    MUSTAJAB.map(([g,arr])=>`<optgroup label="${g}">`+arr.map(x=>`<option>${esc(x)}</option>`).join('')+`</optgroup>`).join('');
+}
+function duaCard(d){
+  const locs=(d.delivered_locs||[]);
+  return `<div class="card" data-dua="${d.id}">
+    <div class="row-between"><b style="font-size:13.5px">${esc(d.name||'Hamba Allah')}</b><span class="pill gold">${esc(d.category||'Umum')}</span></div>
+    <div style="font-size:13.5px;margin:6px 0">"${esc(d.dua_text)}"</div>
+    <div class="dua-foot">
+      <span class="tag">${relTime(d.created_at)}</span>
+      <div class="dua-acts">
+        <button class="amiin-btn${d.mine?' on':''}" onclick="toggleAmiin('${d.id}',this)">🤲 Aamin <span class="amiin-n">${d.amiin_count||0}</span></button>
+        <button class="deliver-btn" onclick="showDeliver('${d.id}')">🕋 Saya sampaikan doa</button>
+      </div>
+    </div>
+    <div class="deliver-box" id="db-${d.id}" style="display:none">
+      <select class="deliver-sel" id="ds-${d.id}">${mustajabOpts()}</select>
+      <button class="btn sm" onclick="submitDeliver('${d.id}',this)">Hantar</button>
+    </div>
+    <div class="deliver-list" id="dl-${d.id}"${d.delivered_count?'':' style="display:none"'}>${d.delivered_count?`🕋 Disampaikan (${d.delivered_count}): ${locs.map(esc).join(', ')}`:''}</div>
+  </div>`;
 }
 async function loadFeed(){
   const el=document.getElementById('dua-feed');
-  el.innerHTML='<div class="empty">Memuatkan du\'a…</div>';
-  const {data,error}=await sb.from('duas').select('name,category,dua_text,created_at')
-    .order('created_at',{ascending:false}).limit(50);
-  if(error){el.innerHTML='<div class="empty">Gagal memuat du\'a komuniti.</div>';return;}
+  el.innerHTML='<div class="empty">Memuatkan doa…</div>';
+  const {data,error}=await sb.rpc('list_duas',{p_visitor:vid()});
+  if(error){el.innerHTML='<div class="empty">Gagal memuat kiriman doa.</div>';return;}
   state.duas=data||[];
-  if(!state.duas.length){el.innerHTML='<div class="empty">Belum ada du\'a. Jadilah yang pertama 🤲</div>';return;}
+  if(!state.duas.length){el.innerHTML='<div class="empty">Belum ada doa. Jadilah yang pertama 🤲</div>';return;}
   el.innerHTML=
-    `<div class="muted" style="font-size:12.5px;margin-bottom:10px">Du'a komuniti — aamiin-kan du'a saudara seakidah anda. 🤲</div>`+
-    state.duas.map(d=>`<div class="card">
-      <div class="row-between"><b style="font-size:13.5px">${d.name||'Hamba Allah'}</b><span class="pill gold">${d.category||'Umum'}</span></div>
-      <div style="font-size:13.5px;margin:6px 0">"${d.dua_text}"</div>
-      <div class="row-between"><span class="tag">${relTime(d.created_at)}</span>
-      <button class="btn ghost sm" onclick="toast('Aamiin 🤍')">🤲 Aamiin</button></div>
-    </div>`).join('');
+    `<div class="muted" style="font-size:12.5px;margin-bottom:10px">Kiriman doa komuniti — aamin-kan doa saudara seakidah anda, atau sampaikan doa mereka di tempat mustajab. 🤲</div>`+
+    state.duas.map(duaCard).join('');
+}
+async function toggleAmiin(id,btn){
+  btn.disabled=true;
+  try{
+    const {data,error}=await sb.rpc('dua_amiin_toggle',{p_dua:id,p_visitor:vid()});
+    if(error) throw error;
+    btn.classList.toggle('on', !!data.mine);
+    const n=btn.querySelector('.amiin-n'); if(n) n.textContent=data.count;
+  }catch(e){ toast('Gagal. Cuba lagi.'); }
+  btn.disabled=false;
+}
+function showDeliver(id){
+  const b=document.getElementById('db-'+id); if(!b) return;
+  b.style.display = b.style.display==='none' ? 'flex' : 'none';
+}
+async function submitDeliver(id,btn){
+  const sel=document.getElementById('ds-'+id);
+  const loc=sel?sel.value:'';
+  if(!loc){ toast('Sila pilih tempat mustajab.'); return; }
+  btn.disabled=true;
+  try{
+    const {error}=await sb.rpc('dua_deliver',{p_dua:id,p_visitor:vid(),p_location:loc});
+    if(error) throw error;
+    toast('Alhamdulillah, terima kasih menyampaikan doa 🤍');
+    loadFeed();
+  }catch(e){ toast('Gagal hantar. Cuba lagi.'); btn.disabled=false; }
 }
 
 /* ============ STAY ============ */
