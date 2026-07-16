@@ -289,6 +289,13 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .kbtn{background:var(--gold);color:#3a2e05;border:0;border-radius:12px;padding:11px 16px;font-weight:800;
     font-size:13.5px;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 9px rgba(201,162,39,.3)}
   .kbtn:hover{filter:brightness(1.04)}
+  .ktdaftar{display:flex; align-items:flex-end; gap:8px}
+  .ktdaftar .kbtn-daftar{height:42px}
+  @media(max-width:820px){
+    .ktdaftar{flex:1}
+    .ktdaftar .kbtn-daftar{order:2}
+    .ktdaftar .kfield{order:1}
+  }
   /* Modal */
   .modal{position:fixed;inset:0;background:rgba(10,25,20,.55);z-index:60;display:none;
     align-items:center;justify-content:center;padding:16px}
@@ -429,7 +436,6 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
               <div class="u"></div>
               <div class="sub">Jadual kursus &amp; kelas persediaan umrah</div>
             </div>
-            <button class="kbtn" onclick="openCourseForm()">+ Daftar Kursus</button>
           </div>
           <div class="kbar" id="kursusFilter"></div>
           <div class="ktable-wrap">
@@ -507,13 +513,13 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
 
       <!-- DIRECTORY -->
       <section class="view" id="v-med">
-        <div class="section-title">Direktori Perubatan<span class="u"></span></div>
+        <div class="section-title">Perubatan<span class="u"></span></div>
         <div id="dir-med"></div>
       </section>
 
       <!-- SERVIS -->
       <section class="view" id="v-svc">
-        <div class="section-title">Servis Jemaah<span class="u"></span></div>
+        <div class="section-title">Servis<span class="u"></span></div>
         <div id="dir-svc"></div>
       </section>
 
@@ -678,7 +684,7 @@ const NAV=[
   {v:'agency', t:'Agensi Umrah',       i:'plane'},
   {v:'dua',    t:"Du'a",               i:'dua'},
   {v:'stay',   t:'Penginapan',         i:'bed'},
-  {v:'med',    t:'Direktori Perubatan', i:'med'},
+  {v:'med',    t:'Perubatan', i:'med'},
   {v:'svc',    t:'Servis',              i:'bell'},
   {v:'guide',  t:'Panduan Umrah',      i:'book'},
   {v:'news',   t:'Berita Umrah',       i:'news'},
@@ -690,7 +696,7 @@ const BOTTOM=[
   {v:'dua',t:"Du'a",i:'dua',c:'#6d4bb0'},{v:'solah',t:'Solat',i:'mosque',c:'#2f74c0'},{v:'stay',t:'Penginapan',i:'bed',c:'#d99a2b'},
 ];
 const TITLES={home:"HARAMAEN",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
-  med:"Direktori Perubatan",svc:"Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",admin:"Statistik Pelawat"};
+  med:"Perubatan",svc:"Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",admin:"Statistik Pelawat"};
 const ADMIN_EMAILS=['salizam.oasys@gmail.com'];
 function isAdmin(){ return !!(state.user && ADMIN_EMAILS.includes((state.user.email||'').toLowerCase())); }
 function buildNav(){
@@ -840,8 +846,8 @@ const MENU=[
   {t:'Panduan Umrah',      s:'Info lengkap & tips umrah terkini',        c:'#1c7d54', i:'user',   v:'guide'},
   {t:'Kirim Doa',          s:'Hantar doa anda ke Tanah Suci',            c:'#6d4bb0', i:'dua',    v:'dua'},
   {t:'Agensi Umrah',       s:'Cari & pilih agensi berdaftar',            c:'#10808e', i:'plane',  v:'agency'},
-  {t:'Direktori Perubatan',s:'Klinik, hospital & farmasi di Tanah Suci', c:'#a56a2e', i:'med',    v:'med'},
-  {t:'Servis Jemaah',      s:'Mutawwif, dobi, transport & lain-lain',    c:'#0f8a7e', i:'bell',   v:'svc'},
+  {t:'Perubatan',s:'Klinik, hospital & farmasi di Tanah Suci', c:'#a56a2e', i:'med',    v:'med'},
+  {t:'Servis',      s:'Mutawwif, dobi, transport & lain-lain',    c:'#0f8a7e', i:'bell',   v:'svc'},
   {t:'Waktu Solat',        s:'Waktu solat tempatan ikut lokasi anda',       c:'#2f74c0', i:'mosque', v:'solah'},
   {t:'Penginapan',         s:'Hotel & penginapan pilihan terbaik',       c:'#d99a2b', i:'bed',    v:'stay'},
   {t:'Orang Hilang',       s:'Pusat maklumat & bantuan',                 c:'#2f9e57', i:'pin',    v:'lost'},
@@ -858,10 +864,13 @@ function renderKursus(){
   if(state.kDaerah!=='all' && !daerahs.includes(state.kDaerah)) state.kDaerah='all';
   if(fbar){
     fbar.innerHTML=`<div class="kfilter">
-      <div class="kfield"><label>Tarikh</label>
-        <div class="kdate">
-          <input type="date" id="kfTarikhInput" value="${state.kTarikh!=='all'?esc(state.kTarikh):''}" onchange="state.kTarikh=this.value||'all';renderKursus()">
-          ${state.kTarikh!=='all'?`<button type="button" class="kdate-x" title="Semua tarikh" onclick="state.kTarikh='all';renderKursus()">✕</button>`:''}
+      <div class="ktdaftar">
+        <button class="kbtn kbtn-daftar" onclick="openCourseForm()">Daftar kursus anda</button>
+        <div class="kfield"><label>Tarikh</label>
+          <div class="kdate">
+            <input type="date" id="kfTarikhInput" value="${state.kTarikh!=='all'?esc(state.kTarikh):''}" onchange="state.kTarikh=this.value||'all';renderKursus()">
+            ${state.kTarikh!=='all'?`<button type="button" class="kdate-x" title="Semua tarikh" onclick="state.kTarikh='all';renderKursus()">✕</button>`:''}
+          </div>
         </div>
       </div>
       <div class="kfield"><label>Negeri</label><select onchange="state.kNegeri=this.value;state.kDaerah='all';renderKursus()">
