@@ -293,6 +293,13 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .kbtn:hover{filter:brightness(1.04)}
   .ktdaftar{display:flex; align-items:flex-end; gap:8px}
   .ktdaftar .kbtn-daftar{height:42px}
+  .kmore{margin-top:14px; text-align:center}
+  .kmore-btn{background:transparent; color:var(--ink); border:1.5px solid var(--gold); border-radius:12px;
+    padding:11px 20px; font-weight:800; font-size:13.5px; cursor:pointer; font-family:inherit; transition:.15s}
+  .kmore-btn:hover{background:var(--gold); color:#3a2e05}
+  .backbtn{background:transparent; border:1px solid var(--line); color:var(--ink); border-radius:10px;
+    padding:8px 14px; font-weight:700; font-size:13px; cursor:pointer; font-family:inherit; margin-bottom:14px}
+  .backbtn:hover{background:var(--line)}
   @media(max-width:820px){
     .ktdaftar{flex:1}
     .ktdaftar .kbtn-daftar{order:2}
@@ -443,14 +450,28 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
               <div class="u"></div>
               <div class="sub">Jadual kursus &amp; kelas persediaan umrah</div>
             </div>
+            <button class="kbtn kbtn-daftar" onclick="openCourseForm()">Daftar kursus anda</button>
           </div>
-          <div class="kbar" id="kursusFilter"></div>
           <div class="ktable-wrap">
             <table class="ktable">
               <thead><tr><th>Tarikh</th><th>Masa</th><th>Lokasi</th><th>Hubungi</th></tr></thead>
               <tbody id="kursusBody"></tbody>
             </table>
           </div>
+          <div id="kursusMore" class="kmore"></div>
+        </div>
+      </section>
+
+      <!-- SEMUA KURSUS -->
+      <section class="view" id="v-kursus">
+        <button class="backbtn" onclick="go('home')">← Kembali</button>
+        <div class="section-title">Semua Kursus Umrah<span class="u"></span></div>
+        <div class="kbar" id="kursusAllFilter"></div>
+        <div class="ktable-wrap">
+          <table class="ktable">
+            <thead><tr><th>Tarikh</th><th>Masa</th><th>Lokasi</th><th>Hubungi</th></tr></thead>
+            <tbody id="kursusAllBody"></tbody>
+          </table>
         </div>
       </section>
 
@@ -738,6 +759,7 @@ function go(v){
   document.querySelectorAll('[data-v]').forEach(t=>t.classList.toggle('active', t.getAttribute('data-v')===v));
   const m=document.getElementById('main'); if(m) m.scrollTop=0; window.scrollTo(0,0);
   if(v==='solah') fetchSolah(state.solCity);
+  if(v==='kursus') renderKursusAll();
   if(v==='admin') renderAdmin(); else if(admTimer){ clearInterval(admTimer); admTimer=null; }
 }
 function jump(v){ go(v); }
@@ -899,9 +921,28 @@ const DAERAH={
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function waLink(phone){let d=String(phone||'').replace(/[^\d]/g,'');if(!d)return '';if(d[0]==='0')d='60'+d.slice(1);else if(d.slice(0,2)!=='60')d='60'+d;return 'https://wa.me/'+d;}
 const WA_ICON='<svg viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="vertical-align:-2px;margin-right:4px"><path d="M17.5 6.4A7.9 7.9 0 0 0 12 4a7.9 7.9 0 0 0-6.8 11.9L4 20l4.2-1.1A7.9 7.9 0 1 0 17.5 6.4Zm-5.5 12a6.5 6.5 0 0 1-3.3-.9l-.24-.14-2.45.64.65-2.39-.16-.25A6.5 6.5 0 1 1 12 18.4Zm3.6-4.9c-.2-.1-1.17-.57-1.35-.64s-.31-.1-.44.1-.5.63-.62.76-.23.15-.42.05a5.3 5.3 0 0 1-1.56-.96 5.9 5.9 0 0 1-1.08-1.35c-.11-.19 0-.3.09-.39l.29-.34c.1-.12.13-.2.2-.33a.36.36 0 0 0 0-.35c-.05-.1-.44-1.05-.6-1.44s-.32-.33-.44-.33h-.37a.71.71 0 0 0-.52.24 2.16 2.16 0 0 0-.67 1.6 3.75 3.75 0 0 0 .79 2 8.6 8.6 0 0 0 3.3 2.9c.46.2.82.32 1.1.4.46.15.88.13 1.21.08.37-.05 1.15-.47 1.31-.92s.17-.85.12-.93-.18-.13-.38-.23Z"/></svg>';
+function today(){ const d=new Date(); const p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+function courseRow(k){
+  const loc2=[k.daerah,k.negeri].filter(Boolean).join(', ');
+  return `<tr><td>${esc(k.tarikh)}</td><td>${esc(k.masa)}</td><td>${esc(k.lokasi)}${loc2?`<br><small style="color:var(--muted)">${esc(loc2)}</small>`:''}</td><td data-l="Hubungi">${k.hubungi?`<a href="${waLink(k.hubungi)}" target="_blank" rel="noopener" class="wa-link">${WA_ICON}${esc(k.hubungi)}</a>`:''}</td></tr>`;
+}
 function renderKursus(){
   const b=document.getElementById('kursusBody'); if(!b) return;
-  const fbar=document.getElementById('kursusFilter');
+  const t=today();
+  const upcoming=COURSES.filter(c=>c.date && c.date>=t);
+  const shown=upcoming.slice(0,10);
+  b.innerHTML=shown.map(courseRow).join('')
+    || `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px">Tiada kursus akan datang.</td></tr>`;
+  const more=document.getElementById('kursusMore');
+  if(more){
+    more.innerHTML = COURSES.length>shown.length
+      ? `<button class="kmore-btn" onclick="go('kursus')">Lihat semua kursus (${COURSES.length}) →</button>`
+      : '';
+  }
+}
+function renderKursusAll(){
+  const b=document.getElementById('kursusAllBody'); if(!b) return;
+  const fbar=document.getElementById('kursusAllFilter');
   const negeris=[...new Set(COURSES.map(c=>c.negeri).filter(Boolean))].sort();
   if(state.kNegeri!=='all' && !negeris.includes(state.kNegeri)) state.kNegeri='all';
   const daerahs=[...new Set(COURSES.filter(c=>state.kNegeri==='all'||c.negeri===state.kNegeri).map(c=>c.daerah).filter(Boolean))].sort();
@@ -912,16 +953,16 @@ function renderKursus(){
         <button class="kbtn kbtn-daftar" onclick="openCourseForm()">Daftar kursus anda</button>
         <div class="kfield"><label>Tarikh</label>
           <div class="kdate">
-            <input type="date" id="kfTarikhInput" value="${state.kTarikh!=='all'?esc(state.kTarikh):''}" onchange="state.kTarikh=this.value||'all';renderKursus()">
-            ${state.kTarikh!=='all'?`<button type="button" class="kdate-x" title="Semua tarikh" onclick="state.kTarikh='all';renderKursus()">✕</button>`:''}
+            <input type="date" id="kfTarikhInputAll" value="${state.kTarikh!=='all'?esc(state.kTarikh):''}" onchange="state.kTarikh=this.value||'all';renderKursusAll()">
+            ${state.kTarikh!=='all'?`<button type="button" class="kdate-x" title="Semua tarikh" onclick="state.kTarikh='all';renderKursusAll()">✕</button>`:''}
           </div>
         </div>
       </div>
-      <div class="kfield"><label>Negeri</label><select onchange="state.kNegeri=this.value;state.kDaerah='all';renderKursus()">
+      <div class="kfield"><label>Negeri</label><select onchange="state.kNegeri=this.value;state.kDaerah='all';renderKursusAll()">
         <option value="all"${state.kNegeri==='all'?' selected':''}>Semua negeri</option>
         ${negeris.map(n=>`<option value="${esc(n)}"${state.kNegeri===n?' selected':''}>${esc(n)}</option>`).join('')}
       </select></div>
-      <div class="kfield"><label>Daerah</label><select onchange="state.kDaerah=this.value;renderKursus()">
+      <div class="kfield"><label>Daerah</label><select onchange="state.kDaerah=this.value;renderKursusAll()">
         <option value="all"${state.kDaerah==='all'?' selected':''}>Semua daerah</option>
         ${daerahs.map(d=>`<option value="${esc(d)}"${state.kDaerah===d?' selected':''}>${esc(d)}</option>`).join('')}
       </select></div>
@@ -931,10 +972,7 @@ function renderKursus(){
     (state.kTarikh==='all'||c.date===state.kTarikh) &&
     (state.kNegeri==='all'||c.negeri===state.kNegeri) &&
     (state.kDaerah==='all'||c.daerah===state.kDaerah));
-  b.innerHTML=list.map(k=>{
-    const loc2=[k.daerah,k.negeri].filter(Boolean).join(', ');
-    return `<tr><td>${esc(k.tarikh)}</td><td>${esc(k.masa)}</td><td>${esc(k.lokasi)}${loc2?`<br><small style="color:var(--muted)">${esc(loc2)}</small>`:''}</td><td data-l="Hubungi">${k.hubungi?`<a href="${waLink(k.hubungi)}" target="_blank" rel="noopener" class="wa-link">${WA_ICON}${esc(k.hubungi)}</a>`:''}</td></tr>`;
-  }).join('')
+  b.innerHTML=list.map(courseRow).join('')
     || `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px">Tiada kursus untuk tapisan ini.</td></tr>`;
 }
 
@@ -1066,7 +1104,7 @@ async function setCourse(id,status,btn){
     const {error}=await sb.rpc('admin_set_course_status',{p_id:id,p_status:status});
     if(error) throw error;
     toast(status==='approved'?'Kursus diluluskan & kini dipapar.':'Kursus ditolak.');
-    if(status==='approved'){ try{ await loadData(); renderKursus(); }catch(e){} }
+    if(status==='approved'){ try{ await loadData(); renderKursus(); renderKursusAll(); }catch(e){} }
     loadPendingCourses();
   }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
 }
