@@ -606,8 +606,22 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   <div class="modal-box">
     <h3>Daftar Kursus Umrah</h3>
     <div class="mh-sub">Isi maklumat kursus. Kursus akan disemak admin dahulu sebelum dipaparkan dalam senarai.</div>
-    <label class="fl">Nama / Anjuran kursus</label>
-    <input id="cfAnjuran" placeholder="cth: Kelas Persediaan Umrah Perdana">
+    <div class="modal-row">
+      <div>
+        <label class="fl">Penganjur</label>
+        <select id="cfJenis">
+          <option value="">— Pilih —</option>
+          <option>Agensi Travel</option>
+          <option>Persendirian</option>
+          <option>Masjid</option>
+          <option>Lain-Lain</option>
+        </select>
+      </div>
+      <div>
+        <label class="fl">Nama Penganjur</label>
+        <input id="cfNama" placeholder="cth: Al-Falah Travel">
+      </div>
+    </div>
     <div class="modal-row">
       <div>
         <label class="fl">Tarikh</label>
@@ -623,11 +637,11 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <div class="modal-row">
       <div>
         <label class="fl">Negeri</label>
-        <select id="cfNegeri"></select>
+        <select id="cfNegeri" onchange="onCfNegeri()"></select>
       </div>
       <div>
         <label class="fl">Daerah</label>
-        <input id="cfDaerah" placeholder="cth: Hulu Langat">
+        <select id="cfDaerah"><option value="">— Pilih negeri dahulu —</option></select>
       </div>
     </div>
     <label class="fl">No. telefon / Hubungi</label>
@@ -854,6 +868,24 @@ const MENU=[
   {t:'Berita Umrah',       s:'Berita & info terkini umrah & haji',       c:'#2d63b8', i:'book',   v:'news'},
 ];
 const MY_NEGERI=['Johor','Kedah','Kelantan','Melaka','Negeri Sembilan','Pahang','Perak','Perlis','Pulau Pinang','Sabah','Sarawak','Selangor','Terengganu','W.P. Kuala Lumpur','W.P. Labuan','W.P. Putrajaya'];
+const DAERAH={
+  'Johor':['Batu Pahat','Johor Bahru','Kluang','Kota Tinggi','Kulai','Mersing','Muar','Pontian','Segamat','Tangkak'],
+  'Kedah':['Baling','Bandar Baharu','Kota Setar','Kuala Muda','Kubang Pasu','Kulim','Langkawi','Padang Terap','Pendang','Pokok Sena','Sik','Yan'],
+  'Kelantan':['Bachok','Gua Musang','Jeli','Kota Bharu','Kuala Krai','Machang','Pasir Mas','Pasir Puteh','Tanah Merah','Tumpat'],
+  'Melaka':['Alor Gajah','Jasin','Melaka Tengah'],
+  'Negeri Sembilan':['Jelebu','Jempol','Kuala Pilah','Port Dickson','Rembau','Seremban','Tampin'],
+  'Pahang':['Bentong','Bera','Cameron Highlands','Jerantut','Kuantan','Lipis','Maran','Pekan','Raub','Rompin','Temerloh'],
+  'Perak':['Bagan Datuk','Batang Padang','Hilir Perak','Hulu Perak','Kampar','Kerian','Kinta','Kuala Kangsar','Larut Matang & Selama','Manjung','Muallim','Perak Tengah'],
+  'Perlis':['Kangar','Arau','Padang Besar'],
+  'Pulau Pinang':['Timur Laut','Barat Daya','Seberang Perai Utara','Seberang Perai Tengah','Seberang Perai Selatan'],
+  'Sabah':['Kota Kinabalu','Putatan','Penampang','Papar','Tuaran','Kota Belud','Ranau','Kudat','Kota Marudu','Pitas','Beaufort','Kuala Penyu','Sipitang','Tenom','Nabawan','Keningau','Tambunan','Sandakan','Beluran','Telupid','Kinabatangan','Tongod','Lahad Datu','Kunak','Semporna','Tawau','Kalabakan'],
+  'Sarawak':['Kuching','Bau','Lundu','Serian','Samarahan','Asajaya','Simunjan','Sri Aman','Lubok Antu','Betong','Saratok','Sarikei','Meradong','Julau','Pakan','Sibu','Kanowit','Selangau','Mukah','Dalat','Matu','Daro','Bintulu','Tatau','Miri','Marudi','Subis','Telang Usan','Limbang','Lawas','Kapit','Song','Belaga'],
+  'Selangor':['Gombak','Hulu Langat','Hulu Selangor','Klang','Kuala Langat','Kuala Selangor','Petaling','Sabak Bernam','Sepang'],
+  'Terengganu':['Besut','Dungun','Hulu Terengganu','Kemaman','Kuala Nerus','Kuala Terengganu','Marang','Setiu'],
+  'W.P. Kuala Lumpur':['Kuala Lumpur'],
+  'W.P. Labuan':['Labuan'],
+  'W.P. Putrajaya':['Putrajaya']
+};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function renderKursus(){
   const b=document.getElementById('kursusBody'); if(!b) return;
@@ -898,9 +930,18 @@ function renderKursus(){
 function openCourseForm(){
   const sel=document.getElementById('cfNegeri');
   if(sel && !sel.dataset.filled){ sel.innerHTML='<option value="">— Pilih negeri —</option>'+MY_NEGERI.map(n=>`<option>${n}</option>`).join(''); sel.dataset.filled=1; }
-  ['cfAnjuran','cfTarikhDate','cfMasa','cfLokasi','cfDaerah','cfHubungi'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['cfNama','cfTarikhDate','cfMasa','cfLokasi','cfHubungi'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  const j=document.getElementById('cfJenis'); if(j) j.value='';
   if(sel) sel.value='';
+  const dd=document.getElementById('cfDaerah'); if(dd) dd.innerHTML='<option value="">— Pilih negeri dahulu —</option>';
   document.getElementById('courseModal').classList.add('open');
+}
+function onCfNegeri(){
+  const neg=document.getElementById('cfNegeri').value;
+  const dd=document.getElementById('cfDaerah'); if(!dd) return;
+  const list=DAERAH[neg]||[];
+  dd.innerHTML = neg ? ('<option value="">— Pilih daerah —</option>'+list.map(d=>`<option>${esc(d)}</option>`).join('')+'<option>Lain-Lain</option>')
+                     : '<option value="">— Pilih negeri dahulu —</option>';
 }
 function closeCourseForm(){ document.getElementById('courseModal').classList.remove('open'); }
 function fmtDateMs(iso){
@@ -912,18 +953,19 @@ function fmtDateMs(iso){
   return `${d.getDate()} ${mon[d.getMonth()]} ${d.getFullYear()} (${days[d.getDay()]})`;
 }
 async function submitCourse(){
-  const anjuran=document.getElementById('cfAnjuran').value.trim();
+  const jenis=document.getElementById('cfJenis').value;
+  const nama=document.getElementById('cfNama').value.trim();
   const dateISO=document.getElementById('cfTarikhDate').value;
   const masa=document.getElementById('cfMasa').value.trim();
   const lokasi=document.getElementById('cfLokasi').value.trim();
   const negeri=document.getElementById('cfNegeri').value;
-  const daerah=document.getElementById('cfDaerah').value.trim();
+  const daerah=document.getElementById('cfDaerah').value;
   const hubungi=document.getElementById('cfHubungi').value.trim();
   if(!dateISO||!lokasi||!hubungi){ toast('Sila isi Tarikh, Lokasi & No. telefon.'); return; }
   const btn=document.getElementById('cfSave'); btn.disabled=true; btn.textContent='Menghantar…';
   try{
     const {error}=await sb.rpc('submit_course',{
-      p_anjuran:anjuran, p_tarikh:fmtDateMs(dateISO), p_tarikh_date:dateISO, p_masa:masa,
+      p_jenis:jenis, p_anjuran:nama, p_tarikh:fmtDateMs(dateISO), p_tarikh_date:dateISO, p_masa:masa,
       p_lokasi:lokasi, p_daerah:daerah, p_negeri:negeri, p_hubungi:hubungi });
     if(error) throw error;
     closeCourseForm();
@@ -980,7 +1022,7 @@ async function loadPendingCourses(){
     const list=data||[];
     box.innerHTML = list.length ? list.map(c=>`
       <div class="pend" data-id="${c.id}">
-        <h4>${esc(c.anjuran||'Kursus Umrah')}</h4>
+        <h4>${esc(c.anjuran||'Kursus Umrah')}${c.penganjur_jenis?` <span style="font-weight:600;color:var(--muted);font-size:12px">(${esc(c.penganjur_jenis)})</span>`:''}</h4>
         <div class="pmeta"><b>Tarikh:</b> ${esc(c.tarikh_label||'-')} &nbsp;·&nbsp; <b>Masa:</b> ${esc(c.masa||'-')}<br>
         <b>Lokasi:</b> ${esc(c.lokasi||'-')} ${c.daerah||c.negeri?`(${esc([c.daerah,c.negeri].filter(Boolean).join(', '))})`:''}<br>
         <b>Hubungi:</b> ${esc(c.hubungi||'-')}</div>
