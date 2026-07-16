@@ -506,14 +506,15 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
       </section>
 
       <!-- DIRECTORY -->
-      <section class="view" id="v-dir">
-        <div class="section-title">Direktori &amp; Servis<span class="u"></span></div>
-        <div class="seg">
-          <button class="on" onclick="dirTab('med',this)">Perubatan</button>
-          <button onclick="dirTab('svc',this)">Servis</button>
-        </div>
+      <section class="view" id="v-med">
+        <div class="section-title">Direktori Perubatan<span class="u"></span></div>
         <div id="dir-med"></div>
-        <div id="dir-svc" style="display:none"></div>
+      </section>
+
+      <!-- SERVIS -->
+      <section class="view" id="v-svc">
+        <div class="section-title">Servis Jemaah<span class="u"></span></div>
+        <div id="dir-svc"></div>
       </section>
 
       <!-- PANDUAN UMRAH -->
@@ -677,7 +678,8 @@ const NAV=[
   {v:'agency', t:'Agensi Umrah',       i:'plane'},
   {v:'dua',    t:"Du'a",               i:'dua'},
   {v:'stay',   t:'Penginapan',         i:'bed'},
-  {v:'dir',    t:'Direktori & Servis', i:'med'},
+  {v:'med',    t:'Direktori Perubatan', i:'med'},
+  {v:'svc',    t:'Servis',              i:'bell'},
   {v:'guide',  t:'Panduan Umrah',      i:'book'},
   {v:'news',   t:'Berita Umrah',       i:'news'},
   {v:'lost',   t:'Orang Hilang',       i:'pin'},
@@ -688,7 +690,7 @@ const BOTTOM=[
   {v:'dua',t:"Du'a",i:'dua',c:'#6d4bb0'},{v:'solah',t:'Solat',i:'mosque',c:'#2f74c0'},{v:'stay',t:'Penginapan',i:'bed',c:'#d99a2b'},
 ];
 const TITLES={home:"HARAMAEN",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
-  dir:"Direktori & Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",admin:"Statistik Pelawat"};
+  med:"Direktori Perubatan",svc:"Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",admin:"Statistik Pelawat"};
 const ADMIN_EMAILS=['salizam.oasys@gmail.com'];
 function isAdmin(){ return !!(state.user && ADMIN_EMAILS.includes((state.user.email||'').toLowerCase())); }
 function buildNav(){
@@ -838,7 +840,8 @@ const MENU=[
   {t:'Panduan Umrah',      s:'Info lengkap & tips umrah terkini',        c:'#1c7d54', i:'user',   v:'guide'},
   {t:'Kirim Doa',          s:'Hantar doa anda ke Tanah Suci',            c:'#6d4bb0', i:'dua',    v:'dua'},
   {t:'Agensi Umrah',       s:'Cari & pilih agensi berdaftar',            c:'#10808e', i:'plane',  v:'agency'},
-  {t:'Direktori Perubatan',s:'Senarai klinik & hospital Makkah/Madinah', c:'#a56a2e', i:'med',    v:'dir'},
+  {t:'Direktori Perubatan',s:'Klinik, hospital & farmasi di Tanah Suci', c:'#a56a2e', i:'med',    v:'med'},
+  {t:'Servis Jemaah',      s:'Mutawwif, dobi, transport & lain-lain',    c:'#0f8a7e', i:'bell',   v:'svc'},
   {t:'Waktu Solat',        s:'Waktu solat tempatan ikut lokasi anda',       c:'#2f74c0', i:'mosque', v:'solah'},
   {t:'Penginapan',         s:'Hotel & penginapan pilihan terbaik',       c:'#d99a2b', i:'bed',    v:'stay'},
   {t:'Orang Hilang',       s:'Pusat maklumat & bantuan',                 c:'#2f9e57', i:'pin',    v:'lost'},
@@ -992,7 +995,7 @@ async function setCourse(id,status,btn){
 function renderHome(){
   document.getElementById('featGrid').innerHTML = MENU.map(m=>`
     <button class="feat" onclick="jump('${m.v}')">
-      <span class="fi" style="background:${m.c}"><img class="fimg" src="${ICONS[m.i]}" alt="" draggable="false"></span>
+      <span class="fi" style="background:${m.c}">${ICONS[m.i]?`<img class="fimg" src="${ICONS[m.i]}" alt="" draggable="false">`:svg(m.i)}</span>
       <span class="ft"><b>${m.t}</b><small>${m.s}</small></span>
       <span class="chev">${svg('chev')}</span>
     </button>`).join('');
