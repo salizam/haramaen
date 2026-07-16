@@ -165,6 +165,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .ktable td{padding:11px 14px; border-top:1px solid var(--line); color:var(--ink); vertical-align:top}
   .ktable tbody tr:nth-child(even) td{background:#faf6f7}
   .ktable td[data-l="Hubungi"]{white-space:nowrap; font-variant-numeric:tabular-nums}
+  .wa-link{color:#128C4B; font-weight:700; text-decoration:none; white-space:nowrap}
+  .wa-link:hover{text-decoration:underline}
   .pkgcard{position:relative; overflow:hidden; border-radius:18px; padding:20px; min-height:214px;
     display:flex; flex-direction:column; justify-content:flex-end; border:1px solid var(--line);
     background:linear-gradient(160deg,#fbfcfb,#eef1ee); box-shadow:var(--shadow)}
@@ -633,11 +635,11 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <div class="masa-grp">
       <div class="masa-row"><span class="masa-lbl">Dari</span>
         <select id="cfJamA" class="masa-sel"></select><span>:</span><select id="cfMinitA" class="masa-sel"></select>
-        <select id="cfAmpmA" class="masa-sel"><option value="">—</option><option>pagi</option><option>petang</option></select>
+        <select id="cfAmpmA" class="masa-sel"><option value="">—</option><option>pagi</option><option>tengahari</option><option>petang</option></select>
       </div>
       <div class="masa-row"><span class="masa-lbl">Hingga</span>
         <select id="cfJamB" class="masa-sel"></select><span>:</span><select id="cfMinitB" class="masa-sel"></select>
-        <select id="cfAmpmB" class="masa-sel"><option value="">—</option><option>pagi</option><option>petang</option></select>
+        <select id="cfAmpmB" class="masa-sel"><option value="">—</option><option>pagi</option><option>tengahari</option><option>petang</option></select>
       </div>
     </div>
     <label class="fl">Lokasi / Tempat</label>
@@ -895,6 +897,8 @@ const DAERAH={
   'W.P. Putrajaya':['Putrajaya']
 };
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function waLink(phone){let d=String(phone||'').replace(/[^\d]/g,'');if(!d)return '';if(d[0]==='0')d='60'+d.slice(1);else if(d.slice(0,2)!=='60')d='60'+d;return 'https://wa.me/'+d;}
+const WA_ICON='<svg viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="vertical-align:-2px;margin-right:4px"><path d="M17.5 6.4A7.9 7.9 0 0 0 12 4a7.9 7.9 0 0 0-6.8 11.9L4 20l4.2-1.1A7.9 7.9 0 1 0 17.5 6.4Zm-5.5 12a6.5 6.5 0 0 1-3.3-.9l-.24-.14-2.45.64.65-2.39-.16-.25A6.5 6.5 0 1 1 12 18.4Zm3.6-4.9c-.2-.1-1.17-.57-1.35-.64s-.31-.1-.44.1-.5.63-.62.76-.23.15-.42.05a5.3 5.3 0 0 1-1.56-.96 5.9 5.9 0 0 1-1.08-1.35c-.11-.19 0-.3.09-.39l.29-.34c.1-.12.13-.2.2-.33a.36.36 0 0 0 0-.35c-.05-.1-.44-1.05-.6-1.44s-.32-.33-.44-.33h-.37a.71.71 0 0 0-.52.24 2.16 2.16 0 0 0-.67 1.6 3.75 3.75 0 0 0 .79 2 8.6 8.6 0 0 0 3.3 2.9c.46.2.82.32 1.1.4.46.15.88.13 1.21.08.37-.05 1.15-.47 1.31-.92s.17-.85.12-.93-.18-.13-.38-.23Z"/></svg>';
 function renderKursus(){
   const b=document.getElementById('kursusBody'); if(!b) return;
   const fbar=document.getElementById('kursusFilter');
@@ -929,7 +933,7 @@ function renderKursus(){
     (state.kDaerah==='all'||c.daerah===state.kDaerah));
   b.innerHTML=list.map(k=>{
     const loc2=[k.daerah,k.negeri].filter(Boolean).join(', ');
-    return `<tr><td>${esc(k.tarikh)}</td><td>${esc(k.masa)}</td><td>${esc(k.lokasi)}${loc2?`<br><small style="color:var(--muted)">${esc(loc2)}</small>`:''}</td><td data-l="Hubungi">${esc(k.hubungi)}</td></tr>`;
+    return `<tr><td>${esc(k.tarikh)}</td><td>${esc(k.masa)}</td><td>${esc(k.lokasi)}${loc2?`<br><small style="color:var(--muted)">${esc(loc2)}</small>`:''}</td><td data-l="Hubungi">${k.hubungi?`<a href="${waLink(k.hubungi)}" target="_blank" rel="noopener" class="wa-link">${WA_ICON}${esc(k.hubungi)}</a>`:''}</td></tr>`;
   }).join('')
     || `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px">Tiada kursus untuk tapisan ini.</td></tr>`;
 }
