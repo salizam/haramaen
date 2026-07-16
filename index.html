@@ -275,6 +275,54 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   @media(max-width:400px){
     .feat-grid{grid-template-columns:repeat(3,1fr)}
   }
+  /* Kursus filter + daftar */
+  .kbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:14px}
+  .kfilter{display:flex;flex-wrap:wrap;gap:10px;flex:1}
+  .kfield{display:flex;flex-direction:column;gap:4px}
+  .kfield label{font-size:11.5px;font-weight:700;color:var(--muted)}
+  .kfilter select{min-width:150px}
+  .kbtn{background:var(--gold);color:#3a2e05;border:0;border-radius:12px;padding:11px 16px;font-weight:800;
+    font-size:13.5px;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 9px rgba(201,162,39,.3)}
+  .kbtn:hover{filter:brightness(1.04)}
+  /* Modal */
+  .modal{position:fixed;inset:0;background:rgba(10,25,20,.55);z-index:60;display:none;
+    align-items:center;justify-content:center;padding:16px}
+  .modal.open{display:flex}
+  .modal-box{background:#fff;border-radius:18px;max-width:460px;width:100%;max-height:90vh;overflow-y:auto;
+    padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modal-box h3{margin:0 0 4px;font-size:19px;font-weight:800}
+  .modal-box .mh-sub{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+  .modal-box label.fl{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:10px 0 4px}
+  .modal-box input,.modal-box select{width:100%}
+  .modal-row{display:flex;gap:10px}
+  .modal-row>div{flex:1}
+  .modal-actions{display:flex;gap:10px;margin-top:18px}
+  .modal-actions button{flex:1;border:0;border-radius:12px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit}
+  .m-cancel{background:var(--line);color:var(--ink)}
+  .m-save{background:var(--green);color:#fff}
+  /* Admin stats */
+  .adm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+  .adm-stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .adm-stat .n{font-size:28px;font-weight:800;color:var(--green)}
+  .adm-stat .l{font-size:12px;color:var(--muted);margin-top:2px}
+  .adm-stat.live .n{color:#1f9d55}
+  .adm-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#1f9d55;margin-right:6px;
+    vertical-align:middle;animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .adm-h{font-size:14px;font-weight:800;margin:16px 0 8px}
+  .adm-bars{display:flex;align-items:flex-end;gap:4px;height:160px;padding:10px 6px;overflow-x:auto;
+    border:1px solid var(--line);border-radius:14px;background:var(--card)}
+  .adm-bars .bcol{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:20px;flex:1}
+  .adm-bars .bwrap{display:flex;align-items:flex-end;height:112px}
+  .adm-bars .bar{width:13px;background:linear-gradient(180deg,var(--green-l),var(--green));border-radius:4px 4px 0 0;min-height:2px}
+  .adm-bars .blab{font-size:9px;color:var(--muted);white-space:nowrap;transform:rotate(-45deg)}
+  .pend{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+  .pend h4{margin:0 0 4px;font-size:15px}
+  .pend .pmeta{font-size:12.5px;color:var(--muted);line-height:1.55}
+  .pend-act{display:flex;gap:8px;margin-top:10px}
+  .pend-act button{border:0;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:13px;font-family:inherit}
+  .b-approve{background:#1f9d55;color:#fff}
+  .b-reject{background:#e6ebe7;color:#b3261e}
 </style>
 </head>
 <body>
@@ -375,7 +423,9 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
               <div class="u"></div>
               <div class="sub">Jadual kursus &amp; kelas persediaan umrah</div>
             </div>
+            <button class="kbtn" onclick="openCourseForm()">+ Daftar Kursus</button>
           </div>
+          <div class="kbar" id="kursusFilter"></div>
           <div class="ktable-wrap">
             <table class="ktable">
               <thead><tr><th>Tarikh</th><th>Masa</th><th>Lokasi</th><th>Hubungi</th></tr></thead>
@@ -518,6 +568,18 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div id="solList"></div>
       </section>
 
+      <!-- ADMIN — STATISTIK PELAWAT -->
+      <section class="view" id="v-admin">
+        <div class="section-title">Statistik Pelawat<span class="u"></span></div>
+        <div class="adm-grid" id="admStats">
+          <div class="adm-stat"><div class="n">…</div><div class="l">Memuatkan…</div></div>
+        </div>
+        <div class="adm-h">Trend 30 hari (pelawat unik)</div>
+        <div class="adm-bars" id="admBars"></div>
+        <div class="adm-h">Kursus menunggu kelulusan</div>
+        <div id="admPending"><div class="empty">Memuatkan…</div></div>
+      </section>
+
     </main>
   </div>
   <!-- BOTTOM NAV (mobile) -->
@@ -525,6 +587,44 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- MODAL: Daftar Kursus -->
+<div class="modal" id="courseModal">
+  <div class="modal-box">
+    <h3>Daftar Kursus Umrah</h3>
+    <div class="mh-sub">Isi maklumat kursus. Kursus akan disemak admin dahulu sebelum dipaparkan dalam senarai.</div>
+    <label class="fl">Nama / Anjuran kursus</label>
+    <input id="cfAnjuran" placeholder="cth: Kelas Persediaan Umrah Perdana">
+    <div class="modal-row">
+      <div>
+        <label class="fl">Tarikh</label>
+        <input id="cfTarikhDate" type="date">
+      </div>
+      <div>
+        <label class="fl">Masa</label>
+        <input id="cfMasa" placeholder="cth: 8:00 pagi - 12:00 tgh">
+      </div>
+    </div>
+    <label class="fl">Lokasi / Tempat</label>
+    <input id="cfLokasi" placeholder="cth: Masjid Bandar Baru Bangi">
+    <div class="modal-row">
+      <div>
+        <label class="fl">Negeri</label>
+        <select id="cfNegeri"></select>
+      </div>
+      <div>
+        <label class="fl">Daerah</label>
+        <input id="cfDaerah" placeholder="cth: Hulu Langat">
+      </div>
+    </div>
+    <label class="fl">No. telefon / Hubungi</label>
+    <input id="cfHubungi" placeholder="cth: 012-345 6789">
+    <div class="modal-actions">
+      <button class="m-cancel" onclick="closeCourseForm()">Batal</button>
+      <button class="m-save" id="cfSave" onclick="submitCourse()">Hantar</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -543,7 +643,7 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY, {
 
 /* ============ STATE ============ */
 const MASJIDIL_HARAM = {lat:21.4225, lng:39.8262};
-const state = { user:null, myHotel:null, agRating:0, agPrice:null, hoBudget:null, duas:[], solCity:'me', medFilter:'all', svcFilter:'all' };
+const state = { user:null, myHotel:null, agRating:0, agPrice:null, hoBudget:null, duas:[], solCity:'me', medFilter:'all', svcFilter:'all', kTarikh:'all', kNegeri:'all', kDaerah:'all' };
 
 /* ============ ICONS (inline SVG) ============ */
 const SVG={
@@ -582,9 +682,12 @@ const BOTTOM=[
   {v:'dua',t:"Du'a",i:'dua',c:'#6d4bb0'},{v:'solah',t:'Solat',i:'mosque',c:'#2f74c0'},{v:'stay',t:'Penginapan',i:'bed',c:'#d99a2b'},
 ];
 const TITLES={home:"HARAMAEN",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
-  dir:"Direktori & Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat"};
+  dir:"Direktori & Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",admin:"Statistik Pelawat"};
+const ADMIN_EMAILS=['salizam.oasys@gmail.com'];
+function isAdmin(){ return !!(state.user && ADMIN_EMAILS.includes((state.user.email||'').toLowerCase())); }
 function buildNav(){
-  document.getElementById('sbNav').innerHTML=NAV.map(n=>
+  const navList = NAV.concat(isAdmin()?[{v:'admin',t:'📊 Statistik (Admin)',i:'book'}]:[]);
+  document.getElementById('sbNav').innerHTML=navList.map(n=>
     `<button class="sb-link" data-v="${n.v}" onclick="go('${n.v}')"><span class="ico" data-i="${n.i}"></span> ${n.t}</button>`).join('');
   document.getElementById('bottomNav').innerHTML=BOTTOM.map(n=>
     `<button class="bn" data-v="${n.v}" onclick="go('${n.v}')"><span class="bnfi" style="background:${n.c}">${ICONS[n.i]?`<img src="${ICONS[n.i]}" alt="" draggable="false">`:`<span class="ico" data-i="${n.i}"></span>`}</span><span>${n.t}</span></button>`).join('');
@@ -596,24 +699,30 @@ function go(v){
   document.querySelectorAll('[data-v]').forEach(t=>t.classList.toggle('active', t.getAttribute('data-v')===v));
   const m=document.getElementById('main'); if(m) m.scrollTop=0; window.scrollTo(0,0);
   if(v==='solah') fetchSolah(state.solCity);
+  if(v==='admin') renderAdmin(); else if(admTimer){ clearInterval(admTimer); admTimer=null; }
 }
 function jump(v){ go(v); }
 function toggleUserMenu(e){ if(e) e.stopPropagation(); document.getElementById('tbMenu').classList.toggle('open'); }
 document.addEventListener('click', function(e){ const m=document.getElementById('tbMenu'); if(m && m.classList.contains('open') && !e.target.closest('.tb-user')) m.classList.remove('open'); });
 
 /* ============ LIVE DATA (Supabase) ============ */
-let AGENCIES=[], HOTELS=[], VOLUNTEERS=[], HOSPITALS=[], SERVICES=[], SAR_RATE=1.27;
+let AGENCIES=[], HOTELS=[], VOLUNTEERS=[], HOSPITALS=[], SERVICES=[], COURSES=[], SAR_RATE=1.27;
+let admTimer=null;
 const MED_MAP={hospital:{t:'Hospital',i:'🏥'}, pharmacy:{t:'Farmasi',i:'💊'}, insurance:{t:'Insurans',i:'🛡️'}};
 const SVC_ICON={wheelchair:'♿', kaaba:'🕋', guide:'🧕', exchange:'💱', laundry:'🧺', car:'🚕', shop:'🛍️'};
 async function loadData(){
-  const [ag,ho,vo,me,sv,cr] = await Promise.all([
+  const [ag,ho,vo,me,sv,cr,co] = await Promise.all([
     sb.from('agencies').select('*'),
     sb.from('hotels').select('*'),
     sb.from('volunteers').select('*').eq('active',true),
     sb.from('medical_directory').select('*'),
     sb.from('services').select('*'),
     sb.from('currency_rates').select('*').eq('base_currency','SAR').limit(1),
+    sb.from('courses').select('*').eq('status','approved'),
   ]);
+  COURSES=(co.data||[]).map(c=>({tarikh:c.tarikh_label, date:c.tarikh_date||'', masa:c.masa||'', lokasi:c.lokasi||'',
+    daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||''}))
+    .sort((a,b)=> (a.date||'9999').localeCompare(b.date||'9999'));
   AGENCIES=(ag.data||[]).map(a=>({name:a.name, rating:Number(a.rating), reviews:Number(a.reviews_count||0),
     motac:a.motac_licensed, lic:a.motac_license||'—', price:Number(a.price), tier:a.tier, note:a.note||''}));
   HOTELS=(ho.data||[]).map(h=>({name:h.name, dist:Number(h.distance_km), price:Number(h.price_per_night),
@@ -728,15 +837,149 @@ const MENU=[
   {t:'Orang Hilang',       s:'Pusat maklumat & bantuan',                 c:'#2f9e57', i:'pin',    v:'lost'},
   {t:'Berita Umrah',       s:'Berita & info terkini umrah & haji',       c:'#2d63b8', i:'book',   v:'news'},
 ];
-const KURSUS=[
-  {tarikh:'1 Ogos 2026 (Sabtu)',      masa:'8:00 pagi - 12:00 tengahari', lokasi:'Masjid Bandar Baru Bangi, Selangor', hubungi:'012-345 6789'},
-  {tarikh:'15 Ogos 2026 (Sabtu)',     masa:'9:00 pagi - 1:00 petang',     lokasi:'Masjid Al-Falah USJ 9, Subang Jaya', hubungi:'013-222 3344'},
-  {tarikh:'6 September 2026 (Ahad)',  masa:'8:30 pagi - 12:30 tengahari', lokasi:'Surau Taman Melati, Kuala Lumpur',   hubungi:'019-876 5432'},
-];
+const MY_NEGERI=['Johor','Kedah','Kelantan','Melaka','Negeri Sembilan','Pahang','Perak','Perlis','Pulau Pinang','Sabah','Sarawak','Selangor','Terengganu','W.P. Kuala Lumpur','W.P. Labuan','W.P. Putrajaya'];
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function renderKursus(){
   const b=document.getElementById('kursusBody'); if(!b) return;
-  b.innerHTML=KURSUS.map(k=>`<tr><td>${k.tarikh}</td><td>${k.masa}</td><td>${k.lokasi}</td><td data-l="Hubungi">${k.hubungi}</td></tr>`).join('')
-    || `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px">Tiada kursus dijadualkan buat masa ini.</td></tr>`;
+  const fbar=document.getElementById('kursusFilter');
+  const dates=[...new Map(COURSES.filter(c=>c.date).map(c=>[c.date,c.tarikh])).entries()];
+  const negeris=[...new Set(COURSES.map(c=>c.negeri).filter(Boolean))].sort();
+  if(state.kNegeri!=='all' && !negeris.includes(state.kNegeri)) state.kNegeri='all';
+  const daerahs=[...new Set(COURSES.filter(c=>state.kNegeri==='all'||c.negeri===state.kNegeri).map(c=>c.daerah).filter(Boolean))].sort();
+  if(state.kDaerah!=='all' && !daerahs.includes(state.kDaerah)) state.kDaerah='all';
+  if(fbar){
+    fbar.innerHTML=`<div class="kfilter">
+      <div class="kfield"><label>Tarikh</label><select onchange="state.kTarikh=this.value;renderKursus()">
+        <option value="all"${state.kTarikh==='all'?' selected':''}>Semua tarikh</option>
+        ${dates.map(([d,l])=>`<option value="${esc(d)}"${state.kTarikh===d?' selected':''}>${esc(l)}</option>`).join('')}
+      </select></div>
+      <div class="kfield"><label>Negeri</label><select onchange="state.kNegeri=this.value;state.kDaerah='all';renderKursus()">
+        <option value="all"${state.kNegeri==='all'?' selected':''}>Semua negeri</option>
+        ${negeris.map(n=>`<option value="${esc(n)}"${state.kNegeri===n?' selected':''}>${esc(n)}</option>`).join('')}
+      </select></div>
+      <div class="kfield"><label>Daerah</label><select onchange="state.kDaerah=this.value;renderKursus()">
+        <option value="all"${state.kDaerah==='all'?' selected':''}>Semua daerah</option>
+        ${daerahs.map(d=>`<option value="${esc(d)}"${state.kDaerah===d?' selected':''}>${esc(d)}</option>`).join('')}
+      </select></div>
+    </div>`;
+  }
+  const list=COURSES.filter(c=>
+    (state.kTarikh==='all'||c.date===state.kTarikh) &&
+    (state.kNegeri==='all'||c.negeri===state.kNegeri) &&
+    (state.kDaerah==='all'||c.daerah===state.kDaerah));
+  b.innerHTML=list.map(k=>{
+    const loc2=[k.daerah,k.negeri].filter(Boolean).join(', ');
+    return `<tr><td>${esc(k.tarikh)}</td><td>${esc(k.masa)}</td><td>${esc(k.lokasi)}${loc2?`<br><small style="color:var(--muted)">${esc(loc2)}</small>`:''}</td><td data-l="Hubungi">${esc(k.hubungi)}</td></tr>`;
+  }).join('')
+    || `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px">Tiada kursus untuk tapisan ini.</td></tr>`;
+}
+
+/* ---- Daftar Kursus (modal) ---- */
+function openCourseForm(){
+  const sel=document.getElementById('cfNegeri');
+  if(sel && !sel.dataset.filled){ sel.innerHTML='<option value="">— Pilih negeri —</option>'+MY_NEGERI.map(n=>`<option>${n}</option>`).join(''); sel.dataset.filled=1; }
+  ['cfAnjuran','cfTarikhDate','cfMasa','cfLokasi','cfDaerah','cfHubungi'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  if(sel) sel.value='';
+  document.getElementById('courseModal').classList.add('open');
+}
+function closeCourseForm(){ document.getElementById('courseModal').classList.remove('open'); }
+function fmtDateMs(iso){
+  if(!iso) return '';
+  const days=['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'];
+  const mon=['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
+  const d=new Date(iso+'T00:00:00');
+  if(isNaN(d)) return iso;
+  return `${d.getDate()} ${mon[d.getMonth()]} ${d.getFullYear()} (${days[d.getDay()]})`;
+}
+async function submitCourse(){
+  const anjuran=document.getElementById('cfAnjuran').value.trim();
+  const dateISO=document.getElementById('cfTarikhDate').value;
+  const masa=document.getElementById('cfMasa').value.trim();
+  const lokasi=document.getElementById('cfLokasi').value.trim();
+  const negeri=document.getElementById('cfNegeri').value;
+  const daerah=document.getElementById('cfDaerah').value.trim();
+  const hubungi=document.getElementById('cfHubungi').value.trim();
+  if(!dateISO||!lokasi||!hubungi){ toast('Sila isi Tarikh, Lokasi & No. telefon.'); return; }
+  const btn=document.getElementById('cfSave'); btn.disabled=true; btn.textContent='Menghantar…';
+  try{
+    const {error}=await sb.rpc('submit_course',{
+      p_anjuran:anjuran, p_tarikh:fmtDateMs(dateISO), p_tarikh_date:dateISO, p_masa:masa,
+      p_lokasi:lokasi, p_daerah:daerah, p_negeri:negeri, p_hubungi:hubungi });
+    if(error) throw error;
+    closeCourseForm();
+    toast('Terima kasih! Kursus dihantar untuk semakan admin.');
+  }catch(e){ toast('Gagal menghantar — cuba lagi.'); }
+  btn.disabled=false; btn.textContent='Hantar';
+}
+
+/* ---- Visitor tracking ---- */
+function vid(){
+  try{ let v=localStorage.getItem('hrm_vid'); if(!v){ v='v'+Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem('hrm_vid',v);} return v; }
+  catch(e){ return 'v_anon'; }
+}
+const SESS='s'+Math.random().toString(36).slice(2)+Date.now().toString(36);
+async function beat(){ try{ await sb.rpc('track_visit',{p_visitor:vid(),p_session:SESS}); }catch(e){} }
+function startTracking(){
+  beat();
+  setInterval(()=>{ if(document.visibilityState==='visible') beat(); }, 45000);
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') beat(); });
+}
+
+/* ---- Admin: statistik pelawat + kelulusan kursus ---- */
+async function renderAdmin(){
+  if(!isAdmin()){ document.getElementById('admStats').innerHTML='<div class="empty">Akses admin sahaja.</div>'; return; }
+  loadAdminStats();
+  if(admTimer) clearInterval(admTimer);
+  admTimer=setInterval(()=>{ const a=document.getElementById('v-admin'); if(a&&a.classList.contains('active')) loadAdminStats(true); else { clearInterval(admTimer); admTimer=null; } }, 30000);
+  loadPendingCourses();
+}
+async function loadAdminStats(quiet){
+  try{
+    const {data,error}=await sb.rpc('admin_visit_stats');
+    if(error) throw error;
+    const s=data||{};
+    document.getElementById('admStats').innerHTML=`
+      <div class="adm-stat live"><div class="n"><span class="adm-dot"></span>${s.online_visitors||0}</div><div class="l">Online sekarang (pelawat)</div></div>
+      <div class="adm-stat"><div class="n">${s.today_unique||0}</div><div class="l">Pelawat unik hari ini</div></div>
+      <div class="adm-stat"><div class="n">${s.today_visits||0}</div><div class="l">Kunjungan hari ini</div></div>
+      <div class="adm-stat"><div class="n">${s.total_unique||0}</div><div class="l">Jumlah pelawat unik</div></div>
+      <div class="adm-stat"><div class="n">${s.total_visits||0}</div><div class="l">Jumlah kunjungan</div></div>`;
+    const daily=s.daily||[];
+    const max=Math.max(1,...daily.map(d=>d.uniq||0));
+    document.getElementById('admBars').innerHTML = daily.length ? daily.map(d=>{
+      const h=Math.round((d.uniq/max)*108);
+      return `<div class="bcol" title="${esc(d.day)}: ${d.uniq} unik / ${d.visits} kunjungan"><div class="bwrap"><div class="bar" style="height:${h}px"></div></div><div class="blab">${esc(d.day.slice(5))}</div></div>`;
+    }).join('') : '<div class="empty">Belum ada data.</div>';
+  }catch(e){ if(!quiet) document.getElementById('admStats').innerHTML='<div class="empty">Tak dapat muat statistik (pastikan login sebagai admin).</div>'; }
+}
+async function loadPendingCourses(){
+  const box=document.getElementById('admPending');
+  try{
+    const {data,error}=await sb.rpc('admin_list_pending_courses');
+    if(error) throw error;
+    const list=data||[];
+    box.innerHTML = list.length ? list.map(c=>`
+      <div class="pend" data-id="${c.id}">
+        <h4>${esc(c.anjuran||'Kursus Umrah')}</h4>
+        <div class="pmeta"><b>Tarikh:</b> ${esc(c.tarikh_label||'-')} &nbsp;·&nbsp; <b>Masa:</b> ${esc(c.masa||'-')}<br>
+        <b>Lokasi:</b> ${esc(c.lokasi||'-')} ${c.daerah||c.negeri?`(${esc([c.daerah,c.negeri].filter(Boolean).join(', '))})`:''}<br>
+        <b>Hubungi:</b> ${esc(c.hubungi||'-')}</div>
+        <div class="pend-act">
+          <button class="b-approve" onclick="setCourse(${c.id},'approved',this)">✓ Lulus</button>
+          <button class="b-reject" onclick="setCourse(${c.id},'rejected',this)">✕ Tolak</button>
+        </div>
+      </div>`).join('') : '<div class="empty">Tiada kursus menunggu kelulusan.</div>';
+  }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat senarai.</div>'; }
+}
+async function setCourse(id,status,btn){
+  if(btn) btn.disabled=true;
+  try{
+    const {error}=await sb.rpc('admin_set_course_status',{p_id:id,p_status:status});
+    if(error) throw error;
+    toast(status==='approved'?'Kursus diluluskan & kini dipapar.':'Kursus ditolak.');
+    if(status==='approved'){ try{ await loadData(); renderKursus(); }catch(e){} }
+    loadPendingCourses();
+  }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
 }
 function renderHome(){
   document.getElementById('featGrid').innerHTML = MENU.map(m=>`
@@ -1117,6 +1360,7 @@ function boot(){
   paintIcons();
 }
 initAuth();
+startTracking();
 
 /* PWA service worker — auto-refresh to newest version on all devices */
 if('serviceWorker' in navigator){
