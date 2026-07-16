@@ -373,6 +373,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
           <button class="tb-ava" id="tbAva" title="Akaun" onclick="toggleUserMenu(event)">S</button>
           <div class="tb-menu" id="tbMenu">
             <div class="tb-menu-name" id="tbMenuName">Sahabat Haramaen</div>
+            <button class="tb-menu-item" id="tbStatItem" style="display:none" onclick="document.getElementById('tbMenu').classList.remove('open');go('admin')"><span class="ico" data-i="book"></span> Statistik Pelawat</button>
             <button class="tb-menu-item" onclick="logout()"><span class="ico" data-i="logout"></span> Log keluar</button>
           </div>
         </div>
@@ -687,6 +688,7 @@ const ADMIN_EMAILS=['salizam.oasys@gmail.com'];
 function isAdmin(){ return !!(state.user && ADMIN_EMAILS.includes((state.user.email||'').toLowerCase())); }
 function buildNav(){
   const navList = NAV.concat(isAdmin()?[{v:'admin',t:'📊 Statistik (Admin)',i:'book'}]:[]);
+  const si=document.getElementById('tbStatItem'); if(si) si.style.display=isAdmin()?'flex':'none';
   document.getElementById('sbNav').innerHTML=navList.map(n=>
     `<button class="sb-link" data-v="${n.v}" onclick="go('${n.v}')"><span class="ico" data-i="${n.i}"></span> ${n.t}</button>`).join('');
   document.getElementById('bottomNav').innerHTML=BOTTOM.map(n=>
