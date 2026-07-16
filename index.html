@@ -281,6 +281,11 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .kfield{display:flex;flex-direction:column;gap:4px}
   .kfield label{font-size:11.5px;font-weight:700;color:var(--muted)}
   .kfilter select{min-width:150px}
+  .kdate{display:flex; align-items:center; gap:6px}
+  .kdate input[type=date]{width:auto; min-width:170px; cursor:pointer}
+  .kdate input[type=date]::-webkit-calendar-picker-indicator{cursor:pointer; opacity:.85; padding-left:4px}
+  .kdate-x{border:0; background:var(--line); color:var(--ink); border-radius:9px; min-width:36px; height:40px; cursor:pointer; font-weight:700; flex:none; font-size:13px}
+  .kdate-x:hover{background:#dfe6e0}
   .kbtn{background:var(--gold);color:#3a2e05;border:0;border-radius:12px;padding:11px 16px;font-weight:800;
     font-size:13.5px;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 9px rgba(201,162,39,.3)}
   .kbtn:hover{filter:brightness(1.04)}
@@ -844,17 +849,18 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;',
 function renderKursus(){
   const b=document.getElementById('kursusBody'); if(!b) return;
   const fbar=document.getElementById('kursusFilter');
-  const dates=[...new Map(COURSES.filter(c=>c.date).map(c=>[c.date,c.tarikh])).entries()];
   const negeris=[...new Set(COURSES.map(c=>c.negeri).filter(Boolean))].sort();
   if(state.kNegeri!=='all' && !negeris.includes(state.kNegeri)) state.kNegeri='all';
   const daerahs=[...new Set(COURSES.filter(c=>state.kNegeri==='all'||c.negeri===state.kNegeri).map(c=>c.daerah).filter(Boolean))].sort();
   if(state.kDaerah!=='all' && !daerahs.includes(state.kDaerah)) state.kDaerah='all';
   if(fbar){
     fbar.innerHTML=`<div class="kfilter">
-      <div class="kfield"><label>Tarikh</label><select onchange="state.kTarikh=this.value;renderKursus()">
-        <option value="all"${state.kTarikh==='all'?' selected':''}>Semua tarikh</option>
-        ${dates.map(([d,l])=>`<option value="${esc(d)}"${state.kTarikh===d?' selected':''}>${esc(l)}</option>`).join('')}
-      </select></div>
+      <div class="kfield"><label>Tarikh</label>
+        <div class="kdate">
+          <input type="date" id="kfTarikhInput" value="${state.kTarikh!=='all'?esc(state.kTarikh):''}" onchange="state.kTarikh=this.value||'all';renderKursus()">
+          ${state.kTarikh!=='all'?`<button type="button" class="kdate-x" title="Semua tarikh" onclick="state.kTarikh='all';renderKursus()">✕</button>`:''}
+        </div>
+      </div>
       <div class="kfield"><label>Negeri</label><select onchange="state.kNegeri=this.value;state.kDaerah='all';renderKursus()">
         <option value="all"${state.kNegeri==='all'?' selected':''}>Semua negeri</option>
         ${negeris.map(n=>`<option value="${esc(n)}"${state.kNegeri===n?' selected':''}>${esc(n)}</option>`).join('')}
