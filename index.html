@@ -1255,7 +1255,7 @@ async function loadFeed(){
   state.duas=data||[];
   if(!state.duas.length){el.innerHTML='<div class="empty">Belum ada doa. Jadilah yang pertama 🤲</div>';return;}
   el.innerHTML=
-    `<div class="muted" style="font-size:12.5px;margin-bottom:10px">Kiriman doa komuniti — aamin-kan doa saudara seakidah anda, atau sampaikan doa mereka di tempat mustajab. 🤲</div>`+
+    `<div class="muted" style="font-size:12.5px;margin-bottom:10px">Tidak semua saudara kita berpeluang menjejak kaki ke tanah suci. Untuk sahabat-sahabat Haramaen yang sedang berada di tanah suci, jom bantu sampaikan doa kiriman mereka di sana. 🤲</div>`+
     state.duas.map(duaCard).join('');
 }
 function actorName(){
