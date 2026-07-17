@@ -1126,7 +1126,8 @@ async function loadPendingCourses(){
         <h4>${esc(c.anjuran||'Kursus Umrah')}${c.penganjur_jenis?` <span style="font-weight:600;color:var(--muted);font-size:12px">(${esc(c.penganjur_jenis)})</span>`:''}</h4>
         <div class="pmeta"><b>Tarikh:</b> ${esc(c.tarikh_label||'-')} &nbsp;·&nbsp; <b>Masa:</b> ${esc(c.masa||'-')}<br>
         <b>Lokasi:</b> ${esc(c.lokasi||'-')} ${c.daerah||c.negeri?`(${esc([c.daerah,c.negeri].filter(Boolean).join(', '))})`:''}<br>
-        <b>Hubungi:</b> ${esc(c.hubungi||'-')}</div>
+        <b>Hubungi:</b> ${esc(c.hubungi||'-')}<br>
+        <b>Pemohon:</b> ${esc(c.submitter_name||'Tanpa nama')}${c.submitter_email?` <span style="color:var(--muted)">(${esc(c.submitter_email)})</span>`:''}</div>
         <div class="pend-act">
           <button class="b-approve" onclick="setCourse(${c.id},'approved',this)">✓ Lulus</button>
           <button class="b-reject" onclick="setCourse(${c.id},'rejected',this)">✕ Tolak</button>
