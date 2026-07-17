@@ -386,6 +386,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   <h1>HARAMAEN</h1>
   <p>Direktori panduan perjalanan umrah anda</p>
   <div class="social">
+    <input id="authName" type="text" placeholder="Nama penuh" autocomplete="name" style="display:none">
     <input id="authEmail" type="email" placeholder="Emel" autocomplete="email">
     <input id="authPass" type="password" placeholder="Kata laluan" autocomplete="current-password">
     <button class="sbtn" id="authPrimaryBtn" onclick="authPrimary()" style="background:var(--gold);color:var(--green-d)">Log masuk</button>
@@ -534,8 +535,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
             <div class="muted" style="font-size:12.5px;margin-bottom:4px">
               Hantar doa anda. Mudah-mudahan ada sahabat Haramaen yang sudi memanjatkan doa anda khususnya di tempat-tempat mustajab. 🕋
             </div>
-            <label class="f">Nama (pilihan)</label>
-            <input id="duaName" placeholder="cth: Hamba Allah">
+            <div class="muted" style="font-size:12px;margin:6px 0 2px">Dihantar sebagai: <b id="duaAsName" style="color:var(--green)">—</b></div>
             <label class="f">Kategori</label>
             <select id="duaCat">
               <option>Kesihatan</option><option>Rezeki</option><option>Keluarga</option>
@@ -787,6 +787,7 @@ function go(v){
   document.querySelectorAll('[data-v]').forEach(t=>t.classList.toggle('active', t.getAttribute('data-v')===v));
   const m=document.getElementById('main'); if(m) m.scrollTop=0; window.scrollTo(0,0);
   if(v==='solah') fetchSolah(state.solCity);
+  if(v==='dua'){ const e=document.getElementById('duaAsName'); if(e) e.textContent=actorName(); }
   if(v==='kursus') renderKursusAll();
   if(v==='admin') renderAdmin(); else if(admTimer){ clearInterval(admTimer); admTimer=null; }
 }
@@ -831,16 +832,19 @@ function toggleAuthMode(){
   document.getElementById('authPrimaryBtn').textContent = authMode==='signin'?'Log masuk':'Daftar akaun';
   document.getElementById('authToggleText').textContent = authMode==='signin'?'Belum ada akaun?':'Sudah ada akaun?';
   document.getElementById('authToggleLink').textContent = authMode==='signin'?'Daftar di sini':'Log masuk di sini';
+  const nm=document.getElementById('authName'); if(nm){ nm.style.display = authMode==='signup'?'':'none'; if(authMode==='signin') nm.value=''; }
   setMsg('');
 }
 async function authPrimary(){
   const email=document.getElementById('authEmail').value.trim();
   const pass=document.getElementById('authPass').value;
   if(!email||!pass){setMsg('Sila isi emel & kata laluan.');return;}
+  const name=document.getElementById('authName').value.trim();
+  if(authMode==='signup' && !name){setMsg('Sila isi nama penuh anda.');return;}
   setMsg('Sila tunggu…');
   try{
     if(authMode==='signup'){
-      const {data,error}=await sb.auth.signUp({email,password:pass});
+      const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
       if(error){setMsg(error.message);return;}
       if(!data.session) setMsg('Akaun dicipta! Semak emel anda untuk pengesahan, kemudian log masuk.');
     }else{
@@ -1195,12 +1199,12 @@ function duaTab(t,el){
 async function submitDua(){
   const text=document.getElementById('duaText').value.trim();
   if(!text){toast('Sila tulis doa anda dulu 🤲');return;}
-  const name=document.getElementById('duaName').value.trim()||'Hamba Allah';
+  const name=actorName();
   const cat=document.getElementById('duaCat').value;
   const uid = state.user ? state.user.id : null;
   const {error}=await sb.from('duas').insert({name, category:cat, dua_text:text, user_id:uid});
   if(error){toast('Gagal hantar doa. Cuba lagi.');return;}
-  document.getElementById('duaText').value=''; document.getElementById('duaName').value='';
+  document.getElementById('duaText').value='';
   toast('Doa dihantar. Semoga dimakbulkan 🤍');
 }
 function relTime(iso){
@@ -1254,7 +1258,7 @@ async function loadFeed(){
 function actorName(){
   const u=state.user; if(!u) return 'Hamba Allah';
   const md=u.user_metadata||{};
-  return (md.full_name||md.name||u.email||'Hamba Allah');
+  return (md.full_name||md.name||(u.email?u.email.split('@')[0]:'')||'Hamba Allah');
 }
 async function toggleAmiin(id,btn){
   btn.disabled=true;
