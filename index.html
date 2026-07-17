@@ -1244,6 +1244,7 @@ function duaCard(d){
     <div class="deliver-box" id="db-${d.id}" style="display:none">
       <select class="deliver-sel" id="ds-${d.id}">${mustajabOpts()}</select>
       <button class="btn sm" onclick="submitDeliver('${d.id}',this)">Hantar</button>
+      <div style="flex-basis:100%;font-size:11px;color:var(--muted);margin-top:2px">📍 Lokasi GPS anda akan disahkan berada di tempat tersebut sebelum doa direkod.</div>
     </div>
     <div class="deliver-list" id="dl-${d.id}"${list.length?'':' style="display:none"'}>${deliveredHTML(list)}</div>
   </div>`;
@@ -1282,13 +1283,28 @@ async function submitDeliver(id,btn){
   const sel=document.getElementById('ds-'+id);
   const loc=sel?sel.value:'';
   if(!loc){ toast('Sila pilih tempat mustajab.'); return; }
-  btn.disabled=true;
-  try{
-    const {error}=await sb.rpc('dua_deliver',{p_dua:id,p_visitor:vid(),p_location:loc,p_actor_name:actorName()});
-    if(error) throw error;
-    toast('Alhamdulillah, terima kasih menyampaikan doa 🤍');
-    loadFeed();
-  }catch(e){ toast('Gagal hantar. Cuba lagi.'); btn.disabled=false; }
+  if(!navigator.geolocation){ toast('Peranti anda tidak menyokong pengesanan lokasi.'); return; }
+  const old=btn.textContent; btn.disabled=true; btn.textContent='Mengesan lokasi…';
+  const reset=()=>{ btn.disabled=false; btn.textContent=old; };
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    try{
+      const {error}=await sb.rpc('dua_deliver',{p_dua:id,p_visitor:vid(),p_location:loc,p_actor_name:actorName(),p_lat:pos.coords.latitude,p_lng:pos.coords.longitude});
+      if(error) throw error;
+      toast('Alhamdulillah, lokasi disahkan. Terima kasih menyampaikan doa 🤍');
+      loadFeed();
+    }catch(e){
+      const m=(e&&e.message)||'';
+      const far=m.match(/LOKASI_JAUH:(\d+)/);
+      if(far){ const km=(parseInt(far[1],10)/1000).toFixed(1); toast(`Anda dikesan lebih kurang ${km} km dari ${loc}. Doa hanya boleh disampaikan jika anda benar-benar berada di sana. 📍`); }
+      else if(/LOKASI_TIADA/.test(m)){ toast('Perlu akses lokasi untuk sahkan kedudukan anda. 📍'); }
+      else{ toast('Gagal hantar. Cuba lagi.'); }
+      reset();
+    }
+  }, err=>{
+    if(err && err.code===1){ toast('Akses lokasi ditolak. Untuk sampaikan doa, sila benarkan lokasi supaya kami boleh sahkan anda berada di tanah suci. 📍'); }
+    else{ toast('Tak dapat kesan lokasi anda. Pastikan GPS dihidupkan & cuba lagi. 📍'); }
+    reset();
+  }, {enableHighAccuracy:true, timeout:20000, maximumAge:0});
 }
 /* ---- Notifikasi (loceng) ---- */
 let notifTimer=null;
