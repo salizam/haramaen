@@ -59,6 +59,20 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .tb-bell{width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid var(--line);
     display:grid;place-items:center;cursor:pointer;color:var(--muted)}
   .tb-bell svg{width:20px;height:20px}
+  .tb-bell{position:relative}
+  .tb-notif{position:relative}
+  .notif-badge{position:absolute; top:-3px; right:-3px; min-width:18px; height:18px; padding:0 4px;
+    background:#e0483a; color:#fff; border-radius:999px; font-size:11px; font-weight:800;
+    display:grid; place-items:center; line-height:1; border:2px solid var(--bg)}
+  .notif-panel{min-width:300px; max-width:340px; max-height:70vh; overflow-y:auto; padding:6px}
+  .notif-item{display:flex; gap:9px; align-items:flex-start; padding:10px; border-radius:10px; cursor:default}
+  .notif-item:hover{background:#f3f6f4}
+  .notif-item.unread{background:#eef6f2}
+  .notif-ic{flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-size:15px; background:#eaf3ef}
+  .notif-tx{font-size:13px; color:var(--ink); line-height:1.45}
+  .notif-tx .who{font-weight:800}
+  .notif-tm{font-size:11px; color:var(--muted); margin-top:2px}
+  .notif-empty{text-align:center; color:var(--muted); font-size:12.5px; padding:20px 10px}
   .tb-ava{width:42px;height:42px;border-radius:50%;background:var(--green);color:#fff;border:0;cursor:pointer;
     display:grid;place-items:center;font-weight:700;font-size:16px;font-family:inherit}
   .tb-user{position:relative}
@@ -404,7 +418,13 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <header class="topbar">
       <div class="greet" id="greet">Assalamualaikum 👋</div>
       <div class="tb-right">
-        <button class="tb-bell" title="Notifikasi" onclick="toast('Tiada notifikasi baharu 🤍')"><span class="ico" data-i="bell"></span></button>
+        <div class="tb-notif">
+          <button class="tb-bell" title="Notifikasi" onclick="toggleNotif(event)"><span class="ico" data-i="bell"></span><span class="notif-badge" id="notifBadge" style="display:none">0</span></button>
+          <div class="tb-menu notif-panel" id="notifPanel">
+            <div class="tb-menu-name">Notifikasi</div>
+            <div id="notifList"><div class="notif-empty">Tiada notifikasi lagi.</div></div>
+          </div>
+        </div>
         <div class="tb-user">
           <button class="tb-ava" id="tbAva" title="Akaun" onclick="toggleUserMenu(event)">S</button>
           <div class="tb-menu" id="tbMenu">
@@ -772,7 +792,7 @@ function go(v){
 }
 function jump(v){ go(v); }
 function toggleUserMenu(e){ if(e) e.stopPropagation(); document.getElementById('tbMenu').classList.toggle('open'); }
-document.addEventListener('click', function(e){ const m=document.getElementById('tbMenu'); if(m && m.classList.contains('open') && !e.target.closest('.tb-user')) m.classList.remove('open'); });
+document.addEventListener('click', function(e){ const m=document.getElementById('tbMenu'); if(m && m.classList.contains('open') && !e.target.closest('.tb-user')) m.classList.remove('open'); const p=document.getElementById('notifPanel'); if(p && p.classList.contains('open') && !e.target.closest('.tb-notif')) p.classList.remove('open'); });
 
 /* ============ LIVE DATA (Supabase) ============ */
 let AGENCIES=[], HOTELS=[], VOLUNTEERS=[], HOSPITALS=[], SERVICES=[], COURSES=[], SAR_RATE=1.27;
@@ -862,6 +882,7 @@ async function showApp(user){
     try{ await loadData(); }catch(e){ toast('Gagal muat data — semak sambungan.'); }
     boot(); appReady=true;
   }
+  startNotif();
 }
 async function initAuth(){
   const hasToken = /access_token=|[?&]code=/.test(location.hash + location.search);
@@ -1197,8 +1218,11 @@ function mustajabOpts(){
   return '<option value="">— Pilih tempat mustajab —</option>'+
     MUSTAJAB.map(([g,arr])=>`<optgroup label="${g}">`+arr.map(x=>`<option>${esc(x)}</option>`).join('')+`</optgroup>`).join('');
 }
+function deliveredHTML(list){
+  return (list||[]).map(x=>`<div>🕋 Telah disampaikan oleh <b>${esc(x.by||'Hamba Allah')}</b> di ${esc(x.loc)}</div>`).join('');
+}
 function duaCard(d){
-  const locs=(d.delivered_locs||[]);
+  const list=(d.delivered_list||[]);
   return `<div class="card" data-dua="${d.id}">
     <div class="row-between"><b style="font-size:13.5px">${esc(d.name||'Hamba Allah')}</b><span class="pill gold">${esc(d.category||'Umum')}</span></div>
     <div style="font-size:13.5px;margin:6px 0">"${esc(d.dua_text)}"</div>
@@ -1213,7 +1237,7 @@ function duaCard(d){
       <select class="deliver-sel" id="ds-${d.id}">${mustajabOpts()}</select>
       <button class="btn sm" onclick="submitDeliver('${d.id}',this)">Hantar</button>
     </div>
-    <div class="deliver-list" id="dl-${d.id}"${d.delivered_count?'':' style="display:none"'}>${d.delivered_count?`🕋 Disampaikan (${d.delivered_count}): ${locs.map(esc).join(', ')}`:''}</div>
+    <div class="deliver-list" id="dl-${d.id}"${list.length?'':' style="display:none"'}>${deliveredHTML(list)}</div>
   </div>`;
 }
 async function loadFeed(){
@@ -1227,10 +1251,15 @@ async function loadFeed(){
     `<div class="muted" style="font-size:12.5px;margin-bottom:10px">Kiriman doa komuniti — aamin-kan doa saudara seakidah anda, atau sampaikan doa mereka di tempat mustajab. 🤲</div>`+
     state.duas.map(duaCard).join('');
 }
+function actorName(){
+  const u=state.user; if(!u) return 'Hamba Allah';
+  const md=u.user_metadata||{};
+  return (md.full_name||md.name||u.email||'Hamba Allah');
+}
 async function toggleAmiin(id,btn){
   btn.disabled=true;
   try{
-    const {data,error}=await sb.rpc('dua_amiin_toggle',{p_dua:id,p_visitor:vid()});
+    const {data,error}=await sb.rpc('dua_amiin_toggle',{p_dua:id,p_visitor:vid(),p_actor_name:actorName()});
     if(error) throw error;
     btn.classList.toggle('on', !!data.mine);
     const n=btn.querySelector('.amiin-n'); if(n) n.textContent=data.count;
@@ -1247,11 +1276,54 @@ async function submitDeliver(id,btn){
   if(!loc){ toast('Sila pilih tempat mustajab.'); return; }
   btn.disabled=true;
   try{
-    const {error}=await sb.rpc('dua_deliver',{p_dua:id,p_visitor:vid(),p_location:loc});
+    const {error}=await sb.rpc('dua_deliver',{p_dua:id,p_visitor:vid(),p_location:loc,p_actor_name:actorName()});
     if(error) throw error;
     toast('Alhamdulillah, terima kasih menyampaikan doa 🤍');
     loadFeed();
   }catch(e){ toast('Gagal hantar. Cuba lagi.'); btn.disabled=false; }
+}
+/* ---- Notifikasi (loceng) ---- */
+let notifTimer=null;
+function notifText(n){
+  const who=`<span class="who">${esc(n.actor_name||'Hamba Allah')}</span>`;
+  if(n.type==='deliver') return `${who} telah membacakan kiriman doa anda di ${esc(n.location||'tempat mustajab')}.`;
+  return `${who} telah mengaminkan doa anda.`;
+}
+async function loadNotif(){
+  if(!state.user) return;
+  try{
+    const {data,error}=await sb.rpc('list_my_notifications');
+    if(error) throw error;
+    const items=(data&&data.items)||[]; const unread=(data&&data.unread)||0;
+    const badge=document.getElementById('notifBadge');
+    if(badge){ if(unread>0){ badge.textContent=unread>99?'99+':unread; badge.style.display='grid'; } else { badge.style.display='none'; } }
+    const list=document.getElementById('notifList');
+    if(list){
+      list.innerHTML = items.length ? items.map(n=>`
+        <div class="notif-item${n.is_read?'':' unread'}">
+          <div class="notif-ic">${n.type==='deliver'?'🕋':'🤲'}</div>
+          <div><div class="notif-tx">${notifText(n)}</div><div class="notif-tm">${relTime(n.created_at)}</div></div>
+        </div>`).join('') : '<div class="notif-empty">Tiada notifikasi lagi.</div>';
+    }
+  }catch(e){}
+}
+async function toggleNotif(e){
+  if(e) e.stopPropagation();
+  const p=document.getElementById('notifPanel');
+  const opening=!p.classList.contains('open');
+  document.getElementById('tbMenu').classList.remove('open');
+  p.classList.toggle('open');
+  if(opening){
+    await loadNotif();
+    try{ await sb.rpc('mark_notifications_read'); }catch(_){}
+    const badge=document.getElementById('notifBadge'); if(badge) badge.style.display='none';
+    document.querySelectorAll('#notifList .notif-item.unread').forEach(el=>el.classList.remove('unread'));
+  }
+}
+function startNotif(){
+  loadNotif();
+  if(notifTimer) clearInterval(notifTimer);
+  notifTimer=setInterval(loadNotif, 60000);
 }
 
 /* ============ STAY ============ */
