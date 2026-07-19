@@ -319,8 +319,16 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     .feat-grid{grid-template-columns:repeat(3,1fr)}
   }
   /* Kursus filter + daftar */
-  .kbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:14px}
-  .kfilter{display:flex;flex-wrap:wrap;gap:10px;flex:1}
+  .kbar{display:flex;flex-direction:column;gap:12px;align-items:stretch;margin-bottom:14px}
+  .ksearchrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .ksearch{flex:1;min-width:200px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink)}
+  .ksearch:focus{outline:none;border-color:var(--gold)}
+  .kbtn-near{background:#fff;color:var(--green);border:1.5px solid var(--green);box-shadow:none}
+  .kbtn-near.on{background:var(--green);color:#fff}
+  .kbtn-near:disabled{opacity:.6;cursor:default}
+  .knear-note{font-size:12px;color:var(--muted);background:#f2f7f4;border:1px dashed var(--line);border-radius:10px;padding:8px 12px}
+  .kdist{color:var(--green);font-weight:700}
+  .kfilter{display:flex;flex-wrap:wrap;gap:10px;flex:1;align-items:flex-end}
   .kfield{display:flex;flex-direction:column;gap:4px}
   .kfield label{font-size:11.5px;font-weight:700;color:var(--muted)}
   .kfilter select{min-width:150px}
@@ -748,7 +756,7 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY, {
 
 /* ============ STATE ============ */
 const MASJIDIL_HARAM = {lat:21.4225, lng:39.8262};
-const state = { user:null, myHotel:null, agRating:0, agPrice:null, hoBudget:null, duas:[], solCity:'me', medFilter:'all', svcFilter:'all', kTarikh:'all', kNegeri:'all', kDaerah:'all' };
+const state = { user:null, myHotel:null, agRating:0, agPrice:null, hoBudget:null, duas:[], solCity:'me', medFilter:'all', svcFilter:'all', kTarikh:'all', kNegeri:'all', kDaerah:'all', kSearch:'', kNear:false, userLoc:null, kNearBusy:false };
 
 /* ============ ICONS (inline SVG) ============ */
 const SVG={
@@ -978,9 +986,30 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;',
 function waLink(phone){let d=String(phone||'').replace(/[^\d]/g,'');if(!d)return '';if(d[0]==='0')d='60'+d.slice(1);else if(d.slice(0,2)!=='60')d='60'+d;return 'https://wa.me/'+d;}
 const WA_ICON='<svg viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="vertical-align:-2px;margin-right:4px"><path d="M17.5 6.4A7.9 7.9 0 0 0 12 4a7.9 7.9 0 0 0-6.8 11.9L4 20l4.2-1.1A7.9 7.9 0 1 0 17.5 6.4Zm-5.5 12a6.5 6.5 0 0 1-3.3-.9l-.24-.14-2.45.64.65-2.39-.16-.25A6.5 6.5 0 1 1 12 18.4Zm3.6-4.9c-.2-.1-1.17-.57-1.35-.64s-.31-.1-.44.1-.5.63-.62.76-.23.15-.42.05a5.3 5.3 0 0 1-1.56-.96 5.9 5.9 0 0 1-1.08-1.35c-.11-.19 0-.3.09-.39l.29-.34c.1-.12.13-.2.2-.33a.36.36 0 0 0 0-.35c-.05-.1-.44-1.05-.6-1.44s-.32-.33-.44-.33h-.37a.71.71 0 0 0-.52.24 2.16 2.16 0 0 0-.67 1.6 3.75 3.75 0 0 0 .79 2 8.6 8.6 0 0 0 3.3 2.9c.46.2.82.32 1.1.4.46.15.88.13 1.21.08.37-.05 1.15-.47 1.31-.92s.17-.85.12-.93-.18-.13-.38-.23Z"/></svg>';
 function today(){ const d=new Date(); const p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
-function courseRow(k){
+/* Koordinat pusat/bandar utama setiap negeri — untuk anggaran "kursus berhampiran saya" */
+const NEGERI_LOC={
+  'Johor':[1.4927,103.7414],'Kedah':[6.1184,100.3685],'Kelantan':[6.1254,102.2381],
+  'Melaka':[2.1896,102.2501],'Negeri Sembilan':[2.7297,101.9381],'Pahang':[3.8168,103.3315],
+  'Perak':[4.5975,101.0901],'Perlis':[6.4414,100.1986],'Pulau Pinang':[5.4141,100.3288],
+  'Sabah':[5.9804,116.0735],'Sarawak':[1.5533,110.3592],'Selangor':[3.0733,101.5185],
+  'Terengganu':[5.3302,103.1408],'W.P. Kuala Lumpur':[3.1390,101.6869],
+  'W.P. Labuan':[5.2831,115.2308],'W.P. Putrajaya':[2.9264,101.6964]
+};
+function haversineKm(lat1,lng1,lat2,lng2){
+  const R=6371, toR=x=>x*Math.PI/180;
+  const dLat=toR(lat2-lat1), dLng=toR(lng2-lng1);
+  const a=Math.sin(dLat/2)**2+Math.cos(toR(lat1))*Math.cos(toR(lat2))*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function courseDist(c){
+  if(!state.userLoc || !c.negeri) return null;
+  const co=NEGERI_LOC[c.negeri]; if(!co) return null;
+  return haversineKm(state.userLoc.lat, state.userLoc.lng, co[0], co[1]);
+}
+function courseRow(k,dist){
   const loc2=[k.daerah,k.negeri].filter(Boolean).join(', ');
-  return `<tr><td>${esc(k.tarikh)}</td><td>${esc(k.masa)}</td><td>${esc(k.lokasi)}${loc2?`<br><small style="color:var(--muted)">${esc(loc2)}</small>`:''}</td><td data-l="Hubungi">${k.hubungi?`<a href="${waLink(k.hubungi)}" target="_blank" rel="noopener" class="wa-link">${WA_ICON}${esc(k.hubungi)}</a>`:''}</td></tr>`;
+  const dtxt=(dist!=null)?`<br><small class="kdist">📍 ~${Math.round(dist)} km</small>`:'';
+  return `<tr><td>${esc(k.tarikh)}</td><td>${esc(k.masa)}</td><td>${esc(k.lokasi)}${loc2?`<br><small style="color:var(--muted)">${esc(loc2)}</small>`:''}${dtxt}</td><td data-l="Hubungi">${k.hubungi?`<a href="${waLink(k.hubungi)}" target="_blank" rel="noopener" class="wa-link">${WA_ICON}${esc(k.hubungi)}</a>`:''}</td></tr>`;
 }
 function renderKursus(){
   const b=document.getElementById('kursusBody'); if(!b) return;
@@ -1004,7 +1033,12 @@ function renderKursusAll(){
   const daerahs=[...new Set(COURSES.filter(c=>state.kNegeri==='all'||c.negeri===state.kNegeri).map(c=>c.daerah).filter(Boolean))].sort();
   if(state.kDaerah!=='all' && !daerahs.includes(state.kDaerah)) state.kDaerah='all';
   if(fbar){
-    fbar.innerHTML=`<div class="kfilter">
+    const nearLbl = state.kNearBusy ? 'Mengesan lokasi…' : (state.kNear ? '📍 Berhampiran saya ✓' : '📍 Berhampiran saya');
+    fbar.innerHTML=`<div class="ksearchrow">
+      <input type="text" id="kSearchInput" class="ksearch" placeholder="🔍 Cari kursus (anjuran, lokasi, daerah…)" value="${esc(state.kSearch)}" oninput="state.kSearch=this.value;renderKursusRows()">
+      <button class="kbtn kbtn-near${state.kNear?' on':''}" ${state.kNearBusy?'disabled':''} onclick="toggleKursusNear()">${nearLbl}</button>
+    </div>
+    <div class="kfilter">
       <div class="ktdaftar">
         <button class="kbtn kbtn-daftar" onclick="openCourseForm()">Daftar kursus anda</button>
         <div class="kfield"><label>Tarikh</label>
@@ -1022,14 +1056,41 @@ function renderKursusAll(){
         <option value="all"${state.kDaerah==='all'?' selected':''}>Semua daerah</option>
         ${daerahs.map(d=>`<option value="${esc(d)}"${state.kDaerah===d?' selected':''}>${esc(d)}</option>`).join('')}
       </select></div>
-    </div>`;
+    </div>
+    ${state.kNear&&state.userLoc?`<div class="knear-note">Disusun ikut jarak anggaran dari lokasi anda (ke pusat negeri). Kursus terdekat di atas.</div>`:''}`;
   }
-  const list=COURSES.filter(c=>
+  renderKursusRows();
+}
+function renderKursusRows(){
+  const b=document.getElementById('kursusAllBody'); if(!b) return;
+  const q=state.kSearch.trim().toLowerCase();
+  let list=COURSES.filter(c=>
     (state.kTarikh==='all'||c.date===state.kTarikh) &&
     (state.kNegeri==='all'||c.negeri===state.kNegeri) &&
-    (state.kDaerah==='all'||c.daerah===state.kDaerah));
-  b.innerHTML=list.map(courseRow).join('')
+    (state.kDaerah==='all'||c.daerah===state.kDaerah) &&
+    (!q || [c.anjuran,c.lokasi,c.daerah,c.negeri,c.tarikh].filter(Boolean).join(' ').toLowerCase().includes(q)));
+  const near = state.kNear && state.userLoc;
+  if(near){
+    list=list.map(c=>({c,d:courseDist(c)}))
+      .sort((a,b)=>{ if(a.d==null) return 1; if(b.d==null) return -1; return a.d-b.d; })
+      .map(x=>x.c);
+  }
+  b.innerHTML=list.map(c=>courseRow(c, near?courseDist(c):null)).join('')
     || `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px">Tiada kursus untuk tapisan ini.</td></tr>`;
+}
+function toggleKursusNear(){
+  if(state.kNear){ state.kNear=false; renderKursusAll(); return; }
+  if(state.userLoc){ state.kNear=true; renderKursusAll(); return; }
+  if(!navigator.geolocation){ toast('Peranti anda tidak menyokong pengesanan lokasi.'); return; }
+  state.kNearBusy=true; renderKursusAll();
+  navigator.geolocation.getCurrentPosition(pos=>{
+    state.userLoc={lat:pos.coords.latitude, lng:pos.coords.longitude};
+    state.kNear=true; state.kNearBusy=false; renderKursusAll();
+  }, err=>{
+    state.kNearBusy=false; state.kNear=false; renderKursusAll();
+    if(err && err.code===1){ toast('Akses lokasi ditolak. Benarkan lokasi untuk cari kursus berhampiran anda. 📍'); }
+    else{ toast('Tak dapat kesan lokasi anda. Pastikan GPS dihidupkan & cuba lagi. 📍'); }
+  }, {enableHighAccuracy:false, timeout:15000, maximumAge:300000});
 }
 
 /* ---- Daftar Kursus (modal) ---- */
