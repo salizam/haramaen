@@ -224,6 +224,22 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .news .card{cursor:default}
   .news .n-top{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px}
   .news h4{margin:0; font-size:15px}
+  .n-foot{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px; padding-top:9px; border-top:1px dashed var(--line)}
+  .n-src{font-size:12px; color:var(--green); font-weight:700; text-decoration:none}
+  .n-src:hover{text-decoration:underline}
+  .n-del{margin-left:auto; background:#fdece9; color:var(--danger); border:0; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer}
+  .terkini{margin:0 0 20px; border:1px solid var(--line); border-radius:16px; background:#fff; padding:14px 15px; box-shadow:0 2px 10px rgba(13,92,70,.05)}
+  .terkini .tk-head{display:flex; align-items:center; gap:8px; font-weight:800; font-size:14px; color:var(--green); margin-bottom:6px}
+  .terkini .tk-head .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgba(201,162,39,.18)}
+  .tk-blk{margin-top:12px}
+  .tk-h{display:flex; align-items:center; font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:6px}
+  .tk-more{margin-left:auto; background:none; border:0; color:var(--green); font-weight:700; font-size:12px; cursor:pointer; padding:2px 4px}
+  .tk-item{display:flex; align-items:flex-start; gap:9px; padding:8px 0; border-top:1px solid #f0f3f1; cursor:pointer}
+  .tk-item:first-of-type{border-top:0}
+  .tk-item .pill{flex:none; margin-top:1px}
+  .tk-tx{min-width:0}
+  .tk-tx b{display:block; font-size:13px; color:#233; font-weight:600; line-height:1.35; overflow-wrap:anywhere}
+  .tk-tx small{display:block; font-size:11.5px; color:var(--muted); margin-top:2px}
   .emg{display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:14px;
     border:1px solid var(--line); background:#fff; margin-bottom:10px}
   .emg .ei{width:44px;height:44px;border-radius:12px;flex:none;display:grid;place-items:center;color:#fff;font-size:20px}
@@ -472,6 +488,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
           <div class="u"></div>
           <p>Panduan umrah anda, semua dalam satu tempat.</p>
         </div>
+
+        <div class="terkini" id="terkiniBox"></div>
 
         <div class="feat-grid" id="featGrid"></div>
 
@@ -798,11 +816,12 @@ document.addEventListener('click', function(e){ const m=document.getElementById(
 
 /* ============ LIVE DATA (Supabase) ============ */
 let AGENCIES=[], HOTELS=[], VOLUNTEERS=[], HOSPITALS=[], SERVICES=[], COURSES=[], SAR_RATE=1.27;
+let NEWS=[], LATEST_DUAS=[];
 let admTimer=null;
 const MED_MAP={hospital:{t:'Hospital',i:'🏥'}, pharmacy:{t:'Farmasi',i:'💊'}, insurance:{t:'Insurans',i:'🛡️'}};
 const SVC_ICON={wheelchair:'♿', kaaba:'🕋', guide:'🧕', exchange:'💱', laundry:'🧺', car:'🚕', shop:'🛍️'};
 async function loadData(){
-  const [ag,ho,vo,me,sv,cr,co] = await Promise.all([
+  const [ag,ho,vo,me,sv,cr,co,nw] = await Promise.all([
     sb.from('agencies').select('*'),
     sb.from('hotels').select('*'),
     sb.from('volunteers').select('*').eq('active',true),
@@ -810,10 +829,13 @@ async function loadData(){
     sb.from('services').select('*'),
     sb.from('currency_rates').select('*').eq('base_currency','SAR').limit(1),
     sb.from('courses').select('*').eq('status','approved'),
+    sb.from('news').select('*').eq('status','published').order('published_at',{ascending:false}).limit(50),
   ]);
+  NEWS=(nw.data||[]);
   COURSES=(co.data||[]).map(c=>({tarikh:c.tarikh_label, date:c.tarikh_date||'', masa:c.masa||'', lokasi:c.lokasi||'',
-    daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||''}))
+    daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||'', created:c.created_at||''}))
     .sort((a,b)=> (a.date||'9999').localeCompare(b.date||'9999'));
+  try{ const r=await sb.rpc('list_duas',{p_visitor:vid()}); LATEST_DUAS=(r&&r.data)||[]; }catch(e){ LATEST_DUAS=[]; }
   AGENCIES=(ag.data||[]).map(a=>({name:a.name, rating:Number(a.rating), reviews:Number(a.reviews_count||0),
     motac:a.motac_licensed, lic:a.motac_license||'—', price:Number(a.price), tier:a.tier, note:a.note||''}));
   HOTELS=(ho.data||[]).map(h=>({name:h.name, dist:Number(h.distance_km), price:Number(h.price_per_night),
@@ -1150,6 +1172,7 @@ function renderHome(){
       <span class="ft"><b>${m.t}</b><small>${m.s}</small></span>
       <span class="chev">${svg('chev')}</span>
     </button>`).join('');
+  renderTerkini();
   renderKursus();
 }
 
@@ -1466,21 +1489,60 @@ function renderGuide(){
 }
 
 /* ============ BERITA / INFO UMRAH ============ */
-const NEWS=[
-  {tag:'Info',cat:'Visa',title:'Syarat visa umrah 2026',body:'Visa umrah kini boleh dipohon secara dalam talian melalui platform Nusuk. Pasport perlu sah sekurang-kurangnya 6 bulan. Sila sahkan syarat terkini dengan agensi berlesen MOTAC anda.'},
-  {tag:'Amaran',cat:'Penipuan',title:'Elak penipuan pakej umrah',body:'Pastikan agensi berdaftar MOTAC sebelum membuat bayaran. Jangan bayar penuh secara tunai tanpa resit rasmi. Semak nombor lesen di portal MOTAC.'},
-  {tag:'Kesihatan',cat:'Vaksin',title:'Suntikan meningitis wajib',body:'Jemaah wajib mengambil suntikan meningitis (ACWY) sekurang-kurangnya 10 hari sebelum berangkat dan membawa sijil vaksin antarabangsa.'},
-  {tag:'Tips',cat:'Cuaca',title:'Persediaan cuaca panas',body:'Suhu di Makkah boleh mencecah 40°C+. Bawa payung, minum air kerap, gunakan pelembap bibir, dan elak keluar waktu tengah hari jika tidak perlu.'},
-  {tag:'Info',cat:'Tabung Haji',title:'Khidmat sokongan jemaah',body:'Tabung Haji menyediakan sokongan jemaah di Tanah Suci. Simpan nombor rombongan dan kenali pegawai anda sebelum berangkat.'},
-];
+function newsTagCls(t){ t=(t||'').toLowerCase();
+  if(t==='amaran') return 'red';
+  if(t==='kesihatan') return 'blue';
+  if(t==='tips') return 'gold';
+  return ''; }
 function renderNews(){
-  document.getElementById('newsList').innerHTML=
-    `<div class="muted" style="font-size:12.5px;margin-bottom:12px">Info berguna & panduan terkini. Berita rasmi akan dikemas kini dari semasa ke semasa.</div>`+
-    NEWS.map(n=>`<div class="card">
-      <div class="n-top"><h4>${n.title}</h4><span class="pill ${n.tag==='Amaran'?'red':(n.tag==='Kesihatan'?'blue':(n.tag==='Tips'?'gold':''))}">${n.tag}</span></div>
-      <div class="tag" style="margin-bottom:6px">${n.cat}</div>
-      <div style="font-size:13.5px;color:#2c3a33">${n.body}</div>
-    </div>`).join('');
+  const el=document.getElementById('newsList'); if(!el) return;
+  const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:12px">Berita &amp; pengumuman terkini berkaitan umrah — peraturan Saudi, visa, kesihatan, penerbangan &amp; amaran penting. Dikemas kini dari semasa ke semasa. 📰</div>`;
+  if(!NEWS.length){ el.innerHTML=intro+`<div class="empty">Belum ada berita buat masa ini. Nantikan kemas kini terkini. 🤍</div>`; return; }
+  el.innerHTML=intro+NEWS.map(n=>{
+    const src=n.source_name?`<a class="n-src" href="${esc(n.source_url||'#')}" target="_blank" rel="noopener">🔗 ${esc(n.source_name)}</a>`:'';
+    const del=isAdmin()?`<button class="n-del" onclick="delNews(${n.id},this)">🗑️ Padam</button>`:'';
+    return `<div class="card" data-news="${n.id}">
+      <div class="n-top"><h4>${esc(n.title)}</h4><span class="pill ${newsTagCls(n.tag)}">${esc(n.tag||'Info')}</span></div>
+      <div class="tag" style="margin-bottom:6px">${esc(n.category||'')} · ${relTime(n.published_at)}</div>
+      <div style="font-size:13.5px;color:#2c3a33;white-space:pre-line">${esc(n.body)}</div>
+      <div class="n-foot">${src}${del}</div>
+    </div>`;
+  }).join('');
+}
+async function delNews(id,btn){
+  if(btn){ btn.disabled=true; btn.textContent='Memadam…'; }
+  const {error}=await sb.rpc('admin_delete_news',{p_id:id});
+  if(error){ toast('Gagal padam berita.'); if(btn){btn.disabled=false;btn.textContent='🗑️ Padam';} return; }
+  NEWS=NEWS.filter(n=>n.id!==id);
+  renderNews(); renderTerkini();
+  toast('Berita dipadam.');
+}
+/* ---- Terkini (konten segar di home) ---- */
+function openDuaFeed(){
+  go('dua');
+  const seg=document.querySelector('#v-dua .seg');
+  if(seg){ const btns=seg.querySelectorAll('button'); if(btns[1]) duaTab('feed',btns[1]); }
+}
+function renderTerkini(){
+  const el=document.getElementById('terkiniBox'); if(!el) return;
+  const news=NEWS.slice(0,3);
+  const duas=(LATEST_DUAS||[]).slice(0,3);
+  const crs=(COURSES||[]).slice().sort((a,b)=>String(b.created||'').localeCompare(String(a.created||''))).slice(0,3);
+  if(!news.length && !duas.length && !crs.length){ el.innerHTML=''; return; }
+  let h=`<div class="tk-head"><span class="dot"></span> Terkini di Haramaen</div>`;
+  if(news.length){
+    h+=`<div class="tk-blk"><div class="tk-h">📰 Berita terkini <button class="tk-more" onclick="jump('news')">Lihat semua</button></div>`+
+      news.map(n=>`<div class="tk-item" onclick="jump('news')"><span class="pill ${newsTagCls(n.tag)}">${esc(n.tag||'Info')}</span><div class="tk-tx"><b>${esc(n.title)}</b><small>${relTime(n.published_at)}</small></div></div>`).join('')+`</div>`;
+  }
+  if(duas.length){
+    h+=`<div class="tk-blk"><div class="tk-h">🤲 Kiriman doa terbaru <button class="tk-more" onclick="openDuaFeed()">Lihat semua</button></div>`+
+      duas.map(d=>`<div class="tk-item" onclick="openDuaFeed()"><span class="pill gold">${esc(d.category||'Umum')}</span><div class="tk-tx"><b>${esc((d.dua_text||'').slice(0,70))}${(d.dua_text||'').length>70?'…':''}</b><small>${esc(d.name||'Hamba Allah')} · ${relTime(d.created_at)}</small></div></div>`).join('')+`</div>`;
+  }
+  if(crs.length){
+    h+=`<div class="tk-blk"><div class="tk-h">🎓 Kursus umrah terbaru <button class="tk-more" onclick="jump('kursus')">Lihat semua</button></div>`+
+      crs.map(c=>`<div class="tk-item" onclick="jump('kursus')"><span class="pill">${esc(c.negeri||'—')}</span><div class="tk-tx"><b>${esc(c.anjuran||'Kursus Umrah')}</b><small>${esc(c.tarikh||'')}${c.daerah?' · '+esc(c.daerah):''}</small></div></div>`).join('')+`</div>`;
+  }
+  el.innerHTML=h;
 }
 
 /* ============ ORANG HILANG ============ */
