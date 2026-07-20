@@ -1041,7 +1041,7 @@ function courseRow(k,dist){
   const shrT=esc(k.lokasi||'Kursus Umrah');
   const shrX=esc('Kursus Umrah: '+(k.lokasi||'')+(k.tarikh?' — '+k.tarikh:'')+(loc2?' ('+loc2+')':''));
   const shrU=esc(location.href);
-  return `<tr><td>${esc(k.tarikh)}</td><td>${esc(k.masa)}</td><td>${esc(k.lokasi)}${loc2?`<br><small style="color:var(--muted)">${esc(loc2)}</small>`:''}${dtxt}</td><td data-l="Hubungi" style="vertical-align:top">${k.hubungi?`<a href="${waLink(k.hubungi)}" target="_blank" rel="noopener" class="wa-link">${WA_ICON}${esc(k.hubungi)}</a>`:''}<div style="margin-top:4px"><button class="shr-sm" data-title="${shrT}" data-text="${shrX}" data-url="${shrU}" onclick="shareItem(this)">🔗 Kongsi</button></div></td></tr>`;
+  return `<tr><td>${esc(k.tarikh)}</td><td>${esc(k.masa)}</td><td>${esc(k.lokasi)}${loc2?`<br><small style="color:var(--muted)">${esc(loc2)}</small>`:''}${dtxt}</td><td data-l="Hubungi" style="vertical-align:top">${k.hubungi?`<a href="${waLink(k.hubungi)}" target="_blank" rel="noopener" class="wa-link">${WA_ICON}${esc(k.hubungi)}</a>`:''}<div style="margin-top:4px"><button class="shr-sm" data-title="${shrT}" data-text="${shrX}" data-url="${shrU}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div></td></tr>`;
 }
 function renderKursus(){
   const b=document.getElementById('kursusBody'); if(!b) return;
@@ -1303,7 +1303,7 @@ function renderAgencies(){
         ${hq?`<div class="tag">📍 ${hq}</div>`:''}
         <div class="row-between" style="margin-top:9px">
           ${contact?(isUrl?`<a class="btn ghost sm" style="text-decoration:none;width:auto" href="${contact}" target="_blank" rel="noopener">🌐 Laman web</a>`:`<span class="tag">☎ ${contact}</span>`):'<span></span>'}
-          <button class="shr-sm" data-title="${esc(a.name)}" data-text="${shrTxt}" data-url="${shrUrl}" onclick="shareItem(this)">🔗 Kongsi</button>
+          <button class="shr-sm" data-title="${esc(a.name)}" data-text="${shrTxt}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
         </div>
       </div>
     </div></div>`;}).join('');
@@ -1495,7 +1495,7 @@ function renderHotels(){
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">
           <button class="btn ghost sm" onclick="mapHotel('${h.name.replace(/'/g,"\\'")}')">🗺️ Peta</button>
           <button class="btn ${mine?'gold':'ghost'} sm" onclick="setMyHotel('${h.name.replace(/'/g,"\\'")}')">${mine?'✓ Hotel saya':'Jadikan hotel saya'}</button>
-          <button class="shr-sm" data-title="${esc(h.name)}" data-text="${esc(h.name+' — '+distTxt+' dari Masjidil Haram, Makkah')}" data-url="${esc(location.href)}" onclick="shareItem(this)">🔗 Kongsi</button>
+          <button class="shr-sm" data-title="${esc(h.name)}" data-text="${esc(h.name+' — '+distTxt+' dari Masjidil Haram, Makkah')}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
         </div>
       </div></div></div>`;}).join('');
 }
@@ -1537,7 +1537,7 @@ function renderMed(){
         <span class="tag">☎ ${h.tel}</span>
         <button class="btn ghost sm" onclick="toast('Menghubungi ${h.name}…')">Hubungi</button>
       </div>
-      <div style="margin-top:6px"><button class="shr-sm" data-title="${esc(h.name)}" data-text="${esc(h.name+' ('+h.type+') — di Makkah')}" data-url="${esc(location.href)}" onclick="shareItem(this)">🔗 Kongsi</button></div>
+      <div style="margin-top:6px"><button class="shr-sm" data-title="${esc(h.name)}" data-text="${esc(h.name+' ('+h.type+') — di Makkah')}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
       </div></div></div></div>`).join('') || `<div class="empty">Tiada rekod untuk jenis ini.</div>`);
 }
 function renderSvc(){
@@ -1566,7 +1566,7 @@ function renderSvc(){
       <div class="thumb">${s.icon}</div><div style="flex:1">
       <div class="row-between"><b>${s.name}</b>${s.price?`<span class="pill gold">${s.price}</span>`:''}</div>
       <div class="tag">${s.desc}</div>
-      <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(s.name)}" data-text="${esc(s.name+(s.desc?' — '+s.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)">🔗 Kongsi</button></div>
+      <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(s.name)}" data-text="${esc(s.name+(s.desc?' — '+s.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
       </div></div></div>`).join('');
   });
   if(!shown) html+=`<div class="empty">Tiada rekod untuk kategori ini.</div>`;
@@ -1658,7 +1658,7 @@ function renderNews(){
       <div class="n-body">${esc(n.body)}</div>
       <div class="n-foot">
         ${src}
-        <button class="shr-btn" data-title="${esc(n.title)}" data-text="${esc(n.title)}" data-url="${shrUrl}" onclick="shareItem(this)">🔗 Kongsi</button>
+        <button class="shr-btn" data-title="${esc(n.title)}" data-text="${esc(n.title)}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
         ${del}
       </div>
     </div>`;
