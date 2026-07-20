@@ -232,8 +232,11 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .terkini .tk-head{display:flex; align-items:center; gap:8px; font-weight:800; font-size:14px; color:var(--green); margin-bottom:6px}
   .terkini .tk-head .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px rgba(201,162,39,.18)}
   .tk-blk{margin-top:12px}
-  .tk-h{display:flex; align-items:center; font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:6px}
-  .tk-more{margin-left:auto; background:none; border:0; color:var(--green); font-weight:700; font-size:12px; cursor:pointer; padding:2px 4px}
+  .tk-h{display:flex; align-items:center; font-size:12.5px; font-weight:700; margin-bottom:6px; padding:6px 10px; border-radius:10px; gap:4px}
+  .tk-h-news{background:#e3f5ec; color:#0d5c46}
+  .tk-h-dua{background:#fef4d8; color:#8a6d10}
+  .tk-h-kursus{background:#e8eeff; color:#2a4fa8}
+  .tk-more{margin-left:auto; background:rgba(255,255,255,.6); border:0; color:inherit; font-weight:700; font-size:11.5px; cursor:pointer; padding:2px 8px; border-radius:20px; opacity:.85}
   .tk-item{display:flex; align-items:flex-start; gap:9px; padding:8px 0; border-top:1px solid #f0f3f1; cursor:pointer}
   .tk-item:first-of-type{border-top:0}
   .tk-item .pill{flex:none; margin-top:1px}
@@ -1238,7 +1241,7 @@ function renderHome(){
       <span class="chev">${svg('chev')}</span>
     </button>`).join('');
   renderTerkini();
-  renderKursus();
+  // renderKursus(); // hidden per request
 }
 
 /* ============ AGENCY ============ */
@@ -1592,21 +1595,21 @@ function openDuaFeed(){
 }
 function renderTerkini(){
   const el=document.getElementById('terkiniBox'); if(!el) return;
-  const news=NEWS.slice(0,3);
-  const duas=(LATEST_DUAS||[]).slice(0,3);
-  const crs=(COURSES||[]).slice().sort((a,b)=>String(b.created||'').localeCompare(String(a.created||''))).slice(0,3);
+  const news=NEWS.slice(0,2);
+  const duas=(LATEST_DUAS||[]).slice(0,2);
+  const crs=(COURSES||[]).slice().sort((a,b)=>String(b.created||'').localeCompare(String(a.created||''))).slice(0,2);
   if(!news.length && !duas.length && !crs.length){ el.innerHTML=''; return; }
   let h=`<div class="tk-head"><span class="dot"></span> Terkini di Haramaen</div>`;
   if(news.length){
-    h+=`<div class="tk-blk"><div class="tk-h">📰 Berita terkini <button class="tk-more" onclick="jump('news')">Lihat semua</button></div>`+
+    h+=`<div class="tk-blk"><div class="tk-h tk-h-news">📰 Berita terkini <button class="tk-more" onclick="jump('news')">Lihat semua</button></div>`+
       news.map(n=>`<div class="tk-item" onclick="jump('news')"><span class="pill ${newsTagCls(n.tag)}">${esc(n.tag||'Info')}</span><div class="tk-tx"><b>${esc(n.title)}</b><small>${relTime(n.published_at)}</small></div></div>`).join('')+`</div>`;
   }
   if(duas.length){
-    h+=`<div class="tk-blk"><div class="tk-h">🤲 Kiriman doa terbaru <button class="tk-more" onclick="openDuaFeed()">Lihat semua</button></div>`+
+    h+=`<div class="tk-blk"><div class="tk-h tk-h-dua">🤲 Kiriman doa terbaru <button class="tk-more" onclick="openDuaFeed()">Lihat semua</button></div>`+
       duas.map(d=>`<div class="tk-item" onclick="openDuaFeed()"><span class="pill gold">${esc(d.category||'Umum')}</span><div class="tk-tx"><b>${esc((d.dua_text||'').slice(0,70))}${(d.dua_text||'').length>70?'…':''}</b><small>${esc(d.name||'Hamba Allah')} · ${relTime(d.created_at)}</small></div></div>`).join('')+`</div>`;
   }
   if(crs.length){
-    h+=`<div class="tk-blk"><div class="tk-h">🎓 Kursus umrah terbaru <button class="tk-more" onclick="jump('kursus')">Lihat semua</button></div>`+
+    h+=`<div class="tk-blk"><div class="tk-h tk-h-kursus">🎓 Kursus umrah terbaru <button class="tk-more" onclick="jump('kursus')">Lihat semua</button></div>`+
       crs.map(c=>`<div class="tk-item" onclick="jump('kursus')"><span class="pill">${esc(c.negeri||'—')}</span><div class="tk-tx"><b>${esc(c.anjuran||'Kursus Umrah')}</b><small>${esc(c.tarikh||'')}${c.daerah?' · '+esc(c.daerah):''}</small></div></div>`).join('')+`</div>`;
   }
   el.innerHTML=h;
