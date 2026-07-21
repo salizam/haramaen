@@ -2218,9 +2218,9 @@ function renderSolList(){
 
 /* ============ HELPERS ============ */
 let toastT;
-function toast(msg){
+function toast(msg,ms=2800){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2800);
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),ms);
 }
 
 /* ============ BOOT ============ */
@@ -2261,17 +2261,23 @@ async function updatePushBtn(){
     const perm=Notification.permission;
     if(sub && perm==='granted'){
       lbl.textContent='Matikan Notifikasi Push';
-      btn.style.opacity='1';
+      btn.style.opacity='1'; btn.style.color='';
+    } else if(perm==='denied'){
+      lbl.textContent='Notifikasi Disekat — Tukar Tetapan';
+      btn.style.opacity='0.6'; btn.style.color='#c0392b';
     } else {
       lbl.textContent='Hidupkan Notifikasi Push';
-      btn.style.opacity = perm==='denied' ? '0.5' : '1';
+      btn.style.opacity='1'; btn.style.color='';
     }
   }catch(e){}
 }
 async function togglePush(){
   document.getElementById('tbMenu').classList.remove('open');
   if(!('PushManager' in window)){ toast('Peranti anda tidak menyokong push notification.'); return; }
-  if(Notification.permission==='denied'){ toast('Notifikasi telah disekat. Sila benarkan dalam tetapan penyemak imbas anda.'); return; }
+  if(Notification.permission==='denied'){
+    toast('Notifikasi disekat dalam penyemak imbas. Klik ikon 🔒 di bar alamat → cari "Notifikasi" → pilih "Benarkan" → muat semula halaman.',5500);
+    return;
+  }
   try{
     const reg=await navigator.serviceWorker.ready;
     const sub=await reg.pushManager.getSubscription();
