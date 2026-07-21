@@ -235,7 +235,10 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .n-hd{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:13px 16px 11px; border-bottom:1px solid var(--line)}
   .n-title{margin:12px 16px 0; font-size:16.5px; font-weight:800; line-height:1.35; color:var(--ink)}
   .n-meta{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--muted); flex-wrap:wrap; padding:8px 16px 12px; border-bottom:1px dashed var(--line)}
-  .n-body{padding:13px 16px 4px; font-size:13.5px; color:#2c3a33; white-space:pre-line; line-height:1.68}
+  .n-body{padding:13px 16px 4px; font-size:14px; color:#2c3a33; line-height:1.78}
+  .n-body p{margin:0 0 11px; text-align:justify; text-indent:1.2em}
+  .n-body p:first-child{text-indent:0}
+  .n-body p:last-child{margin-bottom:0}
   .n-foot{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 16px 14px; border-top:1px dashed var(--line); margin-top:10px}
   .n-src{font-size:12px; color:var(--green); font-weight:700; text-decoration:none}
   .n-img{width:100%;max-height:195px;object-fit:cover;display:block}
@@ -1165,6 +1168,17 @@ const DAERAH={
   'W.P. Putrajaya':['Putrajaya']
 };
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmtBody(txt){
+  if(!txt) return '';
+  // Split on two or more newlines = paragraph break; single newline = same paragraph (space)
+  return txt.split(/\n{2,}/).map(para=>{
+    const t=para.trim();
+    if(!t) return '';
+    // escape HTML, then turn any remaining single \n into <br>
+    const escaped=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\n/g,'<br>');
+    return `<p>${escaped}</p>`;
+  }).filter(Boolean).join('');
+}
 function waLink(phone){let d=String(phone||'').replace(/[^\d]/g,'');if(!d)return '';if(d[0]==='0')d='60'+d.slice(1);else if(d.slice(0,2)!=='60')d='60'+d;return 'https://wa.me/'+d;}
 const WA_ICON='<svg viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="vertical-align:-2px;margin-right:4px"><path d="M17.5 6.4A7.9 7.9 0 0 0 12 4a7.9 7.9 0 0 0-6.8 11.9L4 20l4.2-1.1A7.9 7.9 0 1 0 17.5 6.4Zm-5.5 12a6.5 6.5 0 0 1-3.3-.9l-.24-.14-2.45.64.65-2.39-.16-.25A6.5 6.5 0 1 1 12 18.4Zm3.6-4.9c-.2-.1-1.17-.57-1.35-.64s-.31-.1-.44.1-.5.63-.62.76-.23.15-.42.05a5.3 5.3 0 0 1-1.56-.96 5.9 5.9 0 0 1-1.08-1.35c-.11-.19 0-.3.09-.39l.29-.34c.1-.12.13-.2.2-.33a.36.36 0 0 0 0-.35c-.05-.1-.44-1.05-.6-1.44s-.32-.33-.44-.33h-.37a.71.71 0 0 0-.52.24 2.16 2.16 0 0 0-.67 1.6 3.75 3.75 0 0 0 .79 2 8.6 8.6 0 0 0 3.3 2.9c.46.2.82.32 1.1.4.46.15.88.13 1.21.08.37-.05 1.15-.47 1.31-.92s.17-.85.12-.93-.18-.13-.38-.23Z"/></svg>';
 function today(){ const d=new Date(); const p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
@@ -1949,7 +1963,7 @@ function renderNews(){
         <span>·</span>
         <span>${relTime(n.published_at)}</span>
       </div>
-      <div class="n-body">${esc(n.body)}</div>
+      <div class="n-body">${fmtBody(n.body)}</div>
       <div class="n-foot">
         ${src}
         <button class="shr-btn" data-title="${esc(n.title)}" data-text="${esc(n.title)}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
