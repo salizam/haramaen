@@ -129,7 +129,9 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .dir-filter label{font-size:12.5px; font-weight:700; color:var(--muted); flex:none}
   .dir-filter select{max-width:280px}
   .list-row{display:flex; gap:12px; align-items:flex-start}
-  .thumb{width:52px;height:52px;border-radius:12px;flex:none;display:grid;place-items:center;font-size:24px;background:#eef4f1}
+  .thumb{width:52px;height:52px;border-radius:12px;flex:none;display:grid;place-items:center;font-size:24px;background:#eef4f1;overflow:hidden}
+  .ag-logo{width:100%;height:100%;object-fit:contain;border-radius:12px;padding:5px;box-sizing:border-box;background:#fff}
+  .ag-init{width:100%;height:100%;display:grid;place-items:center;color:#fff;font-size:19px;font-weight:800;letter-spacing:-.5px;border-radius:12px}
   .row-between{display:flex; justify-content:space-between; align-items:center; gap:8px}
   .price{font-weight:800; color:var(--green)}
   .badge-motac{background:#e9f7ef;color:#1e8a5a;font-weight:700;font-size:10.5px;padding:2px 7px;border-radius:6px}
@@ -943,7 +945,7 @@ async function loadData(){
     .sort((a,b)=> (a.date||'9999').localeCompare(b.date||'9999'));
   try{ const r=await sb.rpc('list_duas',{p_visitor:vid()}); LATEST_DUAS=(r&&r.data)||[]; }catch(e){ LATEST_DUAS=[]; }
   AGENCIES=(ag.data||[]).map(a=>({name:a.name, rating:Number(a.rating), reviews:Number(a.reviews_count||0),
-    motac:a.motac_licensed, lic:a.motac_license||'—', price:Number(a.price), tier:a.tier, note:a.note||''}));
+    motac:a.motac_licensed, lic:a.motac_license||'—', price:Number(a.price), tier:a.tier, note:a.note||'', logo_url:a.logo_url||''}));
   HOTELS=(ho.data||[]).map(h=>({name:h.name, dist:Number(h.distance_km), price:Number(h.price_per_night),
     stars:Number(h.stars), icon:h.type==='homestay'?'🏠':'🏨', lat:Number(h.lat), lng:Number(h.lng), note:h.note||''}));
   VOLUNTEERS=(vo.data||[]).map(v=>({name:v.name, loc:v.location, done:Number(v.duas_delivered||0), note:v.note||''}));
@@ -1472,6 +1474,17 @@ function renderHome(){
 }
 
 /* ============ AGENCY ============ */
+function agThumb(a){
+  const COLORS=['#10808e','#2d7dd2','#e8623a','#7b61ff','#1e8a5a','#c0392b','#8e44ad','#e0a800'];
+  const letter=(a.name||'?')[0].toUpperCase();
+  const bg=COLORS[(a.name||'').charCodeAt(0)%COLORS.length];
+  if(a.logo_url){
+    return `<img class="ag-logo" src="${esc(a.logo_url)}" alt="${esc(letter)}" loading="lazy" `+
+      `onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">` +
+      `<span class="ag-init" style="display:none;background:${bg}">${letter}</span>`;
+  }
+  return `<span class="ag-init" style="background:${bg}">${letter}</span>`;
+}
 function renderAgencyFilters(){
   const R=[0,4,4.5,4.8];
   document.getElementById('agRating').innerHTML=R.map(r=>`
@@ -1497,7 +1510,7 @@ function renderAgencies(){
     const shrTxt=esc(a.name+(hq?' — '+hq:''));
     const shrUrl=esc(location.href);
     return `<div class="card"><div class="list-row">
-      <div class="thumb">✈️</div>
+      <div class="thumb">${agThumb(a)}</div>
       <div style="flex:1">
         <div class="row-between"><b style="font-size:14.5px">${a.name}</b>
           ${a.motac?'<span class="badge-motac">✓ MOTAC'+(a.lic&&a.lic!=='—'?' '+a.lic:'')+'</span>':''}</div>
