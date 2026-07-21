@@ -1461,7 +1461,7 @@ function renderAgencies(){
     const hq=parts[0]||''; const contact=parts[1]||'';
     const isUrl=/^https?:\/\//.test(contact);
     const shrTxt=esc(a.name+(hq?' — '+hq:''));
-    const shrUrl=isUrl?esc(contact):esc(location.href);
+    const shrUrl=esc(location.href);
     return `<div class="card"><div class="list-row">
       <div class="thumb">✈️</div>
       <div style="flex:1">
@@ -1807,9 +1807,9 @@ function renderNews(){
   const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:12px">Berita &amp; pengumuman terkini berkaitan umrah — peraturan Saudi, visa, kesihatan, penerbangan &amp; amaran penting. Dikemas kini dari semasa ke semasa. 📰</div>`;
   if(!NEWS.length){ el.innerHTML=intro+`<div class="empty">Belum ada berita buat masa ini. Nantikan kemas kini terkini. 🤍</div>`; return; }
   el.innerHTML=intro+NEWS.map(n=>{
-    const src=n.source_name?`<a class="n-src" href="${esc(n.source_url||'#')}" target="_blank" rel="noopener">🔗 ${esc(n.source_name)}</a>`:'';
+    const src='';
     const del=isAdmin()?`<button class="n-del" onclick="delNews(${n.id},this)">🗑️ Padam</button>`:'';
-    const shrUrl=n.source_url?esc(n.source_url):esc(location.href);
+    const shrUrl=esc(location.href);
     const imgHtml=n.image_url?`<img class="n-img" src="${esc(n.image_url)}" alt="${esc(n.title)}" loading="lazy" onerror="this.style.display='none'">`:'';
     return `<div class="card" data-news="${n.id}">
       ${imgHtml}
