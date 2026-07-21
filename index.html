@@ -2275,7 +2275,7 @@ async function togglePush(){
   document.getElementById('tbMenu').classList.remove('open');
   if(!('PushManager' in window)){ toast('Peranti anda tidak menyokong push notification.'); return; }
   if(Notification.permission==='denied'){
-    toast('Notifikasi disekat dalam penyemak imbas. Klik ikon 🔒 di bar alamat → cari "Notifikasi" → pilih "Benarkan" → muat semula halaman.',5500);
+    toast('Notifikasi disekat. Buka Tetapan penyemak imbas → Tetapan Laman / Kebenaran → Notifikasi → cari haramaen.netlify.app → pilih Benarkan → muat semula.',6000);
     return;
   }
   try{
