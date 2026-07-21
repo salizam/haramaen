@@ -249,6 +249,12 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .anb-batal{background:#f0f3f0;color:var(--muted)}
   .k-poster-link{display:inline-block;margin-top:4px;font-size:11.5px;color:var(--green);font-weight:700;text-decoration:none}
   .k-poster-link:hover{text-decoration:underline}
+  .th-poster{width:52px;padding:6px 4px}
+  .k-poster-td{padding:6px 4px;vertical-align:middle}
+  .k-poster-thumb{width:44px;height:56px;object-fit:cover;border-radius:6px;cursor:zoom-in;display:block;box-shadow:0 1px 5px rgba(0,0,0,.2)}
+  .k-poster-thumb:hover{opacity:.85}
+  .k-lb{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10000;display:none;align-items:center;justify-content:center;cursor:zoom-out;padding:16px}
+  .k-lb img{max-width:92vw;max-height:88vh;border-radius:14px;box-shadow:0 8px 48px rgba(0,0,0,.6);object-fit:contain}
   #posterCarousel{padding:0 0 6px}
   .p-carousel{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:4px 0 8px;scrollbar-width:none}
   .p-carousel::-webkit-scrollbar{display:none}
@@ -561,7 +567,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div class="kbar" id="kursusAllFilter"></div>
         <div class="ktable-wrap">
           <table class="ktable">
-            <thead><tr><th>Tarikh</th><th>Masa</th><th>Lokasi</th><th>Hubungi</th></tr></thead>
+            <thead><tr><th class="th-poster"></th><th>Tarikh</th><th>Masa</th><th>Lokasi</th><th>Hubungi</th></tr></thead>
             <tbody id="kursusAllBody"></tbody>
           </table>
         </div>
@@ -1181,8 +1187,10 @@ function courseRow(k,dist){
   const shrT=esc(k.lokasi||'Kursus Umrah');
   const shrX=esc('Kursus Umrah: '+(k.lokasi||'')+(k.tarikh?' — '+k.tarikh:'')+(loc2?' ('+loc2+')':''));
   const shrU=esc(location.href);
-  const posterBtn=k.poster_url?`<br><a class="k-poster-link" href="${esc(k.poster_url)}" target="_blank" rel="noopener">🖼️ Lihat Poster</a>`:'';
-  return `<tr><td>${esc(k.tarikh)}</td><td>${esc(k.masa)}</td><td>${esc(k.lokasi)}${loc2?`<br><small style="color:var(--muted)">${esc(loc2)}</small>`:''}${dtxt}${posterBtn}</td><td data-l="Hubungi" style="vertical-align:top">${k.hubungi?`<a href="${waLink(k.hubungi)}" target="_blank" rel="noopener" class="wa-link">${WA_ICON}${esc(k.hubungi)}</a>`:''}<div style="margin-top:4px"><button class="shr-sm" data-title="${shrT}" data-text="${shrX}" data-url="${shrU}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div></td></tr>`;
+  const posterTd=k.poster_url
+    ?`<td class="k-poster-td"><img class="k-poster-thumb" src="${esc(k.poster_url)}" alt="Poster" loading="lazy" onclick="openPoster('${esc(k.poster_url)}')" onerror="this.style.display='none'"></td>`
+    :`<td class="k-poster-td"></td>`;
+  return `<tr>${posterTd}<td>${esc(k.tarikh)}</td><td>${esc(k.masa)}</td><td>${esc(k.lokasi)}${loc2?`<br><small style="color:var(--muted)">${esc(loc2)}</small>`:''}${dtxt}</td><td data-l="Hubungi" style="vertical-align:top">${k.hubungi?`<a href="${waLink(k.hubungi)}" target="_blank" rel="noopener" class="wa-link">${WA_ICON}${esc(k.hubungi)}</a>`:''}<div style="margin-top:4px"><button class="shr-sm" data-title="${shrT}" data-text="${shrX}" data-url="${shrU}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div></td></tr>`;
 }
 function renderKursus(){
   const b=document.getElementById('kursusBody'); if(!b) return;
@@ -1778,6 +1786,11 @@ function shareItem(el){
   document.getElementById('shSheet').style.display='block';
   document.getElementById('shOverlay').style.display='block';
 }
+function openPoster(url){
+  const lb=document.getElementById('kLb');
+  document.getElementById('kLbImg').src=url;
+  lb.style.display='flex';
+}
 function closeShare(){
   document.getElementById('shSheet').style.display='none';
   document.getElementById('shOverlay').style.display='none';
@@ -2107,6 +2120,7 @@ if('serviceWorker' in navigator){
 }
 </script>
 <!-- Share Sheet -->
+<div id="kLb" class="k-lb" onclick="this.style.display='none'"><img id="kLbImg" src="" alt="Poster Kursus"></div>
 <div class="sh-overlay" id="shOverlay" onclick="closeShare()"></div>
 <div class="sh-sheet" id="shSheet">
   <div class="sh-drag"></div>
