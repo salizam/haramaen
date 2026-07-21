@@ -40,12 +40,16 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .sb-logo h1{margin:0; font-size:20px; letter-spacing:1.5px; font-weight:800}
   .sb-logo small{opacity:.72; font-size:11px; letter-spacing:.3px}
   .sb-nav{display:flex; flex-direction:column; gap:4px; z-index:1}
-  .sb-link{display:flex; align-items:center; gap:13px; width:100%; text-align:left; cursor:pointer;
-    padding:11px 14px; border:0; border-radius:12px; background:none; color:rgba(255,255,255,.82);
-    font-family:inherit; font-size:14.5px; font-weight:600}
-  .sb-link svg{width:20px;height:20px;flex:none}
-  .sb-link:hover{background:rgba(255,255,255,.08); color:#fff}
-  .sb-link.active{background:rgba(255,255,255,.17); color:#fff}
+  .sb-link{display:flex; align-items:center; gap:11px; width:100%; text-align:left; cursor:pointer;
+    padding:6px 10px; border:0; border-radius:11px; background:none; color:rgba(255,255,255,.58);
+    font-family:inherit; font-size:13.5px; font-weight:500; transition:color .15s; letter-spacing:.1px}
+  .sb-link .ico{width:34px;height:34px;min-width:34px;background:rgba(255,255,255,.08);border-radius:9px;
+    display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;color:rgba(255,255,255,.65)}
+  .sb-link svg{width:17px;height:17px;flex:none}
+  .sb-link:hover{color:rgba(255,255,255,.88)}
+  .sb-link:hover .ico{background:rgba(255,255,255,.14);color:#fff}
+  .sb-link.active{color:#fff;font-weight:600}
+  .sb-link.active .ico{background:var(--gold);color:#083c2d;box-shadow:0 2px 12px rgba(201,162,39,.45)}
   .sb-foot{margin-top:auto; z-index:1; border-top:1px solid rgba(255,255,255,.12); padding-top:8px}
   .sb-mosque{position:absolute; left:-20px; right:-20px; bottom:-8px; opacity:.09; pointer-events:none; z-index:0}
   .sb-mosque svg{width:100%; height:auto}
@@ -848,22 +852,22 @@ const state = { user:null, myHotel:null, agRating:0, agPrice:null, hoBudget:null
 
 /* ============ ICONS (inline SVG) ============ */
 const SVG={
-  home:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/>',
-  plane:'<path d="M21 15.5 3 21l4-8L3 5l18 5.5a1 1 0 0 1 0 5z"/>',
-  dua:'<path d="M12 21s-7-4.6-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.4-7 10-7 10z"/>',
-  med:'<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/>',
-  mosque:'<path d="M4 21v-8M20 21v-8M4 13h16M12 3c3 2.5 5 4.5 5 7H7c0-2.5 2-4.5 5-7z"/><path d="M7 21v-4a1.6 1.6 0 0 1 3.2 0v4M13.8 21v-4a1.6 1.6 0 0 1 3.2 0v4"/>',
-  bed:'<path d="M3 8v12M3 13h18v7M21 20v-5a3 3 0 0 0-3-3H8v4"/>',
-  pin:'<path d="M12 21s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="9.5" r="2.6"/>',
-  news:'<path d="M4 5h13v14H4z"/><path d="M17 8h3v9a2 2 0 0 1-2 2M7 9h7M7 12.5h7M7 16h4"/>',
-  book:'<path d="M4 5a2 2 0 0 1 2-2h6v16H6a2 2 0 0 0-2 2z"/><path d="M20 5a2 2 0 0 0-2-2h-6v16h6a2 2 0 0 1 2 2z"/>',
-  bell:'<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
-  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/>',
-  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-  chev:'<path d="M9 6l6 6-6 6"/>',
-  pic:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'
+  home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  plane:'<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 3 21 3s-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+  dua:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  med:'<circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>',
+  mosque:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/><path d="M20 3v4"/><path d="M22 5h-4"/>',
+  bed:'<path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>',
+  pin:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+  news:'<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/>',
+  book:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  chev:'<path d="m9 18 6-6-6-6"/>',
+  pic:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>'
 };
-function svg(k){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${SVG[k]||SVG.home}</svg>`;}
+function svg(k){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${SVG[k]||SVG.home}</svg>`;}
 /* fill data-i icon spans */
 function paintIcons(root){ (root||document).querySelectorAll('.ico[data-i]').forEach(s=>{ if(!s.dataset.done){ s.innerHTML=svg(s.getAttribute('data-i')); s.dataset.done=1; }}); }
 
