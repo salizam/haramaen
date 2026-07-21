@@ -248,6 +248,11 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .anb-batal{background:#f0f3f0;color:var(--muted)}
   .k-poster-link{display:inline-block;margin-top:4px;font-size:11.5px;color:var(--green);font-weight:700;text-decoration:none}
   .k-poster-link:hover{text-decoration:underline}
+  #posterCarousel{padding:0 0 6px}
+  .p-carousel{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:4px 0 8px;scrollbar-width:none}
+  .p-carousel::-webkit-scrollbar{display:none}
+  .p-car-img{width:200px;height:130px;object-fit:cover;border-radius:12px;flex:none;scroll-snap-align:start;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.13);transition:opacity .15s}
+  .p-car-img:hover,.p-car-img:active{opacity:.82}
   .n-src:hover{text-decoration:underline}
   .n-del{margin-left:auto; background:#fdece9; color:var(--danger); border:0; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer}
   /* Share buttons */
@@ -545,23 +550,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
 
         <div class="feat-grid" id="featGrid"></div>
 
-        <div class="pkg-sec">
-          <div class="pkg-head">
-            <div>
-              <h3>Kursus Umrah</h3>
-              <div class="u"></div>
-              <div class="sub">Jadual kursus &amp; kelas persediaan umrah</div>
-            </div>
-            <button class="kbtn kbtn-daftar" onclick="openCourseForm()">Daftar kursus anda</button>
-          </div>
-          <div class="ktable-wrap">
-            <table class="ktable">
-              <thead><tr><th>Tarikh</th><th>Masa</th><th>Lokasi</th><th>Hubungi</th></tr></thead>
-              <tbody id="kursusBody"></tbody>
-            </table>
-          </div>
-          <div id="kursusMore" class="kmore"></div>
-        </div>
+        <div id="posterCarousel"></div>
       </section>
 
       <!-- SEMUA KURSUS -->
@@ -1207,6 +1196,12 @@ function renderKursus(){
       : '';
   }
 }
+function renderPosterCarousel(){
+  const wrap=document.getElementById('posterCarousel'); if(!wrap) return;
+  const posters=COURSES.filter(c=>c.poster_url);
+  if(!posters.length){ wrap.innerHTML=''; return; }
+  wrap.innerHTML=`<div class="p-carousel">${posters.map(c=>`<img class="p-car-img" src="${esc(c.poster_url)}" alt="Poster kursus" loading="lazy" onclick="go('kursus')">`).join('')}</div>`;
+}
 function renderKursusAll(){
   const b=document.getElementById('kursusAllBody'); if(!b) return;
   const fbar=document.getElementById('kursusAllFilter');
@@ -1427,7 +1422,7 @@ async function setCourse(id,status,btn){
     const {error}=await sb.rpc('admin_set_course_status',{p_id:id,p_status:status});
     if(error) throw error;
     toast(status==='approved'?'Kursus diluluskan & kini dipapar.':'Kursus ditolak.');
-    if(status==='approved'){ try{ await loadData(); renderKursus(); renderKursusAll(); }catch(e){} }
+    if(status==='approved'){ try{ await loadData(); renderPosterCarousel(); renderKursusAll(); }catch(e){} }
     loadPendingCourses();
   }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
 }
@@ -1439,7 +1434,7 @@ function renderHome(){
       <span class="chev">${svg('chev')}</span>
     </button>`).join('');
   renderTerkini();
-  // renderKursus(); // hidden per request
+  renderPosterCarousel();
 }
 
 /* ============ AGENCY ============ */
