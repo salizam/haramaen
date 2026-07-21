@@ -43,13 +43,14 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .sb-link{display:flex; align-items:center; gap:11px; width:100%; text-align:left; cursor:pointer;
     padding:6px 10px; border:0; border-radius:11px; background:none; color:rgba(255,255,255,.58);
     font-family:inherit; font-size:13.5px; font-weight:500; transition:color .15s; letter-spacing:.1px}
-  .sb-link .ico{width:34px;height:34px;min-width:34px;background:rgba(255,255,255,.08);border-radius:9px;
-    display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;color:rgba(255,255,255,.65)}
+  .sb-link .ico{width:34px;height:34px;min-width:34px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    opacity:.75;transition:opacity .15s,box-shadow .15s,transform .13s}
   .sb-link svg{width:17px;height:17px;flex:none}
-  .sb-link:hover{color:rgba(255,255,255,.88)}
-  .sb-link:hover .ico{background:rgba(255,255,255,.14);color:#fff}
+  .sb-link:hover{color:rgba(255,255,255,.92)}
+  .sb-link:hover .ico{opacity:1;transform:scale(1.07)}
   .sb-link.active{color:#fff;font-weight:600}
-  .sb-link.active .ico{background:var(--gold);color:#083c2d;box-shadow:0 2px 12px rgba(201,162,39,.45)}
+  .sb-link.active .ico{opacity:1;box-shadow:0 3px 14px rgba(0,0,0,.38);transform:scale(1.08)}
   .sb-foot{margin-top:auto; z-index:1; border-top:1px solid rgba(255,255,255,.12); padding-top:8px}
   .sb-mosque{position:absolute; left:-20px; right:-20px; bottom:-8px; opacity:.09; pointer-events:none; z-index:0}
   .sb-mosque svg{width:100%; height:auto}
@@ -491,7 +492,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     </div>
     <nav class="sb-nav" id="sbNav"></nav>
     <div class="sb-foot">
-      <button class="sb-link" onclick="logout()"><span class="ico" data-i="logout"></span> Log keluar</button>
+      <button class="sb-link" onclick="logout()"><span class="ico" data-i="logout" style="background:#c0392b"></span> Log keluar</button>
     </div>
     <div class="sb-mosque"><svg viewBox="0 0 300 90" preserveAspectRatio="xMidYMax meet"><path fill="#fff" d="M0 90V60h12V44a10 10 0 0 1 20 0v16h10V50a8 8 0 0 1 16 0v10h18V40c0-8 6-12 10-18 4 6 10 10 10 18v20h18V50a8 8 0 0 1 16 0v10h16V38c0-10 8-16 12-24 4 8 12 14 12 24v22h16V50a8 8 0 0 1 16 0v10h18V40c0-8 6-12 10-18 4 6 10 10 10 18v20h10V44a10 10 0 0 1 20 0v16h12v30z"/></svg></div>
   </aside>
@@ -873,16 +874,16 @@ function paintIcons(root){ (root||document).querySelectorAll('.ico[data-i]').for
 
 /* ============ NAV CONFIG ============ */
 const NAV=[
-  {v:'home',   t:'Utama',              i:'home'},
-  {v:'agency', t:'Agensi Umrah',       i:'plane'},
-  {v:'dua',    t:"Doa",                i:'dua'},
-  {v:'stay',   t:'Penginapan',         i:'bed'},
-  {v:'med',    t:'Perubatan', i:'med'},
-  {v:'svc',    t:'Servis',              i:'bell'},
-  {v:'guide',  t:'Panduan Umrah',      i:'book'},
-  {v:'news',   t:'Berita Umrah',       i:'news'},
-  {v:'lost',   t:'Orang Hilang',       i:'pin'},
-  {v:'solah',  t:'Waktu Solat',        i:'mosque'},
+  {v:'home',   t:'Utama',         i:'home',   c:'#0d5c46'},
+  {v:'agency', t:'Agensi Umrah',  i:'plane',  c:'#10808e'},
+  {v:'dua',    t:"Doa",           i:'dua',    c:'#6d4bb0'},
+  {v:'stay',   t:'Penginapan',    i:'bed',    c:'#e8a020'},
+  {v:'med',    t:'Perubatan',     i:'med',    c:'#e0335b'},
+  {v:'svc',    t:'Servis',        i:'bell',   c:'#c0620a'},
+  {v:'guide',  t:'Panduan Umrah', i:'book',   c:'#1c7d54'},
+  {v:'news',   t:'Berita Umrah',  i:'news',   c:'#2d63b8'},
+  {v:'lost',   t:'Orang Hilang',  i:'pin',    c:'#2f9e57'},
+  {v:'solah',  t:'Waktu Solat',   i:'mosque', c:'#2f74c0'},
 ];
 const BOTTOM=[
   {v:'home',t:'Utama',i:'home',c:'#0d5c46'},{v:'agency',t:'Agensi',i:'plane',c:'#10808e'},
@@ -896,7 +897,7 @@ function buildNav(){
   const navList = NAV.concat(isAdmin()?[{v:'admin',t:'📊 Statistik (Admin)',i:'book'}]:[]);
   const si=document.getElementById('tbStatItem'); if(si) si.style.display=isAdmin()?'flex':'none';
   document.getElementById('sbNav').innerHTML=navList.map(n=>
-    `<button class="sb-link" data-v="${n.v}" onclick="go('${n.v}')"><span class="ico" data-i="${n.i}"></span> ${n.t}</button>`).join('');
+    `<button class="sb-link" data-v="${n.v}" onclick="go('${n.v}')"><span class="ico" data-i="${n.i}" style="background:${n.c||'rgba(255,255,255,.15)'}"></span> ${n.t}</button>`).join('');
   document.getElementById('bottomNav').innerHTML=BOTTOM.map(n=>
     `<button class="bn" data-v="${n.v}" onclick="go('${n.v}')"><span class="bnfi" style="background:${n.c}">${ICONS[n.i]?`<img src="${ICONS[n.i]}" alt="" draggable="false">`:`<span class="ico" data-i="${n.i}"></span>`}</span><span>${n.t}</span></button>`).join('');
   paintIcons();
