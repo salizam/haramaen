@@ -924,7 +924,8 @@ async function loadData(){
   ]);
   NEWS=(nw.data||[]);
   COURSES=(co.data||[]).map(c=>({tarikh:c.tarikh_label, date:c.tarikh_date||'', masa:c.masa||'', lokasi:c.lokasi||'',
-    daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||'', created:c.created_at||''}))
+    daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||'', created:c.created_at||'',
+    poster_url:c.poster_url||''}))
     .sort((a,b)=> (a.date||'9999').localeCompare(b.date||'9999'));
   try{ const r=await sb.rpc('list_duas',{p_visitor:vid()}); LATEST_DUAS=(r&&r.data)||[]; }catch(e){ LATEST_DUAS=[]; }
   AGENCIES=(ag.data||[]).map(a=>({name:a.name, rating:Number(a.rating), reviews:Number(a.reviews_count||0),
