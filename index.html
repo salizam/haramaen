@@ -596,7 +596,9 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
             Berlesen MOTAC sahaja
           </label>
         </div>
-        <div class="section-title" style="font-size:14px"><span id="agCount">—</span> agensi ditemui</div>
+        <div class="section-title" style="font-size:14px"><span id="agCount">—</span> agensi ditemui
+          <span style="display:block;font-size:12px;font-weight:400;color:var(--muted);margin-top:5px">Syarikat anda tiada dalam senarai? <a onclick="showAgReg()" style="cursor:pointer;color:var(--primary);text-decoration:underline">Sila senaraikan di sini.</a></span>
+        </div>
         <div id="agencyList"></div>
       </section>
 
@@ -835,6 +837,33 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   </div>
 </div>
 
+<div class="modal" id="agRegModal">
+  <div class="modal-box">
+    <h3>Daftar Agensi Travel</h3>
+    <div class="mh-sub">Maklumat syarikat akan disemak sebelum disiarkan. Pendaftaran percuma.</div>
+    <label class="fl">Nama Syarikat <span style="color:#e74c3c">*</span></label>
+    <input id="arNama" placeholder="cth: Al-Falah Travel Sdn Bhd">
+    <div class="modal-row">
+      <div>
+        <label class="fl">No. Lesen MOTAC <span style="font-weight:400;color:var(--muted)">(jika ada)</span></label>
+        <input id="arMotac" placeholder="cth: KPKK(UL)1234/5">
+      </div>
+      <div>
+        <label class="fl">Rating Google <span style="font-weight:400;color:var(--muted)">(jika ada)</span></label>
+        <input id="arRating" type="number" min="1" max="5" step="0.1" placeholder="cth: 4.5">
+      </div>
+    </div>
+    <label class="fl">HQ / Lokasi Pejabat</label>
+    <input id="arHq" placeholder="cth: Kuala Lumpur">
+    <label class="fl">Laman Web / No. Telefon</label>
+    <input id="arContact" placeholder="cth: https://agensi.com.my atau 03-1234 5678">
+    <div class="modal-actions">
+      <button class="m-cancel" onclick="closeAgReg()">Batal</button>
+      <button class="m-save" id="arSave" onclick="submitAgReg()">Hantar Permohonan</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============ SUPABASE ============ */
@@ -929,7 +958,7 @@ const MED_MAP={hospital:{t:'Hospital',i:'🏥'}, pharmacy:{t:'Farmasi',i:'💊'}
 const SVC_ICON={wheelchair:'♿', kaaba:'🕋', guide:'🧕', exchange:'💱', laundry:'🧺', car:'🚕', shop:'🛍️'};
 async function loadData(){
   const [ag,ho,vo,me,sv,cr,co,nw] = await Promise.all([
-    sb.from('agencies').select('*'),
+    sb.from('agencies').select('*').eq('status','approved'),
     sb.from('hotels').select('*'),
     sb.from('volunteers').select('*').eq('active',true),
     sb.from('medical_directory').select('*'),
@@ -1483,16 +1512,25 @@ function renderHome(){
 }
 
 /* ============ AGENCY ============ */
+function agDomain(note){
+  const contact=(note||'').split('•')[1]||'';
+  if(!/^https?:\/\//.test(contact.trim())) return '';
+  try{ return new URL(contact.trim()).hostname.replace(/^www\./,''); }catch(e){ return ''; }
+}
 function agThumb(a){
   const COLORS=['#10808e','#2d7dd2','#e8623a','#7b61ff','#1e8a5a','#c0392b','#8e44ad','#e0a800'];
   const letter=(a.name||'?')[0].toUpperCase();
   const bg=COLORS[(a.name||'').charCodeAt(0)%COLORS.length];
-  if(a.logo_url){
-    return `<img class="ag-logo" src="${esc(a.logo_url)}" alt="${esc(letter)}" loading="lazy" `+
-      `onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">` +
-      `<span class="ag-init" style="display:none;background:${bg}">${letter}</span>`;
+  const fallback=`<span class="ag-init" style="display:none;background:${bg}">${letter}</span>`;
+  const init=`<span class="ag-init" style="background:${bg}">${letter}</span>`;
+  // Priority: manual logo_url → Clearbit from website domain → initial
+  const domain=agDomain(a.note);
+  const src=a.logo_url||(domain?`https://logo.clearbit.com/${domain}`:'');
+  if(src){
+    return `<img class="ag-logo" src="${esc(src)}" alt="${esc(letter)}" loading="lazy" `+
+      `onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">`+fallback;
   }
-  return `<span class="ag-init" style="background:${bg}">${letter}</span>`;
+  return init;
 }
 function renderAgencyFilters(){
   const R=[0,4,4.5,4.8];
@@ -1533,6 +1571,30 @@ function renderAgencies(){
     </div></div>`;}).join('');
 }
 
+function showAgReg(){document.getElementById('agRegModal').classList.add('open');}
+function closeAgReg(){
+  document.getElementById('agRegModal').classList.remove('open');
+  ['arNama','arMotac','arRating','arHq','arContact'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+async function submitAgReg(){
+  const nama=(document.getElementById('arNama').value||'').trim();
+  if(!nama){toast('Sila isi nama syarikat.');return;}
+  const motac=(document.getElementById('arMotac').value||'').trim();
+  const rating=parseFloat(document.getElementById('arRating').value)||null;
+  const hq=(document.getElementById('arHq').value||'').trim();
+  const contact=(document.getElementById('arContact').value||'').trim();
+  const note=[hq,contact].filter(Boolean).join(' • ');
+  const btn=document.getElementById('arSave');
+  btn.disabled=true; btn.textContent='Menghantar…';
+  const {error}=await sb.from('agencies').insert({
+    name:nama, motac_license:motac||null, rating:rating,
+    motac_licensed:!!motac, note:note||null, status:'pending'
+  });
+  btn.disabled=false; btn.textContent='Hantar Permohonan';
+  if(error){toast('Gagal hantar. Cuba lagi.');return;}
+  closeAgReg();
+  toast('Terima kasih! Permohonan anda sedang disemak. 🙏');
+}
 /* ============ DU'A ============ */
 function duaTab(t,el){
   ['submit','feed'].forEach(x=>document.getElementById('dua-'+x).style.display='none');
