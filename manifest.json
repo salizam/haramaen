@@ -1,11 +1,11 @@
 {
-  "name": "Haramaen — Umrah Guidance",
+  "name": "Haramaen \u2014 Umrah Guidance",
   "short_name": "Haramaen",
-  "description": "Innovation for your Umrah guidance — all in one place.",
+  "description": "Innovation for your Umrah guidance \u2014 all in one place.",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0a4736",
+  "background_color": "transparent",
   "theme_color": "#0d5c46",
   "icons": [
     {
