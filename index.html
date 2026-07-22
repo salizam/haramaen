@@ -1543,7 +1543,9 @@ function agNegeri(note){
   if(!note) return '';
   const loc=(note.split('•')[0]||'').trim();
   const parts=loc.split(',');
-  return (parts[parts.length-1]||'').trim().toUpperCase();
+  const raw=(parts[parts.length-1]||'').trim();
+  // Strip leading postcode digits (e.g. "50000 Kuala Lumpur" → "KUALA LUMPUR")
+  return raw.replace(/^\d+\s*/,'').trim().toUpperCase();
 }
 function agDaerah(note){
   if(!note) return '';
