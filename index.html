@@ -607,11 +607,15 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
             <input type="checkbox" id="agMotac" style="width:auto" onchange="renderAgencies()">
             Berlesen MOTAC sahaja
           </label>
-          <label class="f" style="margin-top:12px">Negeri</label>
-          <div class="chips" id="agNegeriChips"></div>
-          <div id="agDaerahRow" style="display:none">
-            <label class="f" style="margin-top:8px">Daerah</label>
-            <div class="chips" id="agDaerahChips"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <div style="flex:1;min-width:0">
+              <label class="f" style="font-size:12px;margin-bottom:3px">Negeri</label>
+              <select id="agNegeriSel" class="f" style="width:100%;font-size:13px;padding:6px 8px" onchange="setAgNegeri(this.value)"></select>
+            </div>
+            <div id="agDaerahRow" style="flex:1;min-width:0;display:none">
+              <label class="f" style="font-size:12px;margin-bottom:3px">Daerah</label>
+              <select id="agDaerahSel" class="f" style="width:100%;font-size:13px;padding:6px 8px" onchange="setAgDaerah(this.value)"></select>
+            </div>
           </div>
         </div>
         <div class="section-title" style="font-size:14px"><span id="agCount">—</span> agensi ditemui
@@ -1567,15 +1571,14 @@ function renderAgencyFilters(){
   document.getElementById('agRating').innerHTML=R.map(r=>`
     <button class="chip ${state.agRating===r?'on':''}" onclick="setAgRating(${r})">${r===0?'Semua':'⭐ '+r+'+'}</button>`).join('');
   document.getElementById('agPrice').innerHTML='';
-  // Negeri chips — build unique sorted list from loaded AGENCIES
+  // Negeri dropdown — build unique sorted list from loaded AGENCIES
   const negeriSet=new Set();
   (AGENCIES||[]).forEach(a=>{const n=agNegeri(a.note); if(n) negeriSet.add(n);});
   const negeriList=['all',...Array.from(negeriSet).sort()];
-  document.getElementById('agNegeriChips').innerHTML=negeriList.map(n=>`
-    <button class="chip ${state.agNegeri===n?'on':''}" onclick="setAgNegeri('${n.replace(/'/g,"\\'")}')">
-      ${n==='all'?'Semua':n.charAt(0)+n.slice(1).toLowerCase()}
-    </button>`).join('');
-  // Daerah chips — show only when a negeri is selected
+  document.getElementById('agNegeriSel').innerHTML=negeriList.map(n=>
+    `<option value="${n}" ${state.agNegeri===n?'selected':''}>${n==='all'?'Semua Negeri':n.charAt(0)+n.slice(1).toLowerCase()}</option>`
+  ).join('');
+  // Daerah dropdown — show only when a negeri is selected
   const dRow=document.getElementById('agDaerahRow');
   if(state.agNegeri==='all'){
     dRow.style.display='none';
@@ -1584,10 +1587,9 @@ function renderAgencyFilters(){
     (AGENCIES||[]).filter(a=>agNegeri(a.note)===state.agNegeri).forEach(a=>{const d=agDaerah(a.note); if(d) daerahSet.add(d);});
     const daerahList=Array.from(daerahSet).sort();
     if(daerahList.length>0){
-      document.getElementById('agDaerahChips').innerHTML=[{v:'all',l:'Semua'},...daerahList.map(d=>({v:d,l:d}))].map(({v,l})=>`
-        <button class="chip ${state.agDaerah===v?'on':''}" onclick="setAgDaerah('${v.replace(/'/g,"\\'")}')">
-          ${l}
-        </button>`).join('');
+      document.getElementById('agDaerahSel').innerHTML=
+        `<option value="all" ${state.agDaerah==='all'?'selected':''}>Semua Daerah</option>`+
+        daerahList.map(d=>`<option value="${d}" ${state.agDaerah===d?'selected':''}>${d}</option>`).join('');
       dRow.style.display='';
     } else {
       dRow.style.display='none';
