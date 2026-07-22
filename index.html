@@ -1573,9 +1573,9 @@ function renderAgencyFilters(){
   document.getElementById('agRating').innerHTML=R.map(r=>`
     <button class="chip ${state.agRating===r?'on':''}" onclick="setAgRating(${r})">${r===0?'Semua':'⭐ '+r+'+'}</button>`).join('');
   document.getElementById('agPrice').innerHTML='';
-  // Negeri dropdown — build unique sorted list from loaded AGENCIES
+  // Negeri dropdown — build unique sorted list, exclude entries with digits (postcodes etc.)
   const negeriSet=new Set();
-  (AGENCIES||[]).forEach(a=>{const n=agNegeri(a.note); if(n) negeriSet.add(n);});
+  (AGENCIES||[]).forEach(a=>{const n=agNegeri(a.note); if(n&&!/\d/.test(n)) negeriSet.add(n);});
   const negeriList=['all',...Array.from(negeriSet).sort()];
   document.getElementById('agNegeriSel').innerHTML=negeriList.map(n=>
     `<option value="${n}" ${state.agNegeri===n?'selected':''}>${n==='all'?'Semua Negeri':n.charAt(0)+n.slice(1).toLowerCase()}</option>`
@@ -1586,7 +1586,7 @@ function renderAgencyFilters(){
     dRow.style.display='none';
   } else {
     const daerahSet=new Set();
-    (AGENCIES||[]).filter(a=>agNegeri(a.note)===state.agNegeri).forEach(a=>{const d=agDaerah(a.note); if(d) daerahSet.add(d);});
+    (AGENCIES||[]).filter(a=>agNegeri(a.note)===state.agNegeri).forEach(a=>{const d=agDaerah(a.note); if(d&&!/\d/.test(d)) daerahSet.add(d);});
     const daerahList=Array.from(daerahSet).sort();
     if(daerahList.length>0){
       document.getElementById('agDaerahSel').innerHTML=
