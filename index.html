@@ -248,7 +248,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .n-src{font-size:12px; color:var(--green); font-weight:700; text-decoration:none}
   @media(min-width:640px){
     .n-card-top{display:flex; align-items:stretch}
-    .n-thumb{width:400px; height:auto; max-height:none; flex:none; align-self:stretch; border-right:1px solid var(--line)}
+    .n-thumb{width:400px; min-height:220px; max-height:none; flex:none; align-self:stretch; border-right:1px solid var(--line)}
     .n-card-right{flex:1; min-width:0; display:flex; flex-direction:column}
     .n-hd{padding:11px 15px 9px}
     .n-title{margin:0; padding:9px 15px 0; font-size:15px}
@@ -607,6 +607,12 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
             <input type="checkbox" id="agMotac" style="width:auto" onchange="renderAgencies()">
             Berlesen MOTAC sahaja
           </label>
+          <label class="f" style="margin-top:12px">Negeri</label>
+          <div class="chips" id="agNegeriChips"></div>
+          <div id="agDaerahRow" style="display:none">
+            <label class="f" style="margin-top:8px">Daerah</label>
+            <div class="chips" id="agDaerahChips"></div>
+          </div>
         </div>
         <div class="section-title" style="font-size:14px"><span id="agCount">—</span> agensi ditemui
           <span style="display:block;font-size:12px;font-weight:400;color:var(--muted);margin-top:5px">Syarikat anda tiada dalam senarai? <a onclick="showAgReg()" style="cursor:pointer;color:var(--primary);text-decoration:underline">Sila senaraikan di sini.</a></span>
@@ -895,7 +901,7 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY, {
 
 /* ============ STATE ============ */
 const MASJIDIL_HARAM = {lat:21.4225, lng:39.8262};
-const state = { user:null, myHotel:null, agRating:0, agPrice:null, hoBudget:null, duas:[], solCity:'me', medFilter:'all', svcFilter:'all', kTarikh:'all', kNegeri:'all', kDaerah:'all', kSearch:'', kNear:false, userLoc:null, kNearBusy:false };
+const state = { user:null, myHotel:null, agRating:0, agPrice:null, agNegeri:'all', agDaerah:'all', hoBudget:null, duas:[], solCity:'me', medFilter:'all', svcFilter:'all', kTarikh:'all', kNegeri:'all', kDaerah:'all', kSearch:'', kNear:false, userLoc:null, kNearBusy:false };
 
 /* ============ ICONS (inline SVG) ============ */
 const SVG={
@@ -1529,6 +1535,18 @@ function agDomain(note){
   if(!/^https?:\/\//.test(contact.trim())) return '';
   try{ return new URL(contact.trim()).hostname.replace(/^www\./,''); }catch(e){ return ''; }
 }
+function agNegeri(note){
+  if(!note) return '';
+  const loc=(note.split('•')[0]||'').trim();
+  const parts=loc.split(',');
+  return (parts[parts.length-1]||'').trim().toUpperCase();
+}
+function agDaerah(note){
+  if(!note) return '';
+  const loc=(note.split('•')[0]||'').trim();
+  const parts=loc.split(',');
+  return parts.length>1?parts[0].trim():'';
+}
 function agThumb(a){
   const COLORS=['#10808e','#2d7dd2','#e8623a','#7b61ff','#1e8a5a','#c0392b','#8e44ad','#e0a800'];
   const letter=(a.name||'?')[0].toUpperCase();
@@ -1549,15 +1567,47 @@ function renderAgencyFilters(){
   document.getElementById('agRating').innerHTML=R.map(r=>`
     <button class="chip ${state.agRating===r?'on':''}" onclick="setAgRating(${r})">${r===0?'Semua':'⭐ '+r+'+'}</button>`).join('');
   document.getElementById('agPrice').innerHTML='';
+  // Negeri chips — build unique sorted list from loaded AGENCIES
+  const negeriSet=new Set();
+  (AGENCIES||[]).forEach(a=>{const n=agNegeri(a.note); if(n) negeriSet.add(n);});
+  const negeriList=['all',...Array.from(negeriSet).sort()];
+  document.getElementById('agNegeriChips').innerHTML=negeriList.map(n=>`
+    <button class="chip ${state.agNegeri===n?'on':''}" onclick="setAgNegeri('${n.replace(/'/g,"\\'")}')">
+      ${n==='all'?'Semua':n.charAt(0)+n.slice(1).toLowerCase()}
+    </button>`).join('');
+  // Daerah chips — show only when a negeri is selected
+  const dRow=document.getElementById('agDaerahRow');
+  if(state.agNegeri==='all'){
+    dRow.style.display='none';
+  } else {
+    const daerahSet=new Set();
+    (AGENCIES||[]).filter(a=>agNegeri(a.note)===state.agNegeri).forEach(a=>{const d=agDaerah(a.note); if(d) daerahSet.add(d);});
+    const daerahList=Array.from(daerahSet).sort();
+    if(daerahList.length>0){
+      document.getElementById('agDaerahChips').innerHTML=[{v:'all',l:'Semua'},...daerahList.map(d=>({v:d,l:d}))].map(({v,l})=>`
+        <button class="chip ${state.agDaerah===v?'on':''}" onclick="setAgDaerah('${v.replace(/'/g,"\\'")}')">
+          ${l}
+        </button>`).join('');
+      dRow.style.display='';
+    } else {
+      dRow.style.display='none';
+    }
+  }
 }
 function setAgRating(r){state.agRating=r; renderAgencyFilters(); renderAgencies();}
 function setAgPrice(v){state.agPrice=(state.agPrice===v?null:v); renderAgencyFilters(); renderAgencies();}
+function setAgNegeri(n){state.agNegeri=n; state.agDaerah='all'; renderAgencyFilters(); renderAgencies();}
+function setAgDaerah(d){state.agDaerah=d; renderAgencyFilters(); renderAgencies();}
 function stars(n){const full=Math.round(n); return '★'.repeat(full)+'☆'.repeat(5-full);}
 function renderAgencies(){
   const q=(document.getElementById('agQuery').value||'').toLowerCase();
   const motac=document.getElementById('agMotac').checked;
   let list=AGENCIES.filter(a=>
-    a.name.toLowerCase().includes(q) && (a.rating||0)>=state.agRating && (!motac || a.motac)
+    a.name.toLowerCase().includes(q) &&
+    (a.rating||0)>=state.agRating &&
+    (!motac || a.motac) &&
+    (state.agNegeri==='all' || agNegeri(a.note)===state.agNegeri) &&
+    (state.agDaerah==='all' || agDaerah(a.note)===state.agDaerah)
   ).sort((a,b)=>(b.rating||0)-(a.rating||0));
   document.getElementById('agCount').textContent=list.length;
   const el=document.getElementById('agencyList');
