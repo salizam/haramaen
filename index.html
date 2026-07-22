@@ -234,16 +234,18 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .step .sc b{font-size:14.5px} .step .sc p{margin:5px 0 0; font-size:13px; color:var(--muted)}
   /* News portal layout */
   .news .card{cursor:default; padding:0; overflow:hidden}
-  .n-hd{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:13px 16px 11px; border-bottom:1px solid var(--line)}
-  .n-title{margin:12px 16px 0; font-size:16.5px; font-weight:800; line-height:1.35; color:var(--ink)}
-  .n-meta{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--muted); flex-wrap:wrap; padding:8px 16px 12px; border-bottom:1px dashed var(--line)}
-  .n-body{padding:13px 16px 4px; font-size:13.5px; color:#2c3a33; line-height:1.68}
+  .n-card-top{display:flex; align-items:stretch}
+  .n-thumb{width:112px; flex:none; object-fit:cover; display:block; border-top-left-radius:14px; border-right:1px solid var(--line); align-self:stretch; min-height:88px}
+  .n-card-right{flex:1; min-width:0; display:flex; flex-direction:column}
+  .n-hd{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:11px 14px 9px; border-bottom:1px solid var(--line)}
+  .n-title{padding:10px 14px 0; margin:0; font-size:15.5px; font-weight:800; line-height:1.35; color:var(--ink)}
+  .n-meta{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--muted); flex-wrap:wrap; padding:7px 14px 10px}
+  .n-body{padding:12px 16px 4px; font-size:13.5px; color:#2c3a33; line-height:1.68; border-top:1px dashed var(--line)}
   .n-body p{margin:0 0 10px; text-align:justify; text-indent:1.5em}
   .n-body p:first-child{text-indent:0}
   .n-body p:last-child{margin-bottom:0}
   .n-foot{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 16px 14px; border-top:1px dashed var(--line); margin-top:10px}
   .n-src{font-size:12px; color:var(--green); font-weight:700; text-decoration:none}
-  .n-img{width:100%;max-height:195px;object-fit:cover;display:block}
   .tk-thumb{width:44px;height:44px;flex:none;border-radius:8px;object-fit:cover;margin-top:1px}
   .pend-poster{width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin-bottom:8px}
   .up-label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:10px 0 4px}
@@ -2032,20 +2034,24 @@ function renderNews(){
     const src='';
     const del=isAdmin()?`<button class="n-del" onclick="delNews(${n.id},this)">🗑️ Padam</button>`:'';
     const shrUrl=esc(location.href);
-    const imgHtml=n.image_url?`<img class="n-img" src="${esc(n.image_url)}" alt="${esc(n.title)}" loading="lazy" onerror="this.style.display='none'">`:'';
+    const imgHtml=n.image_url?`<img class="n-thumb" src="${esc(n.image_url)}" alt="${esc(n.title)}" loading="lazy" onerror="this.style.display='none'">`:'';
     return `<div class="card" data-news="${n.id}">
-      ${imgHtml}
-      <div class="n-hd">
-        <span class="pill ${newsTagCls(n.tag)}">${esc(n.tag||'Info')}</span>
-        <span style="font-size:11px;color:var(--muted);margin-left:auto">${esc(n.category||'Umrah')}</span>
-      </div>
-      <div class="n-title">${esc(n.title)}</div>
-      <div class="n-meta">
-        <span>✍️ ${esc(n.author||'Haramaen')}</span>
-        <span>·</span>
-        <span>📅 ${fmtDate(n.published_at)}</span>
-        <span>·</span>
-        <span>${relTime(n.published_at)}</span>
+      <div class="n-card-top">
+        ${imgHtml}
+        <div class="n-card-right">
+          <div class="n-hd">
+            <span class="pill ${newsTagCls(n.tag)}">${esc(n.tag||'Info')}</span>
+            <span style="font-size:11px;color:var(--muted);margin-left:auto">${esc(n.category||'Umrah')}</span>
+          </div>
+          <div class="n-title">${esc(n.title)}</div>
+          <div class="n-meta">
+            <span>✍️ ${esc(n.author||'Haramaen')}</span>
+            <span>·</span>
+            <span>📅 ${fmtDate(n.published_at)}</span>
+            <span>·</span>
+            <span>${relTime(n.published_at)}</span>
+          </div>
+        </div>
       </div>
       <div class="n-body">${fmtBody(n.body)}</div>
       <div class="n-foot">
