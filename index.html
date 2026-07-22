@@ -235,16 +235,15 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   /* News portal layout */
   .news .card{cursor:default; padding:0; overflow:hidden}
   .n-card-top{display:flex; align-items:stretch}
-  .n-thumb{width:112px; flex:none; object-fit:cover; display:block; border-top-left-radius:14px; border-right:1px solid var(--line); align-self:stretch; min-height:88px}
+  .n-thumb{width:118px; flex:none; object-fit:cover; display:block; align-self:stretch; border-right:1px solid var(--line)}
   .n-card-right{flex:1; min-width:0; display:flex; flex-direction:column}
-  .n-hd{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:11px 14px 9px; border-bottom:1px solid var(--line)}
-  .n-title{padding:10px 14px 0; margin:0; font-size:15.5px; font-weight:800; line-height:1.35; color:var(--ink)}
-  .n-meta{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--muted); flex-wrap:wrap; padding:7px 14px 10px}
-  .n-body{padding:12px 16px 4px; font-size:13.5px; color:#2c3a33; line-height:1.68; border-top:1px dashed var(--line)}
-  .n-body p{margin:0 0 10px; text-align:justify; text-indent:1.5em}
-  .n-body p:first-child{text-indent:0}
+  .n-hd{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:11px 13px 9px; border-bottom:1px solid var(--line)}
+  .n-title{padding:9px 13px 0; margin:0; font-size:14.5px; font-weight:800; line-height:1.38; color:var(--ink)}
+  .n-meta{display:flex; align-items:center; gap:5px; font-size:11px; color:var(--muted); flex-wrap:wrap; padding:6px 13px 0}
+  .n-body{padding:9px 13px 4px; font-size:12.5px; color:#2c3a33; line-height:1.6; border-top:1px dashed var(--line); margin-top:8px}
+  .n-body p{margin:0 0 7px; text-align:justify}
   .n-body p:last-child{margin-bottom:0}
-  .n-foot{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 16px 14px; border-top:1px dashed var(--line); margin-top:10px}
+  .n-foot{display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:8px 13px 11px; border-top:1px dashed var(--line); margin-top:auto}
   .n-src{font-size:12px; color:var(--green); font-weight:700; text-decoration:none}
   .tk-thumb{width:44px;height:44px;flex:none;border-radius:8px;object-fit:cover;margin-top:1px}
   .pend-poster{width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin-bottom:8px}
@@ -2051,13 +2050,13 @@ function renderNews(){
             <span>·</span>
             <span>${relTime(n.published_at)}</span>
           </div>
+          <div class="n-body">${fmtBody(n.body)}</div>
+          <div class="n-foot">
+            ${src}
+            <button class="shr-btn" data-title="${esc(n.title)}" data-text="${esc(n.title)}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
+            ${del}
+          </div>
         </div>
-      </div>
-      <div class="n-body">${fmtBody(n.body)}</div>
-      <div class="n-foot">
-        ${src}
-        <button class="shr-btn" data-title="${esc(n.title)}" data-text="${esc(n.title)}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
-        ${del}
       </div>
     </div>`;
   }).join('');
