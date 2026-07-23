@@ -138,6 +138,11 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .badge-premium{display:inline-flex;align-items:center;gap:3px;background:linear-gradient(90deg,#ffd700,#ffb300);color:#5a3a00;font-weight:800;font-size:10px;padding:2px 8px;border-radius:20px;letter-spacing:.3px;text-transform:uppercase}
   .card-premium{border:1.5px solid #ffd700;background:linear-gradient(135deg,#fffdf0 0%,#fff9e0 100%);position:relative}
   /* ---- Agency Reviews ---- */
+  .ag-icon-wrap{display:flex;gap:5px;justify-content:center;margin-top:6px}
+  .ag-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:#fafafa;color:#888;text-decoration:none;transition:background .15s,color .15s,border-color .15s;position:relative;cursor:pointer}
+  .ag-icon-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .ag-icon-btn::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:#222;color:#fff;font-size:10.5px;white-space:nowrap;padding:3px 8px;border-radius:5px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:9}
+  .ag-icon-btn:hover::after{opacity:1}
   .rv-trigger{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--primary);font-weight:600;cursor:pointer;background:none;border:none;padding:0;margin-top:5px}
   .rv-trigger:hover{text-decoration:underline}
   .rv-summary-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#f7faf9;border-radius:12px;margin-bottom:16px}
@@ -850,6 +855,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
       <div id="rvList"><div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Memuat ulasan…</div></div>
       <div class="rv-write" id="rvWrite" style="display:none">
         <div class="rv-write-title">✍️ <span id="rvWriteLabel">Tulis ulasan anda</span></div>
+        <p id="rvEditNote" style="font-size:11.5px;color:var(--muted);margin:0 0 8px"></p>
         <div class="rv-star-pick" id="rvStarPick">
           <button data-v="1" onclick="setRvStar(1)">★</button>
           <button data-v="2" onclick="setRvStar(2)">★</button>
@@ -1784,29 +1790,43 @@ async function togglePremium(id, current){
   renderAgencies();
   toast(next?'✅ Agensi dijadikan Premium':'❌ Status Premium dibuang');
 }
+const ICO_PIN=`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`;
+const ICO_GLOBE=`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+const ICO_PHONE=`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.23h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.27 6.27l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`;
 function agencyCardHtml(a, isPrem){
   const parts=(a.note||'').split('•').map(s=>s.trim());
   const hq=parts[0]||''; const contact=parts[1]||'';
   const isUrl=/^https?:\/\//.test(contact);
+  const isPhone=contact&&!isUrl;
   const shrTxt=esc(a.name+(hq?' — '+hq:''));
   const shrUrl=esc(location.href);
   const adminBtn=isAdmin()&&a.id?`<button onclick="togglePremium('${a.id}',${isPrem})" style="background:${isPrem?'#fff3cd':'#f0f0f0'};color:${isPrem?'#856404':'#555'};border:1px solid ${isPrem?'#ffc107':'#ccc'};border-radius:6px;padding:2px 8px;font-size:10.5px;font-weight:700;cursor:pointer">${isPrem?'★ Buang Premium':'☆ Set Premium'}</button>`:'';
-  return `<div class="card${isPrem?' card-premium':''}"><div class="list-row">
-    <div class="thumb">${agThumb(a)}</div>
-    <div style="flex:1;min-width:0">
+  const mapQ=hq?encodeURIComponent(hq):'';
+  const thumbIcons=`<div class="ag-icon-wrap">
+    ${hq?`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Peta lokasi">${ICO_PIN}</a>`:''}
+    ${isUrl?`<a class="ag-icon-btn" href="${contact}" target="_blank" rel="noopener" data-tip="Laman web">${ICO_GLOBE}</a>`:''}
+    ${isPhone?`<a class="ag-icon-btn" href="tel:${contact.replace(/\s/g,'')}" data-tip="Telefon">${ICO_PHONE}</a>`:''}
+  </div>`;
+  const rv=a.id&&AG_REVIEW_SUMMARY[a.id];
+  const rvLine=`<button class="rv-trigger" onclick="openReviews('${a.id}','${esc(a.name)}')">${rv?`<span style="color:#f5a623">★</span> ${rv.avg} · <span style="text-decoration:underline">${rv.count} ulasan Haramaen</span>`:'✍️ Ulasan Haramaen'}</button>`;
+  return `<div class="card${isPrem?' card-premium':''}"><div class="list-row" style="align-items:flex-start">
+    <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+      <div class="thumb" style="margin-bottom:0">${agThumb(a)}</div>
+      ${thumbIcons}
+    </div>
+    <div style="flex:1;min-width:0;padding-left:12px">
       ${isPrem?'<div class="premium-label">⭐ Premium</div>':''}
-      <div class="row-between"><b style="font-size:13.5px">${a.name}</b>
-        <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;align-items:center">
+      <div class="row-between" style="align-items:flex-start;gap:4px">
+        <b style="font-size:13.5px;line-height:1.3">${a.name}</b>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;align-items:center;flex-shrink:0">
           ${isPrem?'<span class="badge-premium">★ Premium</span>':''}
           ${a.motac?'<span class="badge-motac">✓ MOTAC'+(a.lic&&a.lic!=='—'?' '+a.lic:'')+'</span>':''}
           ${adminBtn}
         </div>
       </div>
       ${a.rating?`<div style="margin:3px 0"><span class="stars">${stars(a.rating)}</span> <span class="tag">${a.rating} · Google</span></div>`:''}
-      ${(()=>{const rv=a.id&&AG_REVIEW_SUMMARY[a.id];return rv?`<button class="rv-trigger" onclick="openReviews('${a.id}','${esc(a.name)}')"><span style="color:#f5a623">★</span> ${rv.avg} · <span style="text-decoration:underline">${rv.count} ulasan Haramaen</span></button>`:`<button class="rv-trigger" onclick="openReviews('${a.id}','${esc(a.name)}')">✍️ Tulis ulasan pertama</button>`;})()}
-      ${hq?`<div class="tag">📍 ${hq}</div>`:''}
-      <div class="row-between" style="margin-top:9px">
-        ${contact?(isUrl?`<a class="btn ghost sm" style="text-decoration:none;width:auto" href="${contact}" target="_blank" rel="noopener">🌐 Laman web</a>`:`<span class="tag">☎ ${contact}</span>`):'<span></span>'}
+      ${rvLine}
+      <div style="display:flex;justify-content:flex-end;margin-top:8px">
         <button class="shr-sm" data-title="${esc(a.name)}" data-text="${shrTxt}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
       </div>
     </div>
@@ -1890,6 +1910,7 @@ async function openReviews(agencyId, agencyName){
     const writeEl=document.getElementById('rvWrite');
     writeEl.style.display='block';
     document.getElementById('rvWriteLabel').textContent=mine?'Kemaskini ulasan anda':'Tulis ulasan anda';
+    document.getElementById('rvEditNote').textContent=mine?'Anda boleh kemaskini ulasan ini bila-bila masa.':'Setiap pengguna hanya dibenarkan 1 ulasan bagi setiap agensi.';
     document.getElementById('rvText').value=mine&&mine.body?mine.body:'';
     rvRating=mine?mine.rating:0;
     document.querySelectorAll('#rvStarPick button').forEach(b=>b.classList.toggle('on',Number(b.dataset.v)<=(mine?mine.rating:0)));
