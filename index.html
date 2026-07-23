@@ -135,6 +135,9 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .row-between{display:flex; justify-content:space-between; align-items:center; gap:8px}
   .price{font-weight:800; color:var(--green)}
   .badge-motac{background:#e9f7ef;color:#1e8a5a;font-weight:700;font-size:10.5px;padding:2px 7px;border-radius:6px}
+  .badge-premium{display:inline-flex;align-items:center;gap:3px;background:linear-gradient(90deg,#ffd700,#ffb300);color:#5a3a00;font-weight:800;font-size:10px;padding:2px 8px;border-radius:20px;letter-spacing:.3px;text-transform:uppercase}
+  .card-premium{border:1.5px solid #ffd700;background:linear-gradient(135deg,#fffdf0 0%,#fff9e0 100%);position:relative}
+  .premium-label{font-size:10px;font-weight:700;color:#9e7000;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
   .tag{font-size:11.5px;color:var(--muted)}
   .kv{display:flex;justify-content:space-between;font-size:13.5px;padding:7px 0;border-bottom:1px dashed var(--line)}
   .kv:last-child{border-bottom:0}
@@ -1067,8 +1070,8 @@ async function loadData(){
     poster_url:c.poster_url||''}))
     .sort((a,b)=> (b.created||'').localeCompare(a.created||''));
   try{ const r=await sb.rpc('list_duas',{p_visitor:vid()}); LATEST_DUAS=(r&&r.data)||[]; }catch(e){ LATEST_DUAS=[]; }
-  AGENCIES=(ag.data||[]).map(a=>({name:a.name, rating:Number(a.rating), reviews:Number(a.reviews_count||0),
-    motac:a.motac_licensed, lic:a.motac_license||'—', price:Number(a.price), tier:a.tier, note:a.note||'', logo_url:a.logo_url||''}));
+  AGENCIES=(ag.data||[]).map(a=>({id:a.id, name:a.name, rating:Number(a.rating), reviews:Number(a.reviews_count||0),
+    motac:a.motac_licensed, lic:a.motac_license||'—', price:Number(a.price), tier:a.tier, note:a.note||'', logo_url:a.logo_url||'', premium:!!a.is_premium}));
   HOTELS=(ho.data||[]).map(h=>({name:h.name, dist:Number(h.distance_km), price:Number(h.price_per_night),
     stars:Number(h.stars), icon:h.type==='homestay'?'🏠':'🏨', lat:Number(h.lat), lng:Number(h.lng), note:h.note||''}));
   VOLUNTEERS=(vo.data||[]).map(v=>({name:v.name, loc:v.location, done:Number(v.duas_delivered||0), note:v.note||''}));
@@ -1677,38 +1680,64 @@ function setAgPrice(v){state.agPrice=(state.agPrice===v?null:v); renderAgencyFil
 function setAgNegeri(n){state.agNegeri=n; state.agDaerah='all'; renderAgencyFilters(); renderAgencies();}
 function setAgDaerah(d){state.agDaerah=d; renderAgencyFilters(); renderAgencies();}
 function stars(n){const full=Math.round(n); return '★'.repeat(full)+'☆'.repeat(5-full);}
+async function togglePremium(id, current){
+  const next=!current;
+  const {error}=await sb.rpc('admin_toggle_premium',{p_id:id, p_premium:next});
+  if(error){toast('Gagal kemaskini. Cuba lagi.');return;}
+  const ag=AGENCIES.find(a=>a.id===id);
+  if(ag) ag.premium=next;
+  renderAgencies();
+  toast(next?'✅ Agensi dijadikan Premium':'❌ Status Premium dibuang');
+}
+function agencyCardHtml(a, isPrem){
+  const parts=(a.note||'').split('•').map(s=>s.trim());
+  const hq=parts[0]||''; const contact=parts[1]||'';
+  const isUrl=/^https?:\/\//.test(contact);
+  const shrTxt=esc(a.name+(hq?' — '+hq:''));
+  const shrUrl=esc(location.href);
+  const adminBtn=isAdmin()&&a.id?`<button onclick="togglePremium(${a.id},${isPrem})" style="background:${isPrem?'#fff3cd':'#f0f0f0'};color:${isPrem?'#856404':'#555'};border:1px solid ${isPrem?'#ffc107':'#ccc'};border-radius:6px;padding:2px 8px;font-size:10.5px;font-weight:700;cursor:pointer">${isPrem?'★ Buang Premium':'☆ Set Premium'}</button>`:'';
+  return `<div class="card${isPrem?' card-premium':''}"><div class="list-row">
+    <div class="thumb">${agThumb(a)}</div>
+    <div style="flex:1;min-width:0">
+      ${isPrem?'<div class="premium-label">⭐ Premium</div>':''}
+      <div class="row-between"><b style="font-size:14.5px">${a.name}</b>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;align-items:center">
+          ${isPrem?'<span class="badge-premium">★ Premium</span>':''}
+          ${a.motac?'<span class="badge-motac">✓ MOTAC'+(a.lic&&a.lic!=='—'?' '+a.lic:'')+'</span>':''}
+          ${adminBtn}
+        </div>
+      </div>
+      ${a.rating?`<div style="margin:3px 0"><span class="stars">${stars(a.rating)}</span> <span class="tag">${a.rating} · Google</span></div>`:''}
+      ${hq?`<div class="tag">📍 ${hq}</div>`:''}
+      <div class="row-between" style="margin-top:9px">
+        ${contact?(isUrl?`<a class="btn ghost sm" style="text-decoration:none;width:auto" href="${contact}" target="_blank" rel="noopener">🌐 Laman web</a>`:`<span class="tag">☎ ${contact}</span>`):'<span></span>'}
+        <button class="shr-sm" data-title="${esc(a.name)}" data-text="${shrTxt}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
+      </div>
+    </div>
+  </div></div>`;
+}
 function renderAgencies(){
   const q=(document.getElementById('agQuery').value||'').toLowerCase();
   const motac=document.getElementById('agMotac').checked;
-  let list=AGENCIES.filter(a=>
+  const filtered=AGENCIES.filter(a=>
     a.name.toLowerCase().includes(q) &&
     (a.rating||0)>=state.agRating &&
     (!motac || a.motac) &&
     (state.agNegeri==='all' || agNegeri(a.note)===state.agNegeri) &&
     (state.agDaerah==='all' || agDaerah(a.note)===state.agDaerah)
-  ).sort((a,b)=>(b.rating||0)-(a.rating||0));
-  document.getElementById('agCount').textContent=list.length;
+  );
+  const premList=filtered.filter(a=>a.premium).sort((a,b)=>(b.rating||0)-(a.rating||0));
+  const normList=filtered.filter(a=>!a.premium).sort((a,b)=>(b.rating||0)-(a.rating||0));
+  document.getElementById('agCount').textContent=filtered.length;
   const el=document.getElementById('agencyList');
-  if(!list.length){el.innerHTML='<div class="empty">Tiada agensi sepadan dengan tapisan anda.</div>';return;}
-  el.innerHTML=list.map(a=>{
-    const parts=(a.note||'').split('•').map(s=>s.trim());
-    const hq=parts[0]||''; const contact=parts[1]||'';
-    const isUrl=/^https?:\/\//.test(contact);
-    const shrTxt=esc(a.name+(hq?' — '+hq:''));
-    const shrUrl=esc(location.href);
-    return `<div class="card"><div class="list-row">
-      <div class="thumb">${agThumb(a)}</div>
-      <div style="flex:1">
-        <div class="row-between"><b style="font-size:14.5px">${a.name}</b>
-          ${a.motac?'<span class="badge-motac">✓ MOTAC'+(a.lic&&a.lic!=='—'?' '+a.lic:'')+'</span>':''}</div>
-        ${a.rating?`<div style="margin:3px 0"><span class="stars">${stars(a.rating)}</span> <span class="tag">${a.rating} · Google</span></div>`:''}
-        ${hq?`<div class="tag">📍 ${hq}</div>`:''}
-        <div class="row-between" style="margin-top:9px">
-          ${contact?(isUrl?`<a class="btn ghost sm" style="text-decoration:none;width:auto" href="${contact}" target="_blank" rel="noopener">🌐 Laman web</a>`:`<span class="tag">☎ ${contact}</span>`):'<span></span>'}
-          <button class="shr-sm" data-title="${esc(a.name)}" data-text="${shrTxt}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
-        </div>
-      </div>
-    </div></div>`;}).join('');
+  if(!filtered.length){el.innerHTML='<div class="empty">Tiada agensi sepadan dengan tapisan anda.</div>';return;}
+  let html='';
+  if(premList.length){
+    html+=premList.map(a=>agencyCardHtml(a,true)).join('');
+    if(normList.length) html+=`<div style="display:flex;align-items:center;gap:8px;margin:10px 0 6px"><div style="flex:1;height:1px;background:var(--line)"></div><span style="font-size:11px;color:var(--muted);white-space:nowrap">Semua Agensi</span><div style="flex:1;height:1px;background:var(--line)"></div></div>`;
+  }
+  html+=normList.map(a=>agencyCardHtml(a,false)).join('');
+  el.innerHTML=html;
 }
 
 function showAgReg(){document.getElementById('agRegModal').classList.add('open');}
