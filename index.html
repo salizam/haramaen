@@ -1680,6 +1680,7 @@ async function loadPendingCourses(){
   }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat senarai.</div>'; }
 }
 async function setCourse(id,status,btn){
+  if(status==='rejected' && !confirm('Adakah anda pasti untuk menolak kursus ini?')) return;
   if(btn) btn.disabled=true;
   try{
     const {error}=await sb.rpc('admin_set_course_status',{p_id:id,p_status:status});
@@ -2454,6 +2455,7 @@ function renderNews(){
   }).join('');
 }
 async function delNews(id,btn){
+  if(!confirm('Adakah anda pasti untuk padam artikel ini?')) return;
   if(btn){ btn.disabled=true; btn.textContent='Memadam…'; }
   const {error}=await sb.rpc('admin_delete_news',{p_id:id});
   if(error){ toast('Gagal padam berita.'); if(btn){btn.disabled=false;btn.textContent='🗑️ Padam';} return; }
