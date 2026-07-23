@@ -235,7 +235,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   /* News portal layout — mobile: imej atas, desktop: thumbnail 200x200 kiri */
   .news .card{cursor:default; padding:0; overflow:hidden}
   .n-card-top{display:block}
-  .n-thumb{width:100%; max-height:195px; object-fit:cover; display:block}
+  .n-thumb{width:100%; height:195px; object-fit:cover; display:block}
   .n-card-right{}
   .n-hd{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:13px 16px 11px; border-bottom:1px solid var(--line)}
   .n-title{margin:12px 16px 0; padding:0; font-size:16.5px; font-weight:800; line-height:1.35; color:var(--ink)}
@@ -248,7 +248,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .n-src{font-size:12px; color:var(--green); font-weight:700; text-decoration:none}
   @media(min-width:640px){
     .n-card-top{display:flex; align-items:stretch}
-    .n-thumb{width:400px; min-height:220px; max-height:none; flex:none; align-self:stretch; border-right:1px solid var(--line)}
+    .n-thumb{width:400px; height:240px; flex:none; align-self:stretch; border-right:1px solid var(--line)}
     .n-card-right{flex:1; min-width:0; display:flex; flex-direction:column}
     .n-hd{padding:11px 15px 9px}
     .n-title{margin:0; padding:9px 15px 0; font-size:15px}
