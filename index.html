@@ -1618,19 +1618,25 @@ function agDomain(note){
   if(!/^https?:\/\//.test(contact.trim())) return '';
   try{ return new URL(contact.trim()).hostname.replace(/^www\./,''); }catch(e){ return ''; }
 }
+// Abbreviations/cities yang perlu dinormalisasi ke negeri betul
+const NEGERI_ABBR={'KL':'KUALA LUMPUR','K.L.':'KUALA LUMPUR','W.P.KL':'KUALA LUMPUR'};
+// Bandar yang dimasukkan sebagai negeri — perlu dipindah ke daerah
+const CITY_TO_NEGERI={'SHAH ALAM':'SELANGOR'};
 function agNegeri(note){
   if(!note) return '';
   const loc=(note.split('•')[0]||'').trim();
   const parts=loc.split(',');
-  const raw=(parts[parts.length-1]||'').trim();
-  // Strip leading postcode digits (e.g. "50000 Kuala Lumpur" → "KUALA LUMPUR")
-  return raw.replace(/^\d+\s*/,'').trim().toUpperCase();
+  const raw=(parts[parts.length-1]||'').trim().replace(/^\d+\s*/,'').trim().toUpperCase();
+  return NEGERI_ABBR[raw]||CITY_TO_NEGERI[raw]||raw;
 }
 function agDaerah(note){
   if(!note) return '';
   const loc=(note.split('•')[0]||'').trim();
   const parts=loc.split(',');
-  return parts.length>1?parts[0].trim():'';
+  if(parts.length>1) return parts[0].trim();
+  // Lokasi satu-bahagian: kalau ia bandar yang dipetakan ke negeri, jadikan daerah
+  const raw=(parts[0]||'').trim().replace(/^\d+\s*/,'').trim().toUpperCase();
+  return CITY_TO_NEGERI[raw]?(parts[0]||'').trim():'';
 }
 function agThumb(a){
   const COLORS=['#10808e','#2d7dd2','#e8623a','#7b61ff','#1e8a5a','#c0392b','#8e44ad','#e0a800'];
