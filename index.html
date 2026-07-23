@@ -162,8 +162,6 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .rv-star-pick{display:flex;gap:4px;margin-bottom:10px}
   .rv-star-pick button{font-size:30px;background:none;border:none;cursor:pointer;padding:0;opacity:.25;transition:opacity .1s;line-height:1}
   .rv-star-pick button.on{opacity:1}
-  .fb-fab{position:fixed;bottom:72px;right:16px;z-index:120;background:var(--primary);color:#fff;border:none;border-radius:50px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(13,92,70,.35);display:flex;align-items:center;gap:6px;transition:transform .15s}
-  .fb-fab:active{transform:scale(.95)}
   .fb-modal-body{padding:20px}
   .fb-modal-body p{font-size:14px;color:var(--ink);line-height:1.6;margin:0 0 14px}
   .fb-modal-body textarea{width:100%;min-height:110px;resize:vertical;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;outline:none}
@@ -567,6 +565,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
             <div id="notifList"><div class="notif-empty">Tiada notifikasi lagi.</div></div>
           </div>
         </div>
+        <button class="tb-bell" title="Maklum Balas" onclick="openFeedback()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
         <div class="tb-user">
           <button class="tb-ava" id="tbAva" title="Akaun" onclick="toggleUserMenu(event)">S</button>
           <div class="tb-menu" id="tbMenu">
@@ -839,12 +838,6 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   <!-- BOTTOM NAV (mobile) -->
   <nav class="bottomnav" id="bottomNav"></nav>
 </div>
-
-<!-- Butang Feedback -->
-<button class="fb-fab" id="fbFab" onclick="openFeedback()">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-  Maklum Balas
-</button>
 
 <!-- MODAL: Agency Reviews -->
 <div class="modal" id="reviewModal">
