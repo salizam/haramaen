@@ -484,6 +484,11 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .modal-actions button{flex:1;border:0;border-radius:12px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit}
   .m-cancel{background:var(--line);color:var(--ink)}
   .m-save{background:var(--green);color:#fff}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:-22px -22px 16px;padding:16px 20px;border-bottom:1.5px solid var(--line)}
+  .modal-head b{font-size:15.5px;font-weight:800;color:var(--ink);line-height:1.3;flex:1;min-width:0}
+  .modal-close{flex-shrink:0;width:34px;height:34px;border-radius:50%;background:#fff0f2;border:1.5px solid #ffd0d8;color:#e0304a;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,border-color .15s,transform .12s;padding:0}
+  .modal-close:hover{background:#ffe0e6;border-color:#ffb3c1;transform:scale(1.08)}
+  .modal-close:active{transform:scale(.92)}
   .masa-grp{display:flex; flex-direction:column; gap:8px}
   .masa-row{display:flex; align-items:center; gap:6px}
   .masa-lbl{font-size:12px; color:var(--muted); min-width:48px; font-weight:600}
@@ -842,7 +847,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
 <!-- MODAL: Agency Reviews -->
 <div class="modal" id="reviewModal">
   <div class="modal-box" style="max-width:480px">
-    <div class="modal-head"><b id="rvModalTitle">Ulasan</b><button class="modal-close" onclick="closeReviews()">✕</button></div>
+    <div class="modal-head"><b id="rvModalTitle">Ulasan</b><button class="modal-close" onclick="closeReviews()" title="Tutup"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="12.5" y2="12.5"/><line x1="12.5" y1="1.5" x2="1.5" y2="12.5"/></svg></button></div>
     <div style="padding:16px">
       <div class="rv-summary-bar" id="rvSummaryBar" style="display:none"></div>
       <div id="rvList"><div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Memuat ulasan…</div></div>
@@ -870,7 +875,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
 <!-- MODAL: Feedback -->
 <div class="modal" id="feedbackModal">
   <div class="modal-box" style="max-width:440px">
-    <div class="modal-head"><b>Maklum Balas</b><button class="modal-close" onclick="closeFeedback()">✕</button></div>
+    <div class="modal-head"><b>Maklum Balas</b><button class="modal-close" onclick="closeFeedback()" title="Tutup"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="12.5" y2="12.5"/><line x1="12.5" y1="1.5" x2="1.5" y2="12.5"/></svg></button></div>
     <div class="fb-modal-body">
       <p>Kami sentiasa berusaha menjadikan HARAMAEN lebih baik untuk anda. Kongsi pendapat, cadangan, atau sebarang isu — setiap maklum balas anda amat kami hargai. 🙏</p>
       <div class="fb-stars" id="fbStars">
