@@ -1022,6 +1022,7 @@ function buildNav(){
     `<button class="bn" data-v="${n.v}" onclick="go('${n.v}')"><span class="bnfi" style="background:${n.c}">${ICONS[n.i]?`<img src="${ICONS[n.i]}" alt="" draggable="false">`:`<span class="ico" data-i="${n.i}"></span>`}</span><span>${n.t}</span></button>`).join('');
   paintIcons();
 }
+const VALID_VIEWS=['home','agency','dua','stay','med','svc','guide','news','lost','solah','kursus','admin'];
 function go(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   const el=document.getElementById('v-'+v); if(el) el.classList.add('active');
@@ -1031,8 +1032,14 @@ function go(v){
   if(v==='dua'){ const e=document.getElementById('duaAsName'); if(e) e.textContent=actorName(); }
   if(v==='kursus') renderKursusAll();
   if(v==='admin') renderAdmin(); else if(admTimer){ clearInterval(admTimer); admTimer=null; }
+  // Simpan view semasa dalam URL hash supaya refresh kembali ke page yang sama
+  try{ history.replaceState(null,'',v==='home'?location.pathname+'#home':'#'+v); }catch(e){}
 }
 function jump(v){ go(v); }
+window.addEventListener('popstate',function(){
+  const v=(location.hash||'').replace('#','');
+  if(v && VALID_VIEWS.includes(v) && (v!=='admin'||isAdmin())) go(v);
+});
 function toggleUserMenu(e){ if(e) e.stopPropagation(); document.getElementById('tbMenu').classList.toggle('open'); }
 document.addEventListener('click', function(e){ const m=document.getElementById('tbMenu'); if(m && m.classList.contains('open') && !e.target.closest('.tb-user')) m.classList.remove('open'); const p=document.getElementById('notifPanel'); if(p && p.classList.contains('open') && !e.target.closest('.tb-notif')) p.classList.remove('open'); });
 
@@ -2449,6 +2456,13 @@ function boot(){
   renderSolCity();
   loadPrayerTimes();
   paintIcons();
+  // Restore view dari URL hash selepas semua data dimuatkan
+  const savedView=(location.hash||'').replace('#','');
+  if(savedView && VALID_VIEWS.includes(savedView) && (savedView!=='admin'||isAdmin())){
+    go(savedView);
+  } else {
+    go('home');
+  }
 }
 initAuth();
 startTracking();
