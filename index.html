@@ -1809,25 +1809,21 @@ function agencyCardHtml(a, isPrem){
   </div>`;
   const rv=a.id&&AG_REVIEW_SUMMARY[a.id];
   const rvLine=`<button class="rv-trigger" onclick="openReviews('${a.id}','${esc(a.name)}')">${rv?`<span style="color:#f5a623">★</span> ${rv.avg} · <span style="text-decoration:underline">${rv.count} ulasan Haramaen</span>`:'✍️ Ulasan Haramaen'}</button>`;
+  const shrBtn=`<button class="shr-sm" data-title="${esc(a.name)}" data-text="${shrTxt}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>`;
   return `<div class="card${isPrem?' card-premium':''}"><div class="list-row" style="align-items:flex-start">
     <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
       <div class="thumb" style="margin-bottom:0">${agThumb(a)}</div>
       ${thumbIcons}
     </div>
     <div style="flex:1;min-width:0;padding-left:12px">
-      ${isPrem?'<div class="premium-label">⭐ Premium</div>':''}
-      <div class="row-between" style="align-items:flex-start;gap:4px">
-        <b style="font-size:13.5px;line-height:1.3">${a.name}</b>
-        <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;align-items:center;flex-shrink:0">
-          ${isPrem?'<span class="badge-premium">★ Premium</span>':''}
-          ${a.motac?'<span class="badge-motac">✓ MOTAC'+(a.lic&&a.lic!=='—'?' '+a.lic:'')+'</span>':''}
-          ${adminBtn}
-        </div>
-      </div>
+      <b style="font-size:13.5px;line-height:1.3;display:block">${a.name}</b>
       ${a.rating?`<div style="margin:3px 0"><span class="stars">${stars(a.rating)}</span> <span class="tag">${a.rating} · Google</span></div>`:''}
       ${rvLine}
-      <div style="display:flex;justify-content:flex-end;margin-top:8px">
-        <button class="shr-sm" data-title="${esc(a.name)}" data-text="${shrTxt}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;justify-content:flex-end;margin-top:6px">
+        ${isPrem?'<span class="badge-premium">★ Premium</span>':''}
+        ${a.motac?'<span class="badge-motac">✓ MOTAC'+(a.lic&&a.lic!=='—'?' '+a.lic:'')+'</span>':''}
+        ${adminBtn}
+        ${shrBtn}
       </div>
     </div>
   </div></div>`;
