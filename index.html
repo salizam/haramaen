@@ -137,6 +137,26 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .badge-motac{background:#e9f7ef;color:#1e8a5a;font-weight:700;font-size:10.5px;padding:2px 7px;border-radius:6px}
   .badge-premium{display:inline-flex;align-items:center;gap:3px;background:linear-gradient(90deg,#ffd700,#ffb300);color:#5a3a00;font-weight:800;font-size:10px;padding:2px 8px;border-radius:20px;letter-spacing:.3px;text-transform:uppercase}
   .card-premium{border:1.5px solid #ffd700;background:linear-gradient(135deg,#fffdf0 0%,#fff9e0 100%);position:relative}
+  /* ---- Agency Reviews ---- */
+  .rv-trigger{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--primary);font-weight:600;cursor:pointer;background:none;border:none;padding:0;margin-top:5px}
+  .rv-trigger:hover{text-decoration:underline}
+  .rv-summary-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#f7faf9;border-radius:12px;margin-bottom:16px}
+  .rv-big-score{font-size:40px;font-weight:800;color:var(--ink);line-height:1}
+  .rv-big-right{display:flex;flex-direction:column;gap:2px}
+  .rv-big-stars{font-size:20px;color:#f5a623;letter-spacing:1px}
+  .rv-big-count{font-size:12px;color:var(--muted)}
+  .rv-card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fff}
+  .rv-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .rv-card-name{font-weight:700;font-size:13.5px}
+  .rv-card-stars{color:#f5a623;font-size:14px;letter-spacing:.5px}
+  .rv-card-date{font-size:11px;color:var(--muted);margin-top:2px}
+  .rv-card-body{font-size:13px;color:var(--ink);margin-top:6px;line-height:1.55}
+  .rv-mine-badge{font-size:10px;background:#e6f4ef;color:var(--primary);padding:1px 6px;border-radius:6px;font-weight:700}
+  .rv-write{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+  .rv-write-title{font-weight:700;font-size:14px;margin-bottom:10px}
+  .rv-star-pick{display:flex;gap:4px;margin-bottom:10px}
+  .rv-star-pick button{font-size:30px;background:none;border:none;cursor:pointer;padding:0;opacity:.25;transition:opacity .1s;line-height:1}
+  .rv-star-pick button.on{opacity:1}
   .fb-fab{position:fixed;bottom:72px;right:16px;z-index:120;background:var(--primary);color:#fff;border:none;border-radius:50px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(13,92,70,.35);display:flex;align-items:center;gap:6px;transition:transform .15s}
   .fb-fab:active{transform:scale(.95)}
   .fb-modal-body{padding:20px}
@@ -821,6 +841,33 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   Maklum Balas
 </button>
 
+<!-- MODAL: Agency Reviews -->
+<div class="modal" id="reviewModal">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-head"><b id="rvModalTitle">Ulasan</b><button class="modal-close" onclick="closeReviews()">✕</button></div>
+    <div style="padding:16px">
+      <div class="rv-summary-bar" id="rvSummaryBar" style="display:none"></div>
+      <div id="rvList"><div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Memuat ulasan…</div></div>
+      <div class="rv-write" id="rvWrite" style="display:none">
+        <div class="rv-write-title">✍️ <span id="rvWriteLabel">Tulis ulasan anda</span></div>
+        <div class="rv-star-pick" id="rvStarPick">
+          <button data-v="1" onclick="setRvStar(1)">★</button>
+          <button data-v="2" onclick="setRvStar(2)">★</button>
+          <button data-v="3" onclick="setRvStar(3)">★</button>
+          <button data-v="4" onclick="setRvStar(4)">★</button>
+          <button data-v="5" onclick="setRvStar(5)">★</button>
+        </div>
+        <textarea id="rvText" class="f" style="min-height:90px;resize:vertical" placeholder="Kongsi pengalaman anda dengan agensi ini…"></textarea>
+        <button class="btn" style="width:100%;margin-top:10px" id="rvSendBtn" onclick="submitReview()">Hantar Ulasan</button>
+      </div>
+      <div id="rvLoginPrompt" style="display:none;text-align:center;padding:16px 0;font-size:13px;color:var(--muted)">
+        <p>Log masuk untuk menulis ulasan.</p>
+        <button class="btn sm" onclick="closeReviews();openLogin()">Log Masuk</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Feedback -->
 <div class="modal" id="feedbackModal">
   <div class="modal-box" style="max-width:440px">
@@ -1087,12 +1134,12 @@ document.addEventListener('click', function(e){ const m=document.getElementById(
 
 /* ============ LIVE DATA (Supabase) ============ */
 let AGENCIES=[], HOTELS=[], VOLUNTEERS=[], HOSPITALS=[], SERVICES=[], COURSES=[], SAR_RATE=1.27;
-let NEWS=[], LATEST_DUAS=[];
+let NEWS=[], LATEST_DUAS=[], AG_REVIEW_SUMMARY={};
 let admTimer=null;
 const MED_MAP={hospital:{t:'Hospital',i:'🏥'}, pharmacy:{t:'Farmasi',i:'💊'}, insurance:{t:'Insurans',i:'🛡️'}};
 const SVC_ICON={wheelchair:'♿', kaaba:'🕋', guide:'🧕', exchange:'💱', laundry:'🧺', car:'🚕', shop:'🛍️'};
 async function loadData(){
-  const [ag,ho,vo,me,sv,cr,co,nw] = await Promise.all([
+  const [ag,ho,vo,me,sv,cr,co,nw,rv] = await Promise.all([
     sb.from('agencies').select('*').eq('status','approved'),
     sb.from('hotels').select('*'),
     sb.from('volunteers').select('*').eq('active',true),
@@ -1101,7 +1148,10 @@ async function loadData(){
     sb.from('currency_rates').select('*').eq('base_currency','SAR').limit(1),
     sb.from('courses').select('*').eq('status','approved'),
     sb.from('news').select('*').eq('status','published').order('published_at',{ascending:false}).limit(50),
+    sb.rpc('get_agency_review_summary'),
   ]);
+  AG_REVIEW_SUMMARY={};
+  (rv.data||[]).forEach(r=>{ AG_REVIEW_SUMMARY[r.agency_id]={avg:Number(r.avg_rating),count:Number(r.review_count)}; });
   NEWS=(nw.data||[]);
   COURSES=(co.data||[]).map(c=>({tarikh:c.tarikh_label, date:c.tarikh_date||'', masa:c.masa||'', lokasi:c.lokasi||'',
     daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||'', created:c.created_at||'',
@@ -1753,6 +1803,7 @@ function agencyCardHtml(a, isPrem){
         </div>
       </div>
       ${a.rating?`<div style="margin:3px 0"><span class="stars">${stars(a.rating)}</span> <span class="tag">${a.rating} · Google</span></div>`:''}
+      ${(()=>{const rv=a.id&&AG_REVIEW_SUMMARY[a.id];return rv?`<button class="rv-trigger" onclick="openReviews('${a.id}','${esc(a.name)}')"><span style="color:#f5a623">★</span> ${rv.avg} · <span style="text-decoration:underline">${rv.count} ulasan Haramaen</span></button>`:`<button class="rv-trigger" onclick="openReviews('${a.id}','${esc(a.name)}')">✍️ Tulis ulasan pertama</button>`;})()}
       ${hq?`<div class="tag">📍 ${hq}</div>`:''}
       <div class="row-between" style="margin-top:9px">
         ${contact?(isUrl?`<a class="btn ghost sm" style="text-decoration:none;width:auto" href="${contact}" target="_blank" rel="noopener">🌐 Laman web</a>`:`<span class="tag">☎ ${contact}</span>`):'<span></span>'}
@@ -1785,6 +1836,89 @@ function renderAgencies(){
   }
   html+=filtered.map(a=>agencyCardHtml(a,false)).join('');
   el.innerHTML=html;
+}
+
+/* ============ AGENCY REVIEWS ============ */
+let rvAgencyId=null, rvRating=0, rvHasMine=false;
+function starsHtml(n,size){
+  const full=Math.floor(n), half=(n-full)>=0.5;
+  return Array.from({length:5},(_,i)=>`<span style="color:${i<full?'#f5a623':i===full&&half?'#f5a623':'#ddd'};font-size:${size||14}px">${i<full?'★':i===full&&half?'★':'☆'}</span>`).join('');
+}
+async function openReviews(agencyId, agencyName){
+  rvAgencyId=agencyId; rvRating=0; rvHasMine=false;
+  document.getElementById('rvModalTitle').textContent=agencyName;
+  document.getElementById('rvList').innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Memuat ulasan…</div>';
+  document.getElementById('rvSummaryBar').style.display='none';
+  document.getElementById('rvWrite').style.display='none';
+  document.getElementById('rvLoginPrompt').style.display='none';
+  document.getElementById('reviewModal').classList.add('open');
+  const {data,error}=await sb.rpc('get_agency_reviews',{p_agency_id:agencyId});
+  if(error){document.getElementById('rvList').innerHTML='<div style="text-align:center;padding:24px;color:var(--muted)">Gagal memuat ulasan.</div>';return;}
+  const reviews=data||[];
+  const mine=reviews.find(r=>r.is_mine);
+  rvHasMine=!!mine;
+  // Summary bar
+  const sum=AG_REVIEW_SUMMARY[agencyId];
+  if(reviews.length){
+    const avg=sum?sum.avg:(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1);
+    document.getElementById('rvSummaryBar').innerHTML=`
+      <div class="rv-big-score">${avg}</div>
+      <div class="rv-big-right">
+        <div class="rv-big-stars">${starsHtml(Number(avg),20)}</div>
+        <div class="rv-big-count">${reviews.length} ulasan Haramaen</div>
+      </div>`;
+    document.getElementById('rvSummaryBar').style.display='flex';
+  }
+  // Review list
+  if(!reviews.length){
+    document.getElementById('rvList').innerHTML='<div style="text-align:center;padding:20px 0;color:var(--muted);font-size:13px">Belum ada ulasan. Jadilah yang pertama! 🌟</div>';
+  } else {
+    document.getElementById('rvList').innerHTML=reviews.map(r=>`
+      <div class="rv-card">
+        <div class="rv-card-head">
+          <span class="rv-card-name">${esc(r.user_name)}${r.is_mine?' <span class="rv-mine-badge">Ulasan saya</span>':''}</span>
+          <span class="rv-card-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+        </div>
+        <div class="rv-card-date">${new Date(r.created_at).toLocaleDateString('ms-MY',{day:'numeric',month:'long',year:'numeric'})}</div>
+        ${r.body?`<div class="rv-card-body">${esc(r.body)}</div>`:''}
+      </div>`).join('');
+  }
+  // Write section
+  if(!state.user){
+    document.getElementById('rvLoginPrompt').style.display='block';
+  } else {
+    const writeEl=document.getElementById('rvWrite');
+    writeEl.style.display='block';
+    document.getElementById('rvWriteLabel').textContent=mine?'Kemaskini ulasan anda':'Tulis ulasan anda';
+    document.getElementById('rvText').value=mine&&mine.body?mine.body:'';
+    rvRating=mine?mine.rating:0;
+    document.querySelectorAll('#rvStarPick button').forEach(b=>b.classList.toggle('on',Number(b.dataset.v)<=(mine?mine.rating:0)));
+  }
+}
+function closeReviews(){document.getElementById('reviewModal').classList.remove('open'); rvAgencyId=null;}
+function setRvStar(v){
+  rvRating=v;
+  document.querySelectorAll('#rvStarPick button').forEach(b=>b.classList.toggle('on',Number(b.dataset.v)<=v));
+}
+async function submitReview(){
+  if(!rvRating){toast('Sila pilih bilangan bintang dahulu ⭐');return;}
+  const body=(document.getElementById('rvText').value||'').trim();
+  const btn=document.getElementById('rvSendBtn');
+  btn.disabled=true; btn.textContent='Menghantar…';
+  const {error}=await sb.rpc('upsert_agency_review',{
+    p_agency_id:rvAgencyId, p_rating:rvRating,
+    p_body:body||null, p_user_name:actorName()
+  });
+  btn.disabled=false; btn.textContent='Hantar Ulasan';
+  if(error){toast('Gagal hantar ulasan. Cuba lagi.');return;}
+  // Update local summary
+  const prev=AG_REVIEW_SUMMARY[rvAgencyId];
+  if(prev && rvHasMine){ prev.avg=((prev.avg*prev.count - (prev.avg) + rvRating)/prev.count); }
+  else if(prev){ prev.count++; prev.avg=((prev.avg*(prev.count-1)+rvRating)/prev.count); }
+  else { AG_REVIEW_SUMMARY[rvAgencyId]={avg:rvRating, count:1}; }
+  toast('Ulasan anda telah dihantar. Terima kasih! 🌟');
+  renderAgencies();
+  openReviews(rvAgencyId, document.getElementById('rvModalTitle').textContent);
 }
 
 /* ============ FEEDBACK ============ */
