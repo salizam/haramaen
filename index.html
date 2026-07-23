@@ -1808,11 +1808,13 @@ function agencyCardHtml(a, isPrem){
       <div class="thumb" style="margin-bottom:0">${agThumb(a)}</div>
       ${thumbIcons}
     </div>
-    <div style="flex:1;min-width:0;padding-left:12px">
-      <b style="font-size:13.5px;line-height:1.3;display:block">${a.name}</b>
-      ${a.rating?`<div style="margin:3px 0"><span class="stars">${stars(a.rating)}</span> <span class="tag">${a.rating} · Google</span></div>`:''}
-      ${rvLine}
-      <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;justify-content:flex-end;margin-top:6px">
+    <div style="flex:1;min-width:0;padding-left:12px;display:flex;align-items:flex-start;gap:8px">
+      <div style="flex:1;min-width:0">
+        <b style="font-size:13.5px;line-height:1.3;display:block">${a.name}</b>
+        ${a.rating?`<div style="margin:3px 0"><span class="stars">${stars(a.rating)}</span> <span class="tag">${a.rating} · Google</span></div>`:''}
+        ${rvLine}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
         ${isPrem?'<span class="badge-premium">★ Premium</span>':''}
         ${a.motac?'<span class="badge-motac">✓ MOTAC'+(a.lic&&a.lic!=='—'?' '+a.lic:'')+'</span>':''}
         ${adminBtn}
