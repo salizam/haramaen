@@ -1843,7 +1843,7 @@ function renderAgencies(){
     (state.agNegeri==='all' || agNegeri(a.note)===state.agNegeri) &&
     (state.agDaerah==='all' || agDaerah(a.note)===state.agDaerah)
   ).sort((a,b)=>(b.rating||0)-(a.rating||0));
-  document.getElementById('agCount').textContent=filtered.length+premList.length;
+  document.getElementById('agCount').textContent=filtered.length;
   const el=document.getElementById('agencyList');
   if(!filtered.length&&!premList.length){el.innerHTML='<div class="empty">Tiada agensi sepadan dengan tapisan anda.</div>';return;}
   let html='';
