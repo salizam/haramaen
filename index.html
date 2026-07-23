@@ -137,6 +137,15 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .badge-motac{background:#e9f7ef;color:#1e8a5a;font-weight:700;font-size:10.5px;padding:2px 7px;border-radius:6px}
   .badge-premium{display:inline-flex;align-items:center;gap:3px;background:linear-gradient(90deg,#ffd700,#ffb300);color:#5a3a00;font-weight:800;font-size:10px;padding:2px 8px;border-radius:20px;letter-spacing:.3px;text-transform:uppercase}
   .card-premium{border:1.5px solid #ffd700;background:linear-gradient(135deg,#fffdf0 0%,#fff9e0 100%);position:relative}
+  .fb-fab{position:fixed;bottom:72px;right:16px;z-index:120;background:var(--primary);color:#fff;border:none;border-radius:50px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(13,92,70,.35);display:flex;align-items:center;gap:6px;transition:transform .15s}
+  .fb-fab:active{transform:scale(.95)}
+  .fb-modal-body{padding:20px}
+  .fb-modal-body p{font-size:14px;color:var(--ink);line-height:1.6;margin:0 0 14px}
+  .fb-modal-body textarea{width:100%;min-height:110px;resize:vertical;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;outline:none}
+  .fb-modal-body textarea:focus{border-color:var(--primary)}
+  .fb-stars{display:flex;gap:6px;margin-bottom:14px}
+  .fb-star{font-size:26px;cursor:pointer;opacity:.3;transition:opacity .1s;background:none;border:none;padding:0}
+  .fb-star.on{opacity:1}
   .premium-label{font-size:10px;font-weight:700;color:#9e7000;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
   .tag{font-size:11.5px;color:var(--muted)}
   .kv{display:flex;justify-content:space-between;font-size:13.5px;padding:7px 0;border-bottom:1px dashed var(--line)}
@@ -804,6 +813,34 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   </div>
   <!-- BOTTOM NAV (mobile) -->
   <nav class="bottomnav" id="bottomNav"></nav>
+</div>
+
+<!-- Butang Feedback -->
+<button class="fb-fab" id="fbFab" onclick="openFeedback()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  Maklum Balas
+</button>
+
+<!-- MODAL: Feedback -->
+<div class="modal" id="feedbackModal">
+  <div class="modal-box" style="max-width:440px">
+    <div class="modal-head"><b>Maklum Balas</b><button class="modal-close" onclick="closeFeedback()">✕</button></div>
+    <div class="fb-modal-body">
+      <p>Kami sentiasa berusaha menjadikan HARAMAEN lebih baik untuk anda. Kongsi pendapat, cadangan, atau sebarang isu — setiap maklum balas anda amat kami hargai. 🙏</p>
+      <div class="fb-stars" id="fbStars">
+        <button class="fb-star" data-v="1" onclick="setFbStar(1)">★</button>
+        <button class="fb-star" data-v="2" onclick="setFbStar(2)">★</button>
+        <button class="fb-star" data-v="3" onclick="setFbStar(3)">★</button>
+        <button class="fb-star" data-v="4" onclick="setFbStar(4)">★</button>
+        <button class="fb-star" data-v="5" onclick="setFbStar(5)">★</button>
+      </div>
+      <textarea id="fbText" placeholder="Tulis cadangan atau maklum balas anda di sini…"></textarea>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn ghost" style="flex:1" onclick="closeFeedback()">Batal</button>
+        <button class="btn" style="flex:2" id="fbSend" onclick="submitFeedback()">Hantar Maklum Balas</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1727,27 +1764,55 @@ function agencyCardHtml(a, isPrem){
 function renderAgencies(){
   const q=(document.getElementById('agQuery').value||'').toLowerCase();
   const motac=document.getElementById('agMotac').checked;
+  // Premium: sentiasa muncul atas — tidak ditapis oleh negeri/daerah/rating
+  const premList=AGENCIES.filter(a=>a.premium&&a.name.toLowerCase().includes(q))
+    .sort((a,b)=>(b.rating||0)-(a.rating||0));
   const filtered=AGENCIES.filter(a=>
+    !a.premium &&
     a.name.toLowerCase().includes(q) &&
     (a.rating||0)>=state.agRating &&
     (!motac || a.motac) &&
     (state.agNegeri==='all' || agNegeri(a.note)===state.agNegeri) &&
     (state.agDaerah==='all' || agDaerah(a.note)===state.agDaerah)
-  );
-  const premList=filtered.filter(a=>a.premium).sort((a,b)=>(b.rating||0)-(a.rating||0));
-  const normList=filtered.filter(a=>!a.premium).sort((a,b)=>(b.rating||0)-(a.rating||0));
-  document.getElementById('agCount').textContent=filtered.length;
+  ).sort((a,b)=>(b.rating||0)-(a.rating||0));
+  document.getElementById('agCount').textContent=filtered.length+premList.length;
   const el=document.getElementById('agencyList');
-  if(!filtered.length){el.innerHTML='<div class="empty">Tiada agensi sepadan dengan tapisan anda.</div>';return;}
+  if(!filtered.length&&!premList.length){el.innerHTML='<div class="empty">Tiada agensi sepadan dengan tapisan anda.</div>';return;}
   let html='';
   if(premList.length){
     html+=premList.map(a=>agencyCardHtml(a,true)).join('');
-    if(normList.length) html+=`<div style="display:flex;align-items:center;gap:8px;margin:10px 0 6px"><div style="flex:1;height:1px;background:var(--line)"></div><span style="font-size:11px;color:var(--muted);white-space:nowrap">Semua Agensi</span><div style="flex:1;height:1px;background:var(--line)"></div></div>`;
+    if(filtered.length) html+=`<div style="display:flex;align-items:center;gap:8px;margin:10px 0 6px"><div style="flex:1;height:1px;background:var(--line)"></div><span style="font-size:11px;color:var(--muted);white-space:nowrap">Semua Agensi</span><div style="flex:1;height:1px;background:var(--line)"></div></div>`;
   }
-  html+=normList.map(a=>agencyCardHtml(a,false)).join('');
+  html+=filtered.map(a=>agencyCardHtml(a,false)).join('');
   el.innerHTML=html;
 }
 
+/* ============ FEEDBACK ============ */
+let fbRating=0;
+function openFeedback(){document.getElementById('feedbackModal').classList.add('open');}
+function closeFeedback(){
+  document.getElementById('feedbackModal').classList.remove('open');
+  document.getElementById('fbText').value='';
+  fbRating=0;
+  document.querySelectorAll('.fb-star').forEach(s=>s.classList.remove('on'));
+}
+function setFbStar(v){
+  fbRating=v;
+  document.querySelectorAll('.fb-star').forEach(s=>s.classList.toggle('on',Number(s.dataset.v)<=v));
+}
+async function submitFeedback(){
+  const msg=(document.getElementById('fbText').value||'').trim();
+  if(!msg){toast('Sila tulis maklum balas anda dahulu.');return;}
+  const btn=document.getElementById('fbSend');
+  btn.disabled=true; btn.textContent='Menghantar…';
+  const payload={message:fbRating?`[${fbRating}★] ${msg}`:msg};
+  if(state.user){payload.user_email=state.user.email; payload.user_name=actorName();}
+  const {error}=await sb.from('feedback').insert(payload);
+  btn.disabled=false; btn.textContent='Hantar Maklum Balas';
+  if(error){toast('Gagal hantar. Cuba lagi.');return;}
+  closeFeedback();
+  toast('Terima kasih! Maklum balas anda telah kami terima. 🙏');
+}
 function showAgReg(){document.getElementById('agRegModal').classList.add('open');}
 function closeAgReg(){
   document.getElementById('agRegModal').classList.remove('open');
