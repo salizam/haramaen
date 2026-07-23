@@ -283,8 +283,9 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .p-car-img{width:200px;height:130px;object-fit:cover;border-radius:12px;flex:none;scroll-snap-align:start;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.13);transition:opacity .15s}
   .p-car-img:hover,.p-car-img:active{opacity:.82}
   .n-src:hover{text-decoration:underline}
-  .n-del{background:#fdece9; color:var(--danger); border:0; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer; margin-left:auto}
-  .n-edit{background:#eef4f1; color:var(--green); border:0; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer; margin-left:auto}
+  .n-admin-grp{display:flex; gap:6px; margin-left:auto}
+  .n-del{background:#fdece9; color:var(--danger); border:0; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer}
+  .n-edit{background:#eef4f1; color:var(--green); border:0; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer}
   /* Share buttons */
   .shr-btn{display:inline-flex; align-items:center; gap:5px; background:#eef4f1; color:var(--green); border:0; border-radius:20px; padding:5px 12px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; flex:none}
   .shr-btn:hover{background:#daeee5}
@@ -2157,7 +2158,7 @@ function renderNews(){
   if(!NEWS.length){ el.innerHTML=intro+`<div class="empty">Belum ada berita buat masa ini. Nantikan kemas kini terkini. 🤍</div>`; return; }
   el.innerHTML=intro+NEWS.map(n=>{
     const src='';
-    const adminBtns=isAdmin()?`<button class="n-edit" onclick="openEditNews(${n.id})">✏️ Edit</button><button class="n-del" onclick="delNews(${n.id},this)">🗑️ Padam</button>`:'';
+    const adminBtns=isAdmin()?`<span class="n-admin-grp"><button class="n-edit" onclick="openEditNews(${n.id})">✏️ Edit</button><button class="n-del" onclick="delNews(${n.id},this)">🗑️ Padam</button></span>`:'';
     const shrUrl=esc(location.href);
     const imgHtml=n.image_url?`<img class="n-thumb" src="${esc(n.image_url)}" alt="${esc(n.title)}" loading="lazy" onerror="this.style.display='none'">`:'';
     return `<div class="card" data-news="${n.id}">
