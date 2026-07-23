@@ -570,7 +570,6 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
             <div id="notifList"><div class="notif-empty">Tiada notifikasi lagi.</div></div>
           </div>
         </div>
-        <button class="tb-bell" title="Maklum Balas" onclick="openFeedback()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
         <div class="tb-user">
           <button class="tb-ava" id="tbAva" title="Akaun" onclick="toggleUserMenu(event)">S</button>
           <div class="tb-menu" id="tbMenu">
@@ -579,6 +578,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
             <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="changeAvatar(this)">
             <button class="tb-menu-item" id="tbStatItem" style="display:none" onclick="document.getElementById('tbMenu').classList.remove('open');go('admin')"><span class="ico" data-i="book"></span> Statistik Pelawat</button>
             <button class="tb-menu-item" id="pushToggleBtn" onclick="togglePush()" style="display:none"><span class="ico" data-i="bell"></span> <span id="pushToggleLbl">Notifikasi Push</span></button>
+            <button class="tb-menu-item" onclick="document.getElementById('tbMenu').classList.remove('open');openFeedback()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="vertical-align:-3px;margin-right:2px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Maklum Balas</button>
             <button class="tb-menu-item" onclick="logout()"><span class="ico" data-i="logout"></span> Log keluar</button>
           </div>
         </div>
