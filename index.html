@@ -283,7 +283,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .p-car-img{width:200px;height:130px;object-fit:cover;border-radius:12px;flex:none;scroll-snap-align:start;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.13);transition:opacity .15s}
   .p-car-img:hover,.p-car-img:active{opacity:.82}
   .n-src:hover{text-decoration:underline}
-  .n-del{margin-left:auto; background:#fdece9; color:var(--danger); border:0; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer}
+  .n-del{background:#fdece9; color:var(--danger); border:0; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer; margin-left:auto}
+  .n-edit{background:#eef4f1; color:var(--green); border:0; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer; margin-left:auto}
   /* Share buttons */
   .shr-btn{display:inline-flex; align-items:center; gap:5px; background:#eef4f1; color:var(--green); border:0; border-radius:20px; padding:5px 12px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; flex:none}
   .shr-btn:hover{background:#daeee5}
@@ -882,6 +883,66 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <div class="modal-actions">
       <button class="m-cancel" onclick="closeAgReg()">Batal</button>
       <button class="m-save" id="arSave" onclick="submitAgReg()">Hantar Permohonan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDIT BERITA (ADMIN) -->
+<div class="modal" id="enModal">
+  <div class="modal-box" style="max-width:540px">
+    <h3>✏️ Edit Artikel</h3>
+    <div style="display:flex;gap:8px;margin-bottom:4px">
+      <div style="flex:1">
+        <label class="fl">Tag</label>
+        <select id="enTag" class="f">
+          <option value="Info">Info</option>
+          <option value="Penting">Penting</option>
+          <option value="Visa">Visa</option>
+          <option value="Kesihatan">Kesihatan</option>
+          <option value="Tips">Tips</option>
+        </select>
+      </div>
+      <div style="flex:1">
+        <label class="fl">Kategori</label>
+        <select id="enCat" class="f">
+          <option value="Umrah">Umrah</option>
+          <option value="Haji">Haji</option>
+          <option value="Visa">Visa</option>
+          <option value="Kesihatan">Kesihatan</option>
+          <option value="Penerbangan">Penerbangan</option>
+        </select>
+      </div>
+    </div>
+    <label class="fl">Tajuk</label>
+    <input id="enTitle" class="f" placeholder="Tajuk artikel…">
+    <label class="fl">Kandungan</label>
+    <textarea id="enBody" class="f" rows="8" placeholder="Isi kandungan…" style="resize:vertical"></textarea>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1">
+        <label class="fl">Penulis</label>
+        <input id="enAuthor" class="f" placeholder="Haramaen">
+      </div>
+      <div style="flex:1">
+        <label class="fl">Nama Sumber</label>
+        <input id="enSrcName" class="f" placeholder="cth: Berita Harian">
+      </div>
+    </div>
+    <label class="fl">URL Sumber</label>
+    <input id="enSrcUrl" class="f" placeholder="https://…">
+    <label class="fl">Gambar Artikel</label>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <img id="enImgPreview" style="width:90px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:none" alt="preview">
+      <div style="flex:1">
+        <input type="file" id="enImg" accept="image/jpeg,image/png,image/webp" class="f" style="font-size:12px;padding:5px" onchange="previewEnImg(this)">
+        <div style="margin-top:4px;display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="enClearImg" style="width:auto">
+          <label for="enClearImg" style="font-size:12px;color:var(--muted)">Buang gambar sedia ada</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="m-cancel" onclick="closeEditNews()">Batal</button>
+      <button class="m-save" id="enSave" onclick="submitEditNews()">💾 Simpan Perubahan</button>
     </div>
   </div>
 </div>
@@ -2096,7 +2157,7 @@ function renderNews(){
   if(!NEWS.length){ el.innerHTML=intro+`<div class="empty">Belum ada berita buat masa ini. Nantikan kemas kini terkini. 🤍</div>`; return; }
   el.innerHTML=intro+NEWS.map(n=>{
     const src='';
-    const del=isAdmin()?`<button class="n-del" onclick="delNews(${n.id},this)">🗑️ Padam</button>`:'';
+    const adminBtns=isAdmin()?`<button class="n-edit" onclick="openEditNews(${n.id})">✏️ Edit</button><button class="n-del" onclick="delNews(${n.id},this)">🗑️ Padam</button>`:'';
     const shrUrl=esc(location.href);
     const imgHtml=n.image_url?`<img class="n-thumb" src="${esc(n.image_url)}" alt="${esc(n.title)}" loading="lazy" onerror="this.style.display='none'">`:'';
     return `<div class="card" data-news="${n.id}">
@@ -2119,7 +2180,7 @@ function renderNews(){
           <div class="n-foot">
             ${src}
             <button class="shr-btn" data-title="${esc(n.title)}" data-text="${esc(n.title)}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
-            ${del}
+            ${adminBtns}
           </div>
         </div>
       </div>
@@ -2133,6 +2194,85 @@ async function delNews(id,btn){
   NEWS=NEWS.filter(n=>n.id!==id);
   renderNews(); renderTerkini();
   toast('Berita dipadam.');
+}
+
+/* ---- Admin: Edit Berita ---- */
+let _enId=null;
+function openEditNews(id){
+  const n=NEWS.find(x=>x.id===id); if(!n) return;
+  _enId=id;
+  const setVal=(elId,val)=>{const el=document.getElementById(elId);if(el)el.value=val||'';};
+  setVal('enTitle',n.title);
+  setVal('enBody',n.body);
+  setVal('enAuthor',n.author||'Haramaen');
+  setVal('enSrcName',n.source_name||'');
+  setVal('enSrcUrl',n.source_url||'');
+  const tag=document.getElementById('enTag'); if(tag) tag.value=n.tag||'Info';
+  const cat=document.getElementById('enCat'); if(cat) cat.value=n.category||'Umrah';
+  // Gambar semasa
+  const prev=document.getElementById('enImgPreview');
+  if(prev){ if(n.image_url){prev.src=n.image_url;prev.style.display='block';}else{prev.src='';prev.style.display='none';} }
+  const imgInput=document.getElementById('enImg'); if(imgInput) imgInput.value='';
+  const clr=document.getElementById('enClearImg'); if(clr) clr.checked=false;
+  document.getElementById('enModal').classList.add('open');
+}
+function closeEditNews(){
+  document.getElementById('enModal').classList.remove('open');
+  _enId=null;
+}
+function previewEnImg(input){
+  const prev=document.getElementById('enImgPreview');
+  if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; }
+}
+async function submitEditNews(){
+  if(!_enId) return;
+  const title=(document.getElementById('enTitle').value||'').trim();
+  const body=(document.getElementById('enBody').value||'').trim();
+  if(!title||!body){ toast('Tajuk dan kandungan wajib diisi.'); return; }
+  const btn=document.getElementById('enSave'); btn.disabled=true; btn.textContent='Menyimpan…';
+  try{
+    let imgUrl=null;
+    const clearImg=document.getElementById('enClearImg').checked;
+    const imgFile=document.getElementById('enImg').files[0];
+    if(imgFile&&!clearImg){
+      if(imgFile.size>5*1024*1024){ toast('Gambar terlalu besar — maks 5MB.'); btn.disabled=false; btn.textContent='💾 Simpan Perubahan'; return; }
+      const ext=imgFile.name.split('.').pop()||'jpg';
+      const path='news-edit-'+_enId+'-'+Date.now()+'.'+ext;
+      const {error:upErr}=await sb.storage.from('news-images').upload(path,imgFile,{contentType:imgFile.type,upsert:true});
+      if(upErr) throw upErr;
+      const {data:{publicUrl}}=sb.storage.from('news-images').getPublicUrl(path);
+      imgUrl=publicUrl;
+    }
+    const {error}=await sb.rpc('admin_update_news',{
+      p_id:_enId,
+      p_title:title,
+      p_body:body,
+      p_tag:document.getElementById('enTag').value||'Info',
+      p_category:document.getElementById('enCat').value||'Umrah',
+      p_author:document.getElementById('enAuthor').value.trim()||'Haramaen',
+      p_source_name:document.getElementById('enSrcName').value.trim()||null,
+      p_source_url:document.getElementById('enSrcUrl').value.trim()||null,
+      p_image_url:imgUrl,
+      p_clear_image:clearImg
+    });
+    if(error) throw error;
+    // Update local cache
+    const idx=NEWS.findIndex(x=>x.id===_enId);
+    if(idx>=0){
+      NEWS[idx]={...NEWS[idx],title,body,
+        tag:document.getElementById('enTag').value||'Info',
+        category:document.getElementById('enCat').value||'Umrah',
+        author:document.getElementById('enAuthor').value.trim()||'Haramaen',
+        source_name:document.getElementById('enSrcName').value.trim()||null,
+        source_url:document.getElementById('enSrcUrl').value.trim()||null,
+        image_url:clearImg?null:(imgUrl||NEWS[idx].image_url)
+      };
+    }
+    renderNews(); renderTerkini();
+    closeEditNews();
+    toast('Artikel berjaya dikemas kini! ✅');
+  }catch(e){ toast('Gagal simpan — '+(e&&e.message||'cuba lagi.')); }
+  btn.disabled=false; btn.textContent='💾 Simpan Perubahan';
 }
 /* ---- Terkini (konten segar di home) ---- */
 function openDuaFeed(){
