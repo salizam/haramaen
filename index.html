@@ -1497,7 +1497,7 @@ function renderKursusAll(){
         ${daerahs.map(d=>`<option value="${esc(d)}"${state.kDaerah===d?' selected':''}>${esc(d)}</option>`).join('')}
       </select></div>
     </div>
-    ${state.kNear&&state.userLoc?`<div class="knear-note">📍 Menunjukkan kursus dalam radius 150km dari lokasi anda, disusun dari yang terdekat.</div>`:''}`;
+    ${state.kNear&&state.userLoc?`<div class="knear-note">📍 Menunjukkan kursus dalam radius 30km dari lokasi anda, disusun dari yang terdekat.</div>`:''}`;
   }
   renderKursusRows();
 }
@@ -1511,14 +1511,14 @@ function renderKursusRows(){
     (!q || [c.anjuran,c.lokasi,c.daerah,c.negeri,c.tarikh].filter(Boolean).join(' ').toLowerCase().includes(q)));
   const near = state.kNear && state.userLoc;
   if(near){
-    const MAX_KM=150;
+    const MAX_KM=30;
     list=list.map(c=>({c,d:courseDist(c)}))
       .filter(x=>x.d!=null && x.d<=MAX_KM)
       .sort((a,b)=>a.d-b.d)
       .map(x=>x.c);
   }
   b.innerHTML=list.map(c=>courseRow(c, near?courseDist(c):null)).join('')
-    || `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px">${near?'Tiada kursus dalam radius 150km dari lokasi anda.':'Tiada kursus untuk tapisan ini.'}</td></tr>`;
+    || `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px">${near?'Tiada kursus dalam radius 30km dari lokasi anda.':'Tiada kursus untuk tapisan ini.'}</td></tr>`;
 }
 function toggleKursusNear(){
   if(state.kNear){ state.kNear=false; renderKursusAll(); return; }
