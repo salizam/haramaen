@@ -1695,7 +1695,7 @@ function agencyCardHtml(a, isPrem){
   const isUrl=/^https?:\/\//.test(contact);
   const shrTxt=esc(a.name+(hq?' — '+hq:''));
   const shrUrl=esc(location.href);
-  const adminBtn=isAdmin()&&a.id?`<button onclick="togglePremium(${a.id},${isPrem})" style="background:${isPrem?'#fff3cd':'#f0f0f0'};color:${isPrem?'#856404':'#555'};border:1px solid ${isPrem?'#ffc107':'#ccc'};border-radius:6px;padding:2px 8px;font-size:10.5px;font-weight:700;cursor:pointer">${isPrem?'★ Buang Premium':'☆ Set Premium'}</button>`:'';
+  const adminBtn=isAdmin()&&a.id?`<button onclick="togglePremium('${a.id}',${isPrem})" style="background:${isPrem?'#fff3cd':'#f0f0f0'};color:${isPrem?'#856404':'#555'};border:1px solid ${isPrem?'#ffc107':'#ccc'};border-radius:6px;padding:2px 8px;font-size:10.5px;font-weight:700;cursor:pointer">${isPrem?'★ Buang Premium':'☆ Set Premium'}</button>`:'';
   return `<div class="card${isPrem?' card-premium':''}"><div class="list-row">
     <div class="thumb">${agThumb(a)}</div>
     <div style="flex:1;min-width:0">
