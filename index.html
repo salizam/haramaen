@@ -517,6 +517,14 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .pend-act button{border:0;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:13px;font-family:inherit}
   .b-approve{background:#1f9d55;color:#fff}
   .b-reject{background:#e6ebe7;color:#b3261e}
+  .fb-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+  .fb-card .fb-stars{color:var(--gold);font-size:14px;margin-bottom:4px}
+  .fb-card .fb-msg{font-size:14px;color:var(--ink);line-height:1.55;margin-bottom:8px}
+  .fb-card .fb-meta{font-size:11.5px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .fb-card .fb-name{font-weight:700;color:var(--ink)}
+  .fb-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .fb-filter button{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+  .fb-filter button.on{background:var(--green);color:#fff;border-color:var(--green)}
 </style>
 </head>
 <body>
@@ -836,6 +844,9 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         </div>
         <div class="adm-h">Kursus menunggu kelulusan</div>
         <div id="admPending"><div class="empty">Memuatkan…</div></div>
+        <div class="adm-h" style="display:flex;align-items:center;justify-content:space-between"><span>Maklum Balas Pengguna</span><span id="fbCount" style="font-size:12px;font-weight:400;color:var(--muted)"></span></div>
+        <div class="fb-filter" id="fbFilter"><button class="on" onclick="filterFb('all',this)">Semua</button><button onclick="filterFb('5',this)">★★★★★</button><button onclick="filterFb('4',this)">★★★★</button><button onclick="filterFb('3',this)">★★★</button><button onclick="filterFb('unrated',this)">Tanpa rating</button></div>
+        <div id="admFeedback"><div class="empty">Memuatkan…</div></div>
       </section>
 
     </main>
@@ -1643,6 +1654,7 @@ async function renderAdmin(){
   if(admTimer) clearInterval(admTimer);
   admTimer=setInterval(()=>{ const a=document.getElementById('v-admin'); if(a&&a.classList.contains('active')) loadAdminStats(true); else { clearInterval(admTimer); admTimer=null; } }, 30000);
   loadPendingCourses();
+  loadFeedback();
 }
 async function loadAdminStats(quiet){
   try{
@@ -1697,6 +1709,44 @@ async function setCourse(id,status,btn){
     }
     loadPendingCourses();
   }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
+}
+let _fbAll=[];
+async function loadFeedback(){
+  const box=document.getElementById('admFeedback');
+  try{
+    const {data,error}=await sb.from('feedback').select('*').order('created_at',{ascending:false}).limit(200);
+    if(error) throw error;
+    _fbAll=data||[];
+    document.getElementById('fbCount').textContent=`${_fbAll.length} mesej`;
+    renderFbList(_fbAll);
+  }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat maklum balas.</div>'; }
+}
+function renderFbList(list){
+  const box=document.getElementById('admFeedback');
+  if(!list.length){ box.innerHTML='<div class="empty">Tiada maklum balas lagi.</div>'; return; }
+  box.innerHTML=list.map(f=>{
+    const starMatch=(f.message||'').match(/^\[(\d)★\]\s*/);
+    const stars=starMatch?parseInt(starMatch[1]):0;
+    const msg=starMatch?f.message.slice(starMatch[0].length):f.message||'';
+    const dt=new Date(f.created_at);
+    const dtStr=dt.toLocaleDateString('ms-MY',{day:'numeric',month:'short',year:'numeric'})+' '+dt.toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="fb-card">
+      ${stars?`<div class="fb-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div>`:''}
+      <div class="fb-msg">${esc(msg)}</div>
+      <div class="fb-meta">
+        ${f.user_name?`<span class="fb-name">${esc(f.user_name)}</span>`:'<span style="color:var(--muted)">Tanpa nama</span>'}
+        ${f.user_email?`<span>${esc(f.user_email)}</span>`:''}
+        <span style="margin-left:auto">${esc(dtStr)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+function filterFb(key,btn){
+  document.querySelectorAll('#fbFilter button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(key==='all') return renderFbList(_fbAll);
+  if(key==='unrated') return renderFbList(_fbAll.filter(f=>!f.message||!f.message.match(/^\[\d★\]/)));
+  renderFbList(_fbAll.filter(f=>(f.message||'').startsWith(`[${key}★]`)));
 }
 function renderHome(){
   document.getElementById('featGrid').innerHTML = MENU.map(m=>`
