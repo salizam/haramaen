@@ -259,6 +259,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .sol-row .nm{display:flex; align-items:center; gap:12px; font-weight:700}
   .sol-row .nm .di{width:38px;height:38px;border-radius:10px;background:#eef4f1;display:grid;place-items:center;color:var(--green)}
   .sol-row .nm .di svg{width:20px;height:20px}
+  .sol-row .nm .di-img{width:38px;height:38px;display:grid;place-items:center}
+  .sol-row .nm .di-img img{width:38px;height:38px;object-fit:contain}
   .sol-row .tm{font-weight:800; color:var(--green); font-size:16px}
 
   /* ---------- Guide / News / Lost ---------- */
@@ -2754,7 +2756,7 @@ function renderSolList(){
   const rows=[['Fajr','Subuh'],['Sunrise','Syuruk'],['Dhuhr','Zohor'],['Asr','Asar'],['Maghrib','Maghrib'],['Isha','Isyak']];
   lEl.innerHTML=rows.map(r=>{ const t=prayerTimings[r[0]]; if(!t) return '';
     const on=(r[1]===next.name); const d=parseT(t.slice(0,5));
-    const ic=PSVG[r[1]]?`<span class="di" style="background:${PBGC[r[1]]||'#eef4f1'}">${PSVG[r[1]]}</span>`:`<span class="di">${svg(PICON[r[1]]||'mosque')}</span>`;
+    const ic=PSVG[r[1]]?`<span class="di-img">${PSVG[r[1]]}</span>`:`<span class="di">${svg(PICON[r[1]]||'mosque')}</span>`;
     return `<div class="sol-row ${on?'on':''}"><div class="nm">${ic} ${r[1]}</div><div class="tm">${fmtT(d)}</div></div>`;}).join('')
     + (praySrc?`<div class="tag" style="text-align:center;margin-top:10px;opacity:.8">Sumber: ${praySrc}</div>`:'');
 }
