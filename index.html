@@ -477,6 +477,15 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .kbtn:hover{filter:brightness(1.07)}
   .ktdaftar{display:flex; align-items:flex-end; gap:8px}
   .ktdaftar .kbtn-daftar{height:42px}
+  .ktitle-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0 14px;flex-wrap:wrap}
+  .ktitle-row .section-title{margin:0}
+  .ktitle-row .kbtn-daftar{height:40px;white-space:nowrap}
+  .kbar>.ksearch{flex:none;width:100%}
+  .krow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+  .krow>.kfield,.krow>.kbtn-near{flex:1 1 0;min-width:130px}
+  .krow .kfield select{width:100%;min-width:0}
+  .krow .kdate,.krow .kdate input[type=date]{width:100%;min-width:0}
+  .kscroll-hint{font-size:11.5px;color:var(--muted);margin:2px 2px 6px;text-align:right}
   .kmore{margin-top:14px; text-align:center}
   .kmore-btn{background:transparent; color:var(--ink); border:1.5px solid var(--gold); border-radius:12px;
     padding:11px 20px; font-weight:800; font-size:13.5px; cursor:pointer; font-family:inherit; transition:.15s}
@@ -651,16 +660,15 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
 
         <div class="terkini" id="terkiniBox"></div>
 
-        <div class="feat-grid" id="featGrid"></div>
-
         <div id="posterCarousel"></div>
       </section>
 
       <!-- SEMUA KURSUS -->
       <section class="view" id="v-kursus">
         <button class="backbtn" onclick="go('home')">← Kembali</button>
-        <div class="section-title">Semua Kursus Umrah<span class="u"></span></div>
+        <div class="ktitle-row"><div class="section-title">Semua Kursus Umrah<span class="u"></span></div><button class="kbtn kbtn-daftar" onclick="openCourseForm()">Daftar kursus anda</button></div>
         <div class="kbar" id="kursusAllFilter"></div>
+        <div class="kscroll-hint">Skrol ke kanan →</div>
         <div class="ktable-wrap">
           <table class="ktable">
             <thead><tr><th class="th-poster"></th><th>Tarikh</th><th>Masa</th><th>Lokasi</th><th>Hubungi</th></tr></thead>
@@ -1530,13 +1538,10 @@ function renderKursusAll(){
   if(state.kDaerah!=='all' && !daerahs.includes(state.kDaerah)) state.kDaerah='all';
   if(fbar){
     const nearLbl = state.kNearBusy ? 'Mengesan lokasi…' : (state.kNear ? '📍 Berhampiran saya ✓' : '📍 Berhampiran saya');
-    fbar.innerHTML=`<div class="ksearchrow">
+    fbar.innerHTML=`
       <input type="text" id="kSearchInput" class="ksearch" placeholder="🔍 Cari kursus (anjuran, lokasi, daerah…)" value="${esc(state.kSearch)}" oninput="state.kSearch=this.value;renderKursusRows()">
-      <button class="kbtn kbtn-near${state.kNear?' on':''}" ${state.kNearBusy?'disabled':''} onclick="toggleKursusNear()">${nearLbl}</button>
-    </div>
-    <div class="kfilter">
-      <div class="ktdaftar">
-        <button class="kbtn kbtn-daftar" onclick="openCourseForm()">Daftar kursus anda</button>
+      <div class="krow">
+        <button class="kbtn kbtn-near${state.kNear?' on':''}" ${state.kNearBusy?'disabled':''} onclick="toggleKursusNear()">${nearLbl}</button>
         <div class="kfield"><label>Tarikh</label>
           <div class="kdate">
             <input type="date" id="kfTarikhInputAll" value="${state.kTarikh!=='all'?esc(state.kTarikh):''}" onchange="state.kTarikh=this.value||'all';renderKursusAll()">
@@ -1544,16 +1549,17 @@ function renderKursusAll(){
           </div>
         </div>
       </div>
-      <div class="kfield"><label>Negeri</label><select onchange="state.kNegeri=this.value;state.kDaerah='all';renderKursusAll()">
-        <option value="all"${state.kNegeri==='all'?' selected':''}>Semua negeri</option>
-        ${negeris.map(n=>`<option value="${esc(n)}"${state.kNegeri===n?' selected':''}>${esc(n)}</option>`).join('')}
-      </select></div>
-      <div class="kfield"><label>Daerah</label><select onchange="state.kDaerah=this.value;renderKursusAll()">
-        <option value="all"${state.kDaerah==='all'?' selected':''}>Semua daerah</option>
-        ${daerahs.map(d=>`<option value="${esc(d)}"${state.kDaerah===d?' selected':''}>${esc(d)}</option>`).join('')}
-      </select></div>
-    </div>
-    ${state.kNear&&state.userLoc?`<div class="knear-note">📍 Menunjukkan kursus dalam radius 30km dari lokasi anda, disusun dari yang terdekat.</div>`:''}`;
+      <div class="krow">
+        <div class="kfield"><label>Negeri</label><select onchange="state.kNegeri=this.value;state.kDaerah='all';renderKursusAll()">
+          <option value="all"${state.kNegeri==='all'?' selected':''}>Semua negeri</option>
+          ${negeris.map(n=>`<option value="${esc(n)}"${state.kNegeri===n?' selected':''}>${esc(n)}</option>`).join('')}
+        </select></div>
+        <div class="kfield"><label>Daerah</label><select onchange="state.kDaerah=this.value;renderKursusAll()">
+          <option value="all"${state.kDaerah==='all'?' selected':''}>Semua daerah</option>
+          ${daerahs.map(d=>`<option value="${esc(d)}"${state.kDaerah===d?' selected':''}>${esc(d)}</option>`).join('')}
+        </select></div>
+      </div>
+      ${state.kNear&&state.userLoc?`<div class="knear-note">📍 Menunjukkan kursus dalam radius 30km dari lokasi anda, disusun dari yang terdekat.</div>`:''}`;
   }
   renderKursusRows();
 }
@@ -1791,7 +1797,7 @@ function filterFb(key,btn){
   renderFbList(_fbAll.filter(f=>(f.message||'').startsWith(`[${key}★]`)));
 }
 function renderHome(){
-  document.getElementById('featGrid').innerHTML = MENU.map(m=>`
+  const _fg=document.getElementById('featGrid'); if(_fg) _fg.innerHTML = MENU.map(m=>`
     <button class="feat" onclick="jump('${m.v}')">
       <span class="fi" style="background:${m.c}">${ICONS[m.i]?`<img class="fimg" src="${ICONS[m.i]}" alt="" draggable="false">`:svg(m.i)}</span>
       <span class="ft"><b>${m.t}</b><small>${m.s}</small></span>
