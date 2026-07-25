@@ -477,9 +477,9 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .kbtn:hover{filter:brightness(1.07)}
   .ktdaftar{display:flex; align-items:flex-end; gap:8px}
   .ktdaftar .kbtn-daftar{height:42px}
-  .ktitle-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0 14px;flex-wrap:wrap}
-  .ktitle-row .section-title{margin:0}
-  .ktitle-row .kbtn-daftar{height:40px;white-space:nowrap}
+  .ktitle-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0 14px;flex-wrap:nowrap}
+  .ktitle-row .section-title{margin:0;flex:1 1 auto;min-width:0}
+  .ktitle-row .kbtn-daftar{height:40px;white-space:nowrap;flex:0 0 auto}
   .kbar>.ksearch{flex:none;width:100%}
   .krow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
   .krow>.kfield,.krow>.kbtn-near{flex:1 1 0;min-width:130px}
@@ -1615,7 +1615,7 @@ function toggleKursusNear(){
     state.kNearBusy=false; state.kNear=false; renderKursusAll();
     if(err && err.code===1){ toast('Akses lokasi ditolak. Benarkan lokasi untuk cari kursus berhampiran anda. 📍'); }
     else{ toast('Tak dapat kesan lokasi anda. Pastikan GPS dihidupkan & cuba lagi. 📍'); }
-  }, {enableHighAccuracy:false, timeout:15000, maximumAge:300000});
+  }, {enableHighAccuracy:true, timeout:20000, maximumAge:0});
 }
 
 function renderMutawwifAll(){
@@ -1683,7 +1683,7 @@ function toggleMutawwifNear(){
     state.mNearBusy=false; state.mNear=false; renderMutawwifAll();
     if(err && err.code===1){ toast('Akses lokasi ditolak. Benarkan lokasi untuk cari kursus berhampiran anda. 📍'); }
     else{ toast('Tak dapat kesan lokasi anda. Pastikan GPS dihidupkan & cuba lagi. 📍'); }
-  }, {enableHighAccuracy:false, timeout:15000, maximumAge:300000});
+  }, {enableHighAccuracy:true, timeout:20000, maximumAge:0});
 }
 /* ---- Daftar Kursus (modal) ---- */
 function fillMasa(){
