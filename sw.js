@@ -1,7 +1,7 @@
 // Haramaen Umrah — service worker
 // Network-first for the page (HTML) so updates always show after a refresh;
 // cache-first for other assets; cache as offline fallback.
-const CACHE = 'haramaen-umrah-v15';
+const CACHE = 'haramaen-umrah-v16';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
