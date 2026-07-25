@@ -446,8 +446,9 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     .more-title{font-weight:700;font-size:15px;color:var(--ink);margin:0 4px 14px}
     .more-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 8px}
     .more-item{border:0;background:none;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink);font-weight:600;font-size:11px;text-align:center;line-height:1.15}
-    .more-item .ico{width:48px;height:48px;border-radius:15px;color:#fff;display:flex;align-items:center;justify-content:center}
-    .more-item .ico svg{width:24px;height:24px}
+    .more-item .fi{width:48px;height:48px;border-radius:15px;color:#fff;display:grid;place-items:center;flex:none}
+    .more-item .fi svg{width:24px;height:24px}
+    .more-item .fi .fimg{width:30px;height:30px;object-fit:contain}
   }
   @media(max-width:400px){
     .feat-grid{grid-template-columns:repeat(3,1fr)}
@@ -1177,9 +1178,9 @@ function go(v){
 function jump(v){ go(v); }
 const GRID_SVG='<svg viewBox="0 0 44 44" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="7" width="14" height="14" rx="4" fill="#34A853"></rect><rect x="23" y="7" width="14" height="14" rx="4" fill="#FBBC05"></rect><rect x="7" y="23" width="14" height="14" rx="4" fill="#4285F4"></rect><rect x="23" y="23" width="14" height="14" rx="4" fill="#EA4335"></rect></svg>';
 const BOTTOM_MAIN=['home','dua','agency','kursus'];
-function moreList(){ const h=NAV.filter(n=>!BOTTOM_MAIN.includes(n.v)); if(isAdmin()) h.push({v:'admin',t:'Statistik',i:'book',c:'#555'}); return h; }
+function moreList(){ const h=MENU.filter(m=>!BOTTOM_MAIN.includes(m.v)); if(isAdmin()) h.push({v:'admin',t:'Statistik',i:'book',c:'#555'}); return h; }
 function renderMoreSheet(){ const g=document.getElementById('moreGrid'); if(!g) return;
-  g.innerHTML=moreList().map(n=>`<button class="more-item" data-v="${n.v}" onclick="pickMore('${n.v}')"><span class="ico" data-i="${n.i}" style="background:${n.c||'rgba(0,0,0,.12)'}"></span><span>${n.t}</span></button>`).join('');
+  g.innerHTML=moreList().map(m=>`<button class="more-item" data-v="${m.v}" onclick="pickMore('${m.v}')"><span class="fi" style="background:${m.c}">${ICONS[m.i]?`<img class="fimg" src="${ICONS[m.i]}" alt="" draggable="false">`:svg(m.i)}</span><span>${m.t}</span></button>`).join('');
   paintIcons(); }
 function openMore(e){ if(e) e.stopPropagation(); const s=document.getElementById('moreSheet'); if(s) s.classList.add('open'); }
 function closeMore(){ const s=document.getElementById('moreSheet'); if(s) s.classList.remove('open'); }
