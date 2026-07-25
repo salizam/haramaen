@@ -450,6 +450,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     .more-item .fi svg{width:24px;height:24px}
     .more-item .fi .fimg{width:30px;height:30px;object-fit:contain}
   }
+  /* Desktop: sembunyikan komponen mobile-sahaja (bottom nav + more sheet) */
+  @media(min-width:821px){ .bottomnav,.more-sheet{display:none} }
   @media(max-width:400px){
     .feat-grid{grid-template-columns:repeat(3,1fr)}
   }
@@ -1506,6 +1508,7 @@ const NEGERI_LOC={
   'Terengganu':[5.3302,103.1408],'W.P. Kuala Lumpur':[3.1390,101.6869],
   'W.P. Labuan':[5.2831,115.2308],'W.P. Putrajaya':[2.9264,101.6964]
 };
+const DAERAH_LOC={'Batu Pahat':[1.8548,102.9325],'Johor Bahru':[1.4927,103.7414],'Kluang':[2.03,103.3185],'Kota Tinggi':[1.736,103.9],'Kulai':[1.6636,103.6031],'Mersing':[2.4312,103.8405],'Muar':[2.0442,102.5689],'Pontian':[1.4869,103.3899],'Segamat':[2.5148,102.8158],'Tangkak':[2.268,102.5445],'Baling':[5.6752,100.9179],'Bandar Baharu':[5.0916,100.453],'Kota Setar':[6.1264,100.3673],'Kuala Muda':[5.6329,100.486],'Kubang Pasu':[6.29,100.42],'Kulim':[5.365,100.561],'Langkawi':[6.35,99.8],'Padang Terap':[6.245,100.567],'Pendang':[5.9903,100.4759],'Pokok Sena':[6.087,100.47],'Sik':[5.82,100.74],'Yan':[5.8,100.38],'Bachok':[6.043,102.399],'Gua Musang':[4.884,101.967],'Jeli':[5.698,101.842],'Kota Bharu':[6.1254,102.2381],'Kuala Krai':[5.532,102.199],'Lojing':[4.75,101.5],'Machang':[5.766,102.216],'Pasir Mas':[6.049,102.14],'Pasir Puteh':[5.836,102.402],'Tanah Merah':[5.8,102.149],'Tumpat':[6.197,102.171],'Alor Gajah':[2.38,102.208],'Jasin':[2.308,102.43],'Melaka Tengah':[2.1896,102.2501],'Jelebu':[2.95,102.07],'Jempol':[2.83,102.43],'Kuala Pilah':[2.737,102.249],'Port Dickson':[2.523,101.796],'Rembau':[2.59,102.09],'Seremban':[2.7297,101.9381],'Tampin':[2.47,102.23],'Bentong':[3.522,101.908],'Bera':[3.13,102.52],'Cameron Highlands':[4.471,101.377],'Jerantut':[3.936,102.363],'Kuantan':[3.8168,103.3315],'Lipis':[4.187,102.043],'Maran':[3.576,102.764],'Pekan':[3.492,103.389],'Raub':[3.794,101.857],'Rompin':[2.8,103.46],'Temerloh':[3.449,102.421],'Bagan Datuk':[3.988,100.781],'Batang Padang':[4.0,101.38],'Hilir Perak':[4.022,101.043],'Hulu Perak':[5.708,101.11],'Kampar':[4.305,101.152],'Kerian':[5.12,100.66],'Kinta':[4.5975,101.0901],'Kuala Kangsar':[4.77,100.937],'Larut Matang & Selama':[4.857,100.742],'Manjung':[4.228,100.696],'Muallim':[3.71,101.52],'Perak Tengah':[4.2,100.97],'Kangar':[6.4414,100.1986],'Arau':[6.43,100.27],'Kaki Bukit':[6.63,100.19],'Kuala Perlis':[6.4,100.13],'Padang Besar':[6.66,100.32],'Simpang Empat':[6.51,100.25],'Timur Laut':[5.42,100.33],'Barat Daya':[5.33,100.23],'Seberang Perai Utara':[5.41,100.39],'Seberang Perai Tengah':[5.33,100.46],'Seberang Perai Selatan':[5.21,100.48],'Kota Kinabalu':[5.9804,116.0735],'Putatan':[5.913,116.051],'Penampang':[5.925,116.113],'Papar':[5.734,115.933],'Tuaran':[6.178,116.232],'Kota Belud':[6.352,116.429],'Ranau':[5.954,116.663],'Kudat':[6.883,116.846],'Kota Marudu':[6.483,116.766],'Pitas':[6.67,117.0],'Beaufort':[5.347,115.745],'Kuala Penyu':[5.59,115.59],'Sipitang':[5.087,115.551],'Tenom':[5.133,115.949],'Nabawan':[4.95,116.44],'Keningau':[5.339,116.16],'Tambunan':[5.67,116.36],'Sandakan':[5.84,118.117],'Beluran':[5.81,117.55],'Telupid':[5.63,117.13],'Kinabatangan':[5.41,118.04],'Tongod':[5.37,117.28],'Lahad Datu':[5.027,118.327],'Kunak':[4.69,118.24],'Semporna':[4.482,118.611],'Tawau':[4.244,117.891],'Kalabakan':[4.4,117.48],'Kuching':[1.5533,110.3592],'Bau':[1.418,110.152],'Lundu':[1.672,109.855],'Padawan':[1.42,110.31],'Kota Samarahan':[1.46,110.43],'Asajaya':[1.52,110.56],'Simunjan':[1.27,110.75],'Sebuyau':[1.41,110.79],'Serian':[1.17,110.57],'Tebedu':[1.04,110.38],'Sri Aman':[1.237,111.463],'Lubok Antu':[1.04,111.82],'Betong':[1.405,111.53],'Saratok':[1.73,111.32],'Pusa':[1.64,111.05],'Kabong':[1.76,111.14],'Sarikei':[2.128,111.519],'Meradong':[2.15,111.63],'Julau':[2.02,111.73],'Pakan':[2.08,111.89],'Sibu':[2.287,111.831],'Kanowit':[2.1,112.15],'Selangau':[2.15,112.19],'Mukah':[2.896,112.09],'Dalat':[2.73,111.94],'Matu':[2.63,111.57],'Daro':[2.42,111.42],'Tanjung Manis':[2.15,111.35],'Bintulu':[3.171,113.042],'Tatau':[2.75,112.94],'Sebauh':[3.0,113.04],'Kapit':[2.017,112.933],'Song':[2.01,112.54],'Belaga':[2.7,113.77],'Bukit Mabong':[2.1,113.3],'Miri':[4.399,113.991],'Marudi':[4.18,114.33],'Subis':[4.09,113.9],'Beluru':[4.0,114.02],'Telang Usan':[3.4,114.7],'Limbang':[4.75,115.0],'Lawas':[4.855,115.405],'Gombak':[3.236,101.7],'Hulu Langat':[3.1,101.82],'Hulu Selangor':[3.54,101.55],'Klang':[3.044,101.445],'Kuala Langat':[2.81,101.5],'Kuala Selangor':[3.34,101.25],'Petaling':[3.1073,101.6067],'Sabak Bernam':[3.76,100.99],'Sepang':[2.69,101.75],'Besut':[5.83,102.55],'Dungun':[4.757,103.416],'Hulu Terengganu':[5.07,102.86],'Kemaman':[4.23,103.42],'Kuala Nerus':[5.37,103.1],'Kuala Terengganu':[5.3302,103.1408],'Marang':[5.206,103.206],'Setiu':[5.57,102.73],'Kuala Lumpur':[3.139,101.6869],'Labuan':[5.2831,115.2308],'Putrajaya':[2.9264,101.6964]};
 function haversineKm(lat1,lng1,lat2,lng2){
   const R=6371, toR=x=>x*Math.PI/180;
   const dLat=toR(lat2-lat1), dLng=toR(lng2-lng1);
@@ -1513,8 +1516,8 @@ function haversineKm(lat1,lng1,lat2,lng2){
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 function courseDist(c){
-  if(!state.userLoc || !c.negeri) return null;
-  const co=NEGERI_LOC[c.negeri]; if(!co) return null;
+  if(!state.userLoc) return null;
+  const co=(c.daerah&&DAERAH_LOC[c.daerah])||(c.negeri&&NEGERI_LOC[c.negeri]); if(!co) return null;
   return haversineKm(state.userLoc.lat, state.userLoc.lng, co[0], co[1]);
 }
 function courseRow(k,dist){
@@ -1594,7 +1597,7 @@ function renderKursusRows(){
     (!q || [c.anjuran,c.lokasi,c.daerah,c.negeri,c.tarikh].filter(Boolean).join(' ').toLowerCase().includes(q)));
   const near = state.kNear && state.userLoc;
   if(near){
-    const MAX_KM=30;
+    const MAX_KM=15;
     list=list.map(c=>({c,d:courseDist(c)}))
       .filter(x=>x.d!=null && x.d<=MAX_KM)
       .sort((a,b)=>a.d-b.d)
@@ -1662,7 +1665,7 @@ function renderMutawwifRows(){
     (!q || [c.anjuran,c.lokasi,c.daerah,c.negeri,c.tarikh].filter(Boolean).join(' ').toLowerCase().includes(q)));
   const near = state.mNear && state.userLoc;
   if(near){
-    const MAX_KM=30;
+    const MAX_KM=15;
     list=list.map(c=>({c,d:courseDist(c)}))
       .filter(x=>x.d!=null && x.d<=MAX_KM)
       .sort((a,b)=>a.d-b.d)
