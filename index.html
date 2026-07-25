@@ -677,6 +677,19 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         </div>
       </section>
 
+      <section class="view" id="v-mutawwif">
+        <button class="backbtn" onclick="go('home')">← Kembali</button>
+        <div class="ktitle-row"><div class="section-title">Semua Kursus Mutawwif<span class="u"></span></div><button class="kbtn kbtn-daftar" onclick="openMutawwifForm()">Daftar kursus anda</button></div>
+        <div class="kbar" id="mutawwifAllFilter"></div>
+        <div class="kscroll-hint">Skrol ke kanan →</div>
+        <div class="ktable-wrap">
+          <table class="ktable">
+            <thead><tr><th class="th-poster"></th><th>Tarikh</th><th>Masa</th><th>Lokasi</th><th>Hubungi</th></tr></thead>
+            <tbody id="mutawwifAllBody"></tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- AGENCY -->
       <section class="view" id="v-agency">
         <div class="section-title">Cari Agensi Umrah<span class="u"></span></div>
@@ -947,8 +960,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
 <!-- MODAL: Daftar Kursus -->
 <div class="modal" id="courseModal">
   <div class="modal-box">
-    <h3>Daftar Kursus Umrah</h3>
-    <div class="mh-sub">Isi maklumat kursus. Kursus akan disemak admin dahulu sebelum dipaparkan dalam senarai.</div>
+    <h3 id="cfTitle">Daftar Kursus Umrah</h3>
+    <div class="mh-sub" id="cfSub">Isi maklumat kursus. Kursus akan disemak admin dahulu sebelum dipaparkan dalam senarai.</div>
     <div class="modal-row">
       <div>
         <label class="fl">Penganjur</label>
@@ -1108,7 +1121,7 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY, {
 
 /* ============ STATE ============ */
 const MASJIDIL_HARAM = {lat:21.4225, lng:39.8262};
-const state = { user:null, myHotel:null, agRating:0, agPrice:null, agNegeri:'all', agDaerah:'all', hoBudget:null, duas:[], solCity:'me', medFilter:'all', svcFilter:'all', kTarikh:'all', kNegeri:'all', kDaerah:'all', kSearch:'', kNear:false, userLoc:null, kNearBusy:false };
+const state = { user:null, myHotel:null, agRating:0, agPrice:null, agNegeri:'all', agDaerah:'all', hoBudget:null, duas:[], solCity:'me', medFilter:'all', svcFilter:'all', kTarikh:'all', kNegeri:'all', kDaerah:'all', kSearch:'', kNear:false, userLoc:null, kNearBusy:false, mTarikh:'all', mNegeri:'all', mDaerah:'all', mSearch:'', mNear:false, mNearBusy:false };
 
 /* ============ ICONS (inline SVG) ============ */
 const SVG={
@@ -1154,7 +1167,7 @@ const BOTTOM=[
   {v:'kursus',t:'Kursus',i:'kursus',c:'#e91e8c'},
 ];
 const TITLES={home:"HARAMAEN",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
-  med:"Perubatan",svc:"Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",kursus:"Kursus Umrah",admin:"Statistik Pelawat"};
+  med:"Perubatan",svc:"Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",kursus:"Kursus Umrah",mutawwif:"Kursus Mutawwif",admin:"Statistik Pelawat"};
 const ADMIN_EMAILS=['salizam.oasys@gmail.com'];
 function isAdmin(){ return !!(state.user && ADMIN_EMAILS.includes((state.user.email||'').toLowerCase())); }
 function buildNav(){
@@ -1169,7 +1182,7 @@ function buildNav(){
   renderMoreSheet();
   paintIcons();
 }
-const VALID_VIEWS=['home','agency','dua','stay','med','svc','guide','news','lost','solah','kursus','admin'];
+const VALID_VIEWS=['home','agency','dua','stay','med','svc','guide','news','lost','solah','kursus','mutawwif','admin'];
 function go(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   const el=document.getElementById('v-'+v); if(el) el.classList.add('active');
@@ -1179,6 +1192,7 @@ function go(v){
   if(v==='solah') fetchSolah(state.solCity);
   if(v==='dua'){ const e=document.getElementById('duaAsName'); if(e) e.textContent=actorName(); }
   if(v==='kursus') renderKursusAll();
+  if(v==='mutawwif') renderMutawwifAll();
   if(v==='admin') renderAdmin(); else if(admTimer){ clearInterval(admTimer); admTimer=null; }
   // Simpan view semasa dalam URL hash supaya refresh kembali ke page yang sama
   try{ history.replaceState(null,'',v==='home'?location.pathname+'#home':'#'+v); }catch(e){}
@@ -1202,6 +1216,7 @@ document.addEventListener('click', function(e){ const m=document.getElementById(
 
 /* ============ LIVE DATA (Supabase) ============ */
 let AGENCIES=[], HOTELS=[], VOLUNTEERS=[], HOSPITALS=[], SERVICES=[], COURSES=[], SAR_RATE=1.27;
+let MUTAWWIF=[];
 let NEWS=[], LATEST_DUAS=[], AG_REVIEW_SUMMARY={};
 let admTimer=null;
 const MED_MAP={hospital:{t:'Hospital',i:'🏥'}, pharmacy:{t:'Farmasi',i:'💊'}, insurance:{t:'Insurans',i:'🛡️'}};
@@ -1225,6 +1240,11 @@ async function loadData(){
     daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||'', created:c.created_at||'',
     poster_url:c.poster_url||''}))
     .sort((a,b)=> (a.date||'').localeCompare(b.date||''));
+  try{ const mc=await sb.from('mutawwif_courses').select('*').eq('status','approved');
+    MUTAWWIF=(mc.data||[]).map(c=>({tarikh:c.tarikh_label, date:c.tarikh_date||'', masa:c.masa||'', lokasi:c.lokasi||'',
+      daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||'', created:c.created_at||'',
+      poster_url:c.poster_url||''}))
+      .sort((a,b)=> (a.date||'').localeCompare(b.date||'')); }catch(e){ MUTAWWIF=[]; }
   try{ const r=await sb.rpc('list_duas',{p_visitor:vid()}); LATEST_DUAS=(r&&r.data)||[]; }catch(e){ LATEST_DUAS=[]; }
   AGENCIES=(ag.data||[]).map(a=>({id:a.id, name:a.name, rating:Number(a.rating), reviews:Number(a.reviews_count||0),
     motac:a.motac_licensed, lic:a.motac_license||'—', price:Number(a.price), tier:a.tier, note:a.note||'', logo_url:a.logo_url||'', premium:!!a.is_premium}));
@@ -1426,6 +1446,7 @@ const MENU=[
   {t:'Kirim Doa',          s:'Hantar doa anda ke Tanah Suci',            c:'#6d4bb0', i:'dua',    v:'dua'},
   {t:'Agensi Umrah',       s:'Cari & pilih agensi berdaftar',            c:'#10808e', i:'plane',  v:'agency'},
   {t:'Kursus Umrah',       s:'Jadual & pendaftaran kursus umrah',        c:'#e91e8c', i:'kursus', v:'kursus'},
+  {t:'Kursus Mutawwif',    s:'Jadual & pendaftaran kursus mutawwif',     c:'#8e44ad', i:'kursus', v:'mutawwif'},
   {t:'Perubatan',s:'Klinik, hospital & farmasi di Tanah Suci', c:'#a56a2e', i:'med',    v:'med'},
   {t:'Servis',      s:'Mutawwif, dobi, transport & lain-lain',    c:'#0f8a7e', i:'bell',   v:'svc'},
   {t:'Waktu Solat',        s:'Waktu solat tempatan ikut lokasi anda',       c:'#2f74c0', i:'mosque', v:'solah'},
@@ -1597,6 +1618,73 @@ function toggleKursusNear(){
   }, {enableHighAccuracy:false, timeout:15000, maximumAge:300000});
 }
 
+function renderMutawwifAll(){
+  const b=document.getElementById('mutawwifAllBody'); if(!b) return;
+  const fbar=document.getElementById('mutawwifAllFilter');
+  const negeris=[...new Set(MUTAWWIF.map(c=>c.negeri).filter(Boolean))].sort();
+  if(state.mNegeri!=='all' && !negeris.includes(state.mNegeri)) state.mNegeri='all';
+  const daerahs=[...new Set(MUTAWWIF.filter(c=>state.mNegeri==='all'||c.negeri===state.mNegeri).map(c=>c.daerah).filter(Boolean))].sort();
+  if(state.mDaerah!=='all' && !daerahs.includes(state.mDaerah)) state.mDaerah='all';
+  if(fbar){
+    const nearLbl = state.mNearBusy ? 'Mengesan lokasi…' : (state.mNear ? '📍 Berhampiran saya ✓' : '📍 Berhampiran saya');
+    fbar.innerHTML=`
+      <input type="text" id="mSearchInput" class="ksearch" placeholder="🔍 Cari kursus (anjuran, lokasi, daerah…)" value="${esc(state.mSearch)}" oninput="state.mSearch=this.value;renderMutawwifRows()">
+      <div class="krow">
+        <button class="kbtn kbtn-near${state.mNear?' on':''}" ${state.mNearBusy?'disabled':''} onclick="toggleMutawwifNear()">${nearLbl}</button>
+        <div class="kfield"><label>Tarikh</label>
+          <div class="kdate">
+            <input type="date" id="mfTarikhInputAll" value="${state.mTarikh!=='all'?esc(state.mTarikh):''}" onchange="state.mTarikh=this.value||'all';renderMutawwifAll()">
+            ${state.mTarikh!=='all'?`<button type="button" class="kdate-x" title="Semua tarikh" onclick="state.mTarikh='all';renderMutawwifAll()">✕</button>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="krow">
+        <div class="kfield"><label>Negeri</label><select onchange="state.mNegeri=this.value;state.mDaerah='all';renderMutawwifAll()">
+          <option value="all"${state.mNegeri==='all'?' selected':''}>Semua negeri</option>
+          ${negeris.map(n=>`<option value="${esc(n)}"${state.mNegeri===n?' selected':''}>${esc(n)}</option>`).join('')}
+        </select></div>
+        <div class="kfield"><label>Daerah</label><select onchange="state.mDaerah=this.value;renderMutawwifAll()">
+          <option value="all"${state.mDaerah==='all'?' selected':''}>Semua daerah</option>
+          ${daerahs.map(d=>`<option value="${esc(d)}"${state.mDaerah===d?' selected':''}>${esc(d)}</option>`).join('')}
+        </select></div>
+      </div>
+      ${state.mNear&&state.userLoc?`<div class="knear-note">📍 Menunjukkan kursus dalam radius 30km dari lokasi anda, disusun dari yang terdekat.</div>`:''}`;
+  }
+  renderMutawwifRows();
+}
+function renderMutawwifRows(){
+  const b=document.getElementById('mutawwifAllBody'); if(!b) return;
+  const q=state.mSearch.trim().toLowerCase();
+  let list=MUTAWWIF.filter(c=>
+    (state.mTarikh==='all'||c.date===state.mTarikh) &&
+    (state.mNegeri==='all'||c.negeri===state.mNegeri) &&
+    (state.mDaerah==='all'||c.daerah===state.mDaerah) &&
+    (!q || [c.anjuran,c.lokasi,c.daerah,c.negeri,c.tarikh].filter(Boolean).join(' ').toLowerCase().includes(q)));
+  const near = state.mNear && state.userLoc;
+  if(near){
+    const MAX_KM=30;
+    list=list.map(c=>({c,d:courseDist(c)}))
+      .filter(x=>x.d!=null && x.d<=MAX_KM)
+      .sort((a,b)=>a.d-b.d)
+      .map(x=>x.c);
+  }
+  b.innerHTML=list.map(c=>courseRow(c, near?courseDist(c):null)).join('')
+    || `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px">${near?'Tiada kursus dalam radius 30km dari lokasi anda.':'Tiada kursus untuk tapisan ini.'}</td></tr>`;
+}
+function toggleMutawwifNear(){
+  if(state.mNear){ state.mNear=false; renderMutawwifAll(); return; }
+  if(state.userLoc){ state.mNear=true; renderMutawwifAll(); return; }
+  if(!navigator.geolocation){ toast('Peranti anda tidak menyokong pengesanan lokasi.'); return; }
+  state.mNearBusy=true; renderMutawwifAll();
+  navigator.geolocation.getCurrentPosition(pos=>{
+    state.userLoc={lat:pos.coords.latitude, lng:pos.coords.longitude};
+    state.mNear=true; state.mNearBusy=false; renderMutawwifAll();
+  }, err=>{
+    state.mNearBusy=false; state.mNear=false; renderMutawwifAll();
+    if(err && err.code===1){ toast('Akses lokasi ditolak. Benarkan lokasi untuk cari kursus berhampiran anda. 📍'); }
+    else{ toast('Tak dapat kesan lokasi anda. Pastikan GPS dihidupkan & cuba lagi. 📍'); }
+  }, {enableHighAccuracy:false, timeout:15000, maximumAge:300000});
+}
 /* ---- Daftar Kursus (modal) ---- */
 function fillMasa(){
   const jamOpts='<option value="">—</option>'+Array.from({length:12},(_,i)=>`<option>${i+1}</option>`).join('');
@@ -1604,7 +1692,12 @@ function fillMasa(){
   ['cfJamA','cfJamB'].forEach(id=>{const e=document.getElementById(id); if(e&&!e.dataset.f){e.innerHTML=jamOpts; e.dataset.f=1;}});
   ['cfMinitA','cfMinitB'].forEach(id=>{const e=document.getElementById(id); if(e&&!e.dataset.f){e.innerHTML=minOpts; e.dataset.f=1;}});
 }
-function openCourseForm(){
+let cfMode='course';
+function openMutawwifForm(){ cfMode='mutawwif'; openCourseForm(true); }
+function openCourseForm(_keep){
+  if(!_keep) cfMode='course';
+  const _t=document.getElementById('cfTitle'); if(_t) _t.textContent=(cfMode==='mutawwif'?'Daftar Kursus Mutawwif':'Daftar Kursus Umrah');
+  const _sub=document.getElementById('cfSub'); if(_sub) _sub.textContent=(cfMode==='mutawwif'?'Isi maklumat kursus mutawwif. Kursus akan terus dipaparkan dalam senarai.':'Isi maklumat kursus. Kursus akan disemak admin dahulu sebelum dipaparkan dalam senarai.');
   const sel=document.getElementById('cfNegeri');
   if(sel && !sel.dataset.filled){ sel.innerHTML='<option value="">— Pilih negeri —</option>'+MY_NEGERI.map(n=>`<option>${n}</option>`).join(''); sel.dataset.filled=1; }
   fillMasa();
@@ -1667,12 +1760,15 @@ async function submitCourse(){
       const {data:{publicUrl}}=sb.storage.from('course-posters').getPublicUrl(path);
       posterUrl=publicUrl;
     }
-    const {error}=await sb.rpc('submit_course',{
+    const _rpc=(cfMode==='mutawwif')?'submit_mutawwif_course':'submit_course';
+    const {error}=await sb.rpc(_rpc,{
       p_jenis:jenis, p_anjuran:nama, p_tarikh:fmtDateMs(dateISO), p_tarikh_date:dateISO, p_masa:masa,
       p_lokasi:lokasi, p_daerah:daerah, p_negeri:negeri, p_hubungi:hubungi, p_poster_url:posterUrl });
     if(error) throw error;
+    if(cfMode==='mutawwif'){ try{ const mc=await sb.from('mutawwif_courses').select('*').eq('status','approved');
+      MUTAWWIF=(mc.data||[]).map(c=>({tarikh:c.tarikh_label, date:c.tarikh_date||'', masa:c.masa||'', lokasi:c.lokasi||'', daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||'', created:c.created_at||'', poster_url:c.poster_url||''})).sort((a,b)=>(a.date||'').localeCompare(b.date||'')); renderMutawwifAll(); }catch(e){} }
     closeCourseForm();
-    toast('Terima kasih! Kursus dihantar untuk semakan admin.');
+    toast(cfMode==='mutawwif'?'Terima kasih! Kursus mutawwif telah dipaparkan.':'Terima kasih! Kursus dihantar untuk semakan admin.');
   }catch(e){ toast('Gagal menghantar — cuba lagi.'); }
   btn.disabled=false; btn.textContent='Hantar';
 }
