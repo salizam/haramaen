@@ -430,6 +430,24 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     .bn .bnfi img{width:20px;height:20px;object-fit:contain} .bn .bnfi svg{width:18px;height:18px}
     .bn:not(.active) .bnfi{opacity:.58} .bn span{font-size:10px; font-weight:600; white-space:nowrap}
     .bn.active{color:var(--green)} .bn.active .bnfi{transform:translateY(-1px); box-shadow:0 4px 11px rgba(0,0,0,.2)}
+    /* Center 'more' button (raised) */
+    .bn-center{overflow:visible}
+    .bn-center .bn-center-ic{width:54px;height:54px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 4px 14px rgba(0,0,0,.22);margin-top:-24px;border:4px solid #fff;transition:transform .12s}
+    .bn-center:active .bn-center-ic,.bn-center.active .bn-center-ic{transform:translateY(-2px) scale(1.03)}
+    .bn-center span:last-child{margin-top:1px;color:var(--muted)}
+    .bn-center.active span:last-child{color:var(--green)}
+    /* More sheet (hidden menus) */
+    .more-sheet{position:fixed;inset:0;z-index:120;display:none}
+    .more-sheet.open{display:block}
+    .more-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.42)}
+    .more-panel{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;padding:8px 16px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -6px 26px rgba(0,0,0,.2);animation:moreUp .22s ease}
+    @keyframes moreUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .more-handle{width:42px;height:4px;border-radius:2px;background:#dcdce4;margin:6px auto 12px}
+    .more-title{font-weight:700;font-size:15px;color:var(--ink);margin:0 4px 14px}
+    .more-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 8px}
+    .more-item{border:0;background:none;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink);font-weight:600;font-size:11px;text-align:center;line-height:1.15}
+    .more-item .ico{width:48px;height:48px;border-radius:15px;color:#fff;display:flex;align-items:center;justify-content:center}
+    .more-item .ico svg{width:24px;height:24px}
   }
   @media(max-width:400px){
     .feat-grid{grid-template-columns:repeat(3,1fr)}
@@ -855,6 +873,14 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   </div>
   <!-- BOTTOM NAV (mobile) -->
   <nav class="bottomnav" id="bottomNav"></nav>
+  <div class="more-sheet" id="moreSheet">
+    <div class="more-backdrop" onclick="closeMore()"></div>
+    <div class="more-panel">
+      <div class="more-handle"></div>
+      <div class="more-title">Menu Lain</div>
+      <div class="more-grid" id="moreGrid"></div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL: Agency Reviews -->
@@ -1114,9 +1140,9 @@ const NAV=[
 const BOTTOM=[
   {v:'home',t:'Utama',i:'home',c:'#0d5c46'},
   {v:'dua',t:"Doa",i:'dua',c:'#6d4bb0'},
-  {v:'kursus',t:'Kursus',i:'kursus',c:'#e91e8c'},
+  {v:'__more',t:'Menu',center:true},
   {v:'agency',t:'Agensi',i:'plane',c:'#10808e'},
-  {v:'solah',t:'Solat',i:'mosque',c:'#2f74c0'},
+  {v:'kursus',t:'Kursus',i:'kursus',c:'#e91e8c'},
 ];
 const TITLES={home:"HARAMAEN",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
   med:"Perubatan",svc:"Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",kursus:"Kursus Umrah",admin:"Statistik Pelawat"};
@@ -1128,7 +1154,10 @@ function buildNav(){
   document.getElementById('sbNav').innerHTML=navList.map(n=>
     `<button class="sb-link" data-v="${n.v}" onclick="go('${n.v}')"><span class="ico" data-i="${n.i}" style="background:${n.c||'rgba(255,255,255,.15)'}"></span> ${n.t}</button>`).join('');
   document.getElementById('bottomNav').innerHTML=BOTTOM.map(n=>
-    `<button class="bn" data-v="${n.v}" onclick="go('${n.v}')"><span class="bnfi" style="background:${n.c}">${ICONS[n.i]?`<img src="${ICONS[n.i]}" alt="" draggable="false">`:`<span class="ico" data-i="${n.i}"></span>`}</span><span>${n.t}</span></button>`).join('');
+    n.center
+      ? `<button class="bn bn-center" data-v="__more" onclick="openMore(event)" aria-label="Menu lain"><span class="bn-center-ic">${GRID_SVG}</span><span>${n.t}</span></button>`
+      : `<button class="bn" data-v="${n.v}" onclick="go('${n.v}')"><span class="bnfi" style="background:${n.c}">${ICONS[n.i]?`<img src="${ICONS[n.i]}" alt="" draggable="false">`:`<span class="ico" data-i="${n.i}"></span>`}</span><span>${n.t}</span></button>`).join('');
+  renderMoreSheet();
   paintIcons();
 }
 const VALID_VIEWS=['home','agency','dua','stay','med','svc','guide','news','lost','solah','kursus','admin'];
@@ -1136,6 +1165,7 @@ function go(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   const el=document.getElementById('v-'+v); if(el) el.classList.add('active');
   document.querySelectorAll('[data-v]').forEach(t=>t.classList.toggle('active', t.getAttribute('data-v')===v));
+  const _cb=document.querySelector('.bn-center'); if(_cb) _cb.classList.toggle('active', !['home','dua','agency','kursus'].includes(v));
   const m=document.getElementById('main'); if(m) m.scrollTop=0; window.scrollTo(0,0);
   if(v==='solah') fetchSolah(state.solCity);
   if(v==='dua'){ const e=document.getElementById('duaAsName'); if(e) e.textContent=actorName(); }
@@ -1145,6 +1175,15 @@ function go(v){
   try{ history.replaceState(null,'',v==='home'?location.pathname+'#home':'#'+v); }catch(e){}
 }
 function jump(v){ go(v); }
+const GRID_SVG='<svg viewBox="0 0 44 44" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="7" width="14" height="14" rx="4" fill="#34A853"></rect><rect x="23" y="7" width="14" height="14" rx="4" fill="#FBBC05"></rect><rect x="7" y="23" width="14" height="14" rx="4" fill="#4285F4"></rect><rect x="23" y="23" width="14" height="14" rx="4" fill="#EA4335"></rect></svg>';
+const BOTTOM_MAIN=['home','dua','agency','kursus'];
+function moreList(){ const h=NAV.filter(n=>!BOTTOM_MAIN.includes(n.v)); if(isAdmin()) h.push({v:'admin',t:'Statistik',i:'book',c:'#555'}); return h; }
+function renderMoreSheet(){ const g=document.getElementById('moreGrid'); if(!g) return;
+  g.innerHTML=moreList().map(n=>`<button class="more-item" data-v="${n.v}" onclick="pickMore('${n.v}')"><span class="ico" data-i="${n.i}" style="background:${n.c||'rgba(0,0,0,.12)'}"></span><span>${n.t}</span></button>`).join('');
+  paintIcons(); }
+function openMore(e){ if(e) e.stopPropagation(); const s=document.getElementById('moreSheet'); if(s) s.classList.add('open'); }
+function closeMore(){ const s=document.getElementById('moreSheet'); if(s) s.classList.remove('open'); }
+function pickMore(v){ closeMore(); go(v); }
 window.addEventListener('popstate',function(){
   const v=(location.hash||'').replace('#','');
   if(v && VALID_VIEWS.includes(v) && (v!=='admin'||isAdmin())) go(v);
