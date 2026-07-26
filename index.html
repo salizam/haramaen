@@ -1202,12 +1202,19 @@ function go(v){
 function jump(v){ go(v); }
 const GRID_SVG='<svg viewBox="0 0 44 44" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="7" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect><rect x="23" y="7" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect><rect x="7" y="23" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect><rect x="23" y="23" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect></svg>';
 const BOTTOM_MAIN=['home','dua','agency','kursus'];
-function moreList(){ const h=MENU.filter(m=>!BOTTOM_MAIN.includes(m.v)); if(isAdmin()) h.push({v:'admin',t:'Statistik',i:'book',c:'#555'}); return h; }
+function moreList(){ const h=MENU.slice(); if(isAdmin()) h.push({v:'admin',t:'Statistik',i:'book',c:'#555'}); return h; }
 function renderMoreSheet(){ const g=document.getElementById('moreGrid'); if(!g) return;
   g.innerHTML=moreList().map(m=>`<button class="more-item" data-v="${m.v}" onclick="pickMore('${m.v}')"><span class="fi" style="background:${m.c}">${ICONS[m.i]?`<img class="fimg" src="${ICONS[m.i]}" alt="" draggable="false">`:svg(m.i)}</span><span>${m.t}</span></button>`).join('');
   paintIcons(); }
-function openMore(e){ if(e) e.stopPropagation(); const s=document.getElementById('moreSheet'); if(s) s.classList.add('open'); }
-function closeMore(){ const s=document.getElementById('moreSheet'); if(s) s.classList.remove('open'); }
+function openMore(e){ if(e) e.stopPropagation(); const s=document.getElementById('moreSheet'); if(s) s.classList.add('open'); initMoreDrag(); }
+function closeMore(){ const s=document.getElementById('moreSheet'); if(s) s.classList.remove('open'); const p=document.querySelector('.more-panel'); if(p){ p.style.transition=''; p.style.transform=''; } }
+function initMoreDrag(){
+  const panel=document.querySelector('.more-panel'); if(!panel||panel.dataset.dragInit) return; panel.dataset.dragInit='1';
+  let startY=0, dy=0, dragging=false;
+  panel.addEventListener('touchstart', e=>{ startY=e.touches[0].clientY; dy=0; dragging=true; panel.style.transition='none'; }, {passive:true});
+  panel.addEventListener('touchmove', e=>{ if(!dragging) return; dy=e.touches[0].clientY-startY; if(dy<0) dy=0; panel.style.transform='translateY('+dy+'px)'; }, {passive:true});
+  panel.addEventListener('touchend', ()=>{ if(!dragging) return; dragging=false; panel.style.transition='transform .22s ease'; if(dy>90){ panel.style.transform='translateY(100%)'; setTimeout(closeMore,190); } else { panel.style.transform=''; } });
+}
 function pickMore(v){ closeMore(); go(v); }
 window.addEventListener('popstate',function(){
   const v=(location.hash||'').replace('#','');
