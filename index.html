@@ -363,6 +363,11 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     border:1px solid var(--line); background:#fff; margin-bottom:10px}
   .emg .ei{width:44px;height:44px;border-radius:12px;flex:none;display:grid;place-items:center;color:#fff;font-size:20px}
   .emg .num{margin-left:auto; font-weight:800; font-size:17px; color:var(--green); white-space:nowrap}
+  .lost-top{display:flex;gap:12px;align-items:flex-start}
+  .lost-thumb{width:64px;height:64px;border-radius:12px;object-fit:cover;flex:none;background:#f0ede6;border:1px solid var(--line)}
+  .lost-thumb.ph{display:flex;align-items:center;justify-content:center;font-size:28px}
+  .lost-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .btn.sm.wa{background:#25D366;color:#fff}
 
   .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:30px; z-index:200;
     background:var(--ink); color:#fff; padding:12px 18px; border-radius:12px; font-size:13.5px;
@@ -857,7 +862,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div class="card" style="background:linear-gradient(120deg,var(--green),var(--green-l));color:#fff;border:0">
           <b style="font-size:14px">🧭 Bawa saya balik ke hotel</b>
           <div style="font-size:12px;opacity:.9;margin-top:2px">Guna GPS + Google Maps ke hotel yang anda tetapkan.</div>
-          <button class="btn gold" style="margin-top:12px" onclick="findWayBack()">Buka arah ke hotel</button>
+          <button class="btn gold" style="margin-top:12px;color:#fff" onclick="findWayBack()">Buka arah ke hotel</button>
         </div>
         <div class="section-title" style="font-size:15px">Lapor Orang Hilang</div>
         <div class="card">
@@ -870,8 +875,13 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
           <input id="lostLoc" placeholder="cth: Pintu 79 Masjidil Haram, selepas Isyak">
           <label class="f">No. telefon anda</label>
           <input id="lostTel" placeholder="cth: +6013…">
-          <button class="btn" style="margin-top:12px" onclick="reportLost()">Hantar laporan</button>
+          <label class="f">Gambar orang hilang <span style="font-weight:400;color:var(--muted)">(jika ada)</span></label>
+          <input type="file" id="lostImg" accept="image/jpeg,image/png,image/webp" onchange="previewLostImg(this)">
+          <img id="lostImgPreview" class="up-preview" alt="Preview gambar">
+          <button class="btn" id="lostSend" style="margin-top:12px" onclick="reportLost()">Hantar laporan</button>
         </div>
+        <div class="section-title" style="font-size:15px">Laporan Orang Hilang (Terkini)</div>
+        <div id="lostList"></div>
         <div class="section-title" style="font-size:15px">Tips Elak Terpisah</div>
         <div class="card" id="lostTips"></div>
       </section>
@@ -1279,6 +1289,7 @@ function go(v){
   if(v==='mutawwif') renderMutawwifAll();
   if(v==='assistant') renderAssistant();
   if(v==='shop') renderShop();
+  if(v==='lost') loadLost();
   if(v==='admin') renderAdmin(); else if(admTimer){ clearInterval(admTimer); admTimer=null; }
   // Simpan view semasa dalam URL hash supaya refresh kembali ke page yang sama
   try{ history.replaceState(null,'',v==='home'?location.pathname+'#home':'#'+v); }catch(e){}
@@ -2969,12 +2980,93 @@ function renderLost(){
       <div class="num">${e.num}</div></div>`).join('');
   document.getElementById('lostTips').innerHTML=LTIPS.map(t=>`
     <div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13.5px"><span>✅</span><span>${t}</span></div>`).join('');
+  loadLost();
 }
-function reportLost(){
-  const nm=document.getElementById('lostName').value.trim();
+let LOST=[];
+function previewLostImg(input){
+  const prev=document.getElementById('lostImgPreview');
+  if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; }
+  else { prev.style.display='none'; }
+}
+function lostWa(phone){
+  let d=(phone||'').replace(/[^0-9]/g,'');
+  if(!d) return '';
+  if(d[0]==='0') d='60'+d.slice(1);
+  return 'https://wa.me/'+d;
+}
+async function loadLost(){
+  try{
+    const {data}=await sb.from('lost_reports').select('*').eq('status','active').order('created_at',{ascending:false}).limit(60);
+    LOST=data||[];
+  }catch(e){ LOST=[]; }
+  renderLostList();
+}
+function renderLostList(){
+  const el=document.getElementById('lostList'); if(!el) return;
+  if(!LOST.length){ el.innerHTML='<div class="empty">Tiada laporan aktif buat masa ini. 🤍</div>'; return; }
+  el.innerHTML=LOST.map(r=>{
+    const wa=lostWa(r.reporter_phone);
+    const mine=(state.user&&r.reporter_id===state.user.id)||isAdmin();
+    const img=r.photo_url?`<img class="lost-thumb" src="${esc(r.photo_url)}" alt="${esc(r.name)}" loading="lazy" onerror="this.style.display='none'">`:`<div class="lost-thumb ph">👤</div>`;
+    return `<div class="card">
+      <div class="lost-top">
+        ${img}
+        <div style="flex:1;min-width:0">
+          <b style="font-size:14.5px">${esc(r.name)}</b>
+          ${r.description?`<div class="tag">📝 ${esc(r.description)}</div>`:''}
+          ${r.last_seen?`<div class="tag">📍 ${esc(r.last_seen)}</div>`:''}
+          <div class="tag" style="opacity:.7">🕒 ${relTime(r.created_at)}</div>
+        </div>
+      </div>
+      <div class="lost-actions">
+        ${wa?`<a class="btn sm wa" href="${wa}" target="_blank" rel="noopener">💬 ${esc(r.reporter_phone)}</a>`:(r.reporter_phone?`<span class="tag">📱 ${esc(r.reporter_phone)}</span>`:'')}
+        ${mine?`<button class="btn ghost sm" onclick="markFound('${r.id}',this)">✅ Sudah dijumpai</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+async function markFound(id,btn){
+  if(btn){ btn.disabled=true; btn.textContent='…'; }
+  const {error}=await sb.from('lost_reports').update({status:'found'}).eq('id',id);
+  if(error){ toast('Gagal kemas kini.'); if(btn){btn.disabled=false;btn.textContent='✅ Sudah dijumpai';} return; }
+  LOST=LOST.filter(x=>x.id!==id); renderLostList();
+  toast('Alhamdulillah, ditanda sudah dijumpai. 🤍');
+}
+async function reportLost(){
+  const nm=(document.getElementById('lostName').value||'').trim();
   if(!nm){toast('Sila isi nama orang hilang.');return;}
-  ['lostName','lostDesc','lostLoc','lostTel'].forEach(id=>document.getElementById(id).value='');
-  toast('Laporan direkod. Sila hubungi talian kecemasan 911 segera 🚨');
+  const desc=(document.getElementById('lostDesc').value||'').trim();
+  const loc=(document.getElementById('lostLoc').value||'').trim();
+  const tel=(document.getElementById('lostTel').value||'').trim();
+  const btn=document.getElementById('lostSend'); if(btn){ btn.disabled=true; btn.textContent='Menghantar…'; }
+  try{
+    let photoUrl=null;
+    const fi=document.getElementById('lostImg');
+    const imgFile=fi&&fi.files?fi.files[0]:null;
+    if(imgFile){
+      if(imgFile.size>5*1024*1024){ toast('Gambar terlalu besar — maks 5MB.'); if(btn){btn.disabled=false;btn.textContent='Hantar laporan';} return; }
+      const ext=(imgFile.name.split('.').pop()||'jpg').toLowerCase();
+      const path='lost-'+Date.now()+'.'+ext;
+      const {error:upErr}=await sb.storage.from('lost-photos').upload(path,imgFile,{contentType:imgFile.type,upsert:false});
+      if(upErr) throw upErr;
+      const {data:{publicUrl}}=sb.storage.from('lost-photos').getPublicUrl(path);
+      photoUrl=publicUrl;
+    }
+    const {error}=await sb.from('lost_reports').insert({
+      name:nm, description:desc||null, last_seen:loc||null,
+      reporter_phone:tel||null, photo_url:photoUrl,
+      reporter_id: state.user?state.user.id:null, status:'active'
+    });
+    if(error) throw error;
+    ['lostName','lostDesc','lostLoc','lostTel'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    if(fi) fi.value='';
+    const lp=document.getElementById('lostImgPreview'); if(lp){ lp.src=''; lp.style.display='none'; }
+    toast('Laporan dihantar & dipaparkan. Semoga segera dijumpai 🤲');
+    loadLost();
+  }catch(e){
+    toast('Gagal hantar laporan. Cuba lagi.');
+  }
+  if(btn){ btn.disabled=false; btn.textContent='Hantar laporan'; }
 }
 
 /* ============ WAKTU SOLAT ============ */
