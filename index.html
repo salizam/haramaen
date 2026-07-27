@@ -449,6 +449,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     .more-item .fi{width:48px;height:48px;border-radius:15px;color:#fff;display:grid;place-items:center;flex:none}
     .more-item .fi svg{width:24px;height:24px}
     .more-item .fi .fimg{width:30px;height:30px;object-fit:contain}
+    .more-item.soon{opacity:.72}
+    .soon-badge{display:inline-block;font-size:8px;font-weight:800;letter-spacing:.2px;color:#b45309;background:#fef3c7;border:1px solid #fde68a;border-radius:6px;padding:1px 5px;margin-top:3px;line-height:1.5}
   }
   /* Desktop: sembunyikan komponen mobile-sahaja (bottom nav + more sheet) */
   @media(min-width:821px){ .bottomnav,.more-sheet{display:none} }
@@ -495,6 +497,29 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .backbtn{background:transparent; border:1px solid var(--line); color:var(--ink); border-radius:10px;
     padding:8px 14px; font-weight:700; font-size:13px; cursor:pointer; font-family:inherit; margin-bottom:14px}
   .backbtn:hover{background:var(--line)}
+  /* AI Assistant */
+  .ai-head{display:flex;align-items:center;gap:12px;margin:2px 0 14px}
+  .ai-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#6366f1);display:grid;place-items:center;font-size:23px;flex:none;box-shadow:0 3px 10px rgba(99,102,241,.3)}
+  .ai-title{font-weight:800;font-size:17px;color:var(--ink)}
+  .ai-sub{font-size:12.5px;color:var(--muted)}
+  .ai-chat{display:flex;flex-direction:column;gap:10px;min-height:200px;max-height:56vh;overflow-y:auto;overscroll-behavior:contain;padding:4px 2px;margin-bottom:12px}
+  .ai-msg{max-width:88%;padding:10px 13px;border-radius:16px;font-size:14px;line-height:1.55;word-wrap:break-word}
+  .ai-msg.user{align-self:flex-end;background:var(--green);color:#fff;border-bottom-right-radius:5px}
+  .ai-msg.bot{align-self:flex-start;background:#fff;border:1px solid var(--line);color:var(--ink);border-bottom-left-radius:5px}
+  .ai-msg.bot b{color:var(--green-d)}
+  .ai-typing{align-self:flex-start;display:flex;gap:5px;padding:13px 15px;background:#fff;border:1px solid var(--line);border-radius:16px}
+  .ai-typing span{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:aiBlink 1.2s infinite}
+  .ai-typing span:nth-child(2){animation-delay:.2s} .ai-typing span:nth-child(3){animation-delay:.4s}
+  @keyframes aiBlink{0%,60%,100%{opacity:.3}30%{opacity:1}}
+  .ai-suggest{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .ai-chip{background:#eef2ff;border:1px solid #dbe2fb;color:#3730a3;border-radius:20px;padding:8px 13px;font-size:12.5px;font-family:inherit;cursor:pointer;transition:.15s}
+  .ai-chip:hover{background:#e0e7ff}
+  .ai-inputbar{display:flex;gap:8px;align-items:flex-end}
+  .ai-inputbar textarea{flex:1;resize:none;max-height:120px;padding:11px 14px;border:1px solid var(--line);border-radius:16px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink);line-height:1.4}
+  .ai-inputbar textarea:focus{outline:none;border-color:var(--gold)}
+  .ai-send{flex:none;width:44px;height:44px;border-radius:50%;border:0;background:var(--green);color:#fff;cursor:pointer;display:grid;place-items:center}
+  .ai-send:disabled{opacity:.5;cursor:default}
+  .ai-disc{font-size:11px;color:var(--muted);text-align:center;margin-top:10px}
   @media(max-width:820px){
     .ktdaftar{flex:1}
     .ktdaftar .kbtn-daftar{order:2}
@@ -690,6 +715,18 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
             <tbody id="mutawwifAllBody"></tbody>
           </table>
         </div>
+      </section>
+
+      <section class="view" id="v-assistant">
+        <button class="backbtn" onclick="go('home')">← Kembali</button>
+        <div class="ai-head"><div class="ai-avatar">🤖</div><div><div class="ai-title">AI Assistant HARAMAEN</div><div class="ai-sub">Pembantu maya umrah anda</div></div></div>
+        <div class="ai-chat" id="aiChat"></div>
+        <div class="ai-suggest" id="aiSuggest"></div>
+        <div class="ai-inputbar">
+          <textarea id="aiInput" rows="1" placeholder="Tanya apa-apa tentang umrah atau app…" oninput="aiAutoGrow(this)" onkeydown="aiKey(event)"></textarea>
+          <button class="ai-send" id="aiSend" onclick="sendAI()" aria-label="Hantar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+        </div>
+        <div class="ai-disc">AI boleh tersilap. Untuk hal fiqh, rujuk mutawwif/ustaz; harga & jadual sahkan dengan agensi.</div>
       </section>
 
       <!-- AGENCY -->
@@ -1141,6 +1178,7 @@ const SVG={
   clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
   chev:'<path d="m9 18 6-6-6-6"/>',
   pic:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+  ai:'<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',
   kursus:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>'
 };
 function svg(k){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${SVG[k]||SVG.home}</svg>`;}
@@ -1169,7 +1207,7 @@ const BOTTOM=[
   {v:'kursus',t:'Kursus',i:'kursus',c:'#e91e8c'},
 ];
 const TITLES={home:"HARAMAEN",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
-  med:"Perubatan",svc:"Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",kursus:"Kursus Umrah",mutawwif:"Kursus Mutawwif",admin:"Statistik Pelawat"};
+  med:"Perubatan",svc:"Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",kursus:"Kursus Umrah",mutawwif:"Kursus Mutawwif",assistant:"AI Assistant",admin:"Statistik Pelawat"};
 const ADMIN_EMAILS=['salizam.oasys@gmail.com'];
 function isAdmin(){ return !!(state.user && ADMIN_EMAILS.includes((state.user.email||'').toLowerCase())); }
 function buildNav(){
@@ -1184,7 +1222,7 @@ function buildNav(){
   renderMoreSheet();
   paintIcons();
 }
-const VALID_VIEWS=['home','agency','dua','stay','med','svc','guide','news','lost','solah','kursus','mutawwif','admin'];
+const VALID_VIEWS=['home','agency','dua','stay','med','svc','guide','news','lost','solah','kursus','mutawwif','assistant','admin'];
 function go(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   const el=document.getElementById('v-'+v); if(el) el.classList.add('active');
@@ -1195,6 +1233,7 @@ function go(v){
   if(v==='dua'){ const e=document.getElementById('duaAsName'); if(e) e.textContent=actorName(); }
   if(v==='kursus') renderKursusAll();
   if(v==='mutawwif') renderMutawwifAll();
+  if(v==='assistant') renderAssistant();
   if(v==='admin') renderAdmin(); else if(admTimer){ clearInterval(admTimer); admTimer=null; }
   // Simpan view semasa dalam URL hash supaya refresh kembali ke page yang sama
   try{ history.replaceState(null,'',v==='home'?location.pathname+'#home':'#'+v); }catch(e){}
@@ -1204,7 +1243,7 @@ const GRID_SVG='<svg viewBox="0 0 44 44" width="30" height="30" xmlns="http://ww
 const BOTTOM_MAIN=['home','dua','agency','kursus'];
 function moreList(){ const h=MENU.slice(); if(isAdmin()) h.push({v:'admin',t:'Statistik',i:'book',c:'#555'}); return h; }
 function renderMoreSheet(){ const g=document.getElementById('moreGrid'); if(!g) return;
-  g.innerHTML=moreList().map(m=>`<button class="more-item" data-v="${m.v}" onclick="pickMore('${m.v}')"><span class="fi" style="background:${m.c}">${ICONS[m.i]?`<img class="fimg" src="${ICONS[m.i]}" alt="" draggable="false">`:svg(m.i)}</span><span>${m.t}</span></button>`).join('');
+  g.innerHTML=moreList().map(function(m){ const ic=ICONS[m.i]?`<img class="fimg" src="${ICONS[m.i]}" alt="" draggable="false">`:svg(m.i); const badge=m.soon?`<span class="soon-badge">Akan datang</span>`:''; const click=m.soon?`toast('${m.t} akan datang, nantikan!')`:`pickMore('${m.v}')`; return `<button class="more-item${m.soon?' soon':''}" data-v="${m.v}" onclick="${click}"><span class="fi" style="background:${m.c}">${ic}</span><span>${m.t}${badge}</span></button>`; }).join('');
   paintIcons(); }
 function openMore(e){ if(e) e.stopPropagation(); const s=document.getElementById('moreSheet'); if(s) s.classList.add('open'); initMoreDrag(); }
 function closeMore(){ const s=document.getElementById('moreSheet'); if(s) s.classList.remove('open'); const p=document.querySelector('.more-panel'); if(p){ p.style.transition=''; p.style.transform=''; } }
@@ -1216,6 +1255,48 @@ function initMoreDrag(){
   panel.addEventListener('touchend', ()=>{ if(!dragging) return; dragging=false; panel.style.transition='transform .22s ease'; if(dy>90){ panel.style.transform='translateY(100%)'; setTimeout(closeMore,190); } else { panel.style.transform=''; } });
 }
 function pickMore(v){ closeMore(); go(v); }
+/* ---- AI Assistant ---- */
+let AICHAT=[]; let aiBusy=false;
+function renderAssistant(){
+  aiBubbles();
+  const sug=document.getElementById('aiSuggest'); if(!sug) return;
+  if(AICHAT.length){ sug.innerHTML=''; return; }
+  const qs=['Apa rukun umrah?','Macam mana nak guna Kirim Doa?','Tips persediaan sebelum umrah','Cara cari agensi berdaftar'];
+  sug.innerHTML=qs.map(q=>`<button class="ai-chip" onclick="aiAsk(this.textContent)">${q}</button>`).join('');
+}
+function aiFmt(t){ return esc(t).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>'); }
+function aiBubbles(){
+  const chat=document.getElementById('aiChat'); if(!chat) return;
+  if(!AICHAT.length){
+    chat.innerHTML='<div class="ai-msg bot">Assalamualaikum! 😊 Saya pembantu AI HARAMAEN. Tanya saya tentang rukun & doa umrah, tips persediaan, atau cara guna app ini.</div>';
+    return;
+  }
+  chat.innerHTML=AICHAT.map(m=>`<div class="ai-msg ${m.role==='user'?'user':'bot'}">${aiFmt(m.content)}</div>`).join('');
+  chat.scrollTop=chat.scrollHeight;
+}
+function aiAsk(q){ const i=document.getElementById('aiInput'); if(i) i.value=q; sendAI(); }
+function aiAutoGrow(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
+function aiKey(e){ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendAI(); } }
+async function sendAI(){
+  if(aiBusy) return;
+  const input=document.getElementById('aiInput'); if(!input) return;
+  const q=input.value.trim(); if(!q) return;
+  input.value=''; aiAutoGrow(input);
+  const sug=document.getElementById('aiSuggest'); if(sug) sug.innerHTML='';
+  AICHAT.push({role:'user',content:q}); aiBubbles();
+  aiBusy=true; const btn=document.getElementById('aiSend'); if(btn) btn.disabled=true;
+  const chat=document.getElementById('aiChat');
+  const typing=document.createElement('div'); typing.className='ai-typing'; typing.innerHTML='<span></span><span></span><span></span>';
+  if(chat){ chat.appendChild(typing); chat.scrollTop=chat.scrollHeight; }
+  try{
+    const {data,error}=await sb.functions.invoke('assistant',{body:{messages:AICHAT.slice(-12)}});
+    if(error) throw error;
+    AICHAT.push({role:'assistant',content:(data&&data.reply)||'Maaf, saya tak dapat jawab sekarang.'});
+  }catch(e){
+    AICHAT.push({role:'assistant',content:'Maaf, pembantu AI belum tersedia buat masa ini. Sila cuba sebentar lagi. 🙏'});
+  }
+  aiBusy=false; if(btn) btn.disabled=false; aiBubbles();
+}
 window.addEventListener('popstate',function(){
   const v=(location.hash||'').replace('#','');
   if(v && VALID_VIEWS.includes(v) && (v!=='admin'||isAdmin())) go(v);
@@ -1451,6 +1532,7 @@ const ICONS={
   book:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAYAAAA5ZDbSAAASO0lEQVR42u1debRdVXn/fefdN4QkkEFCIoNhDsFWohEkoGIIiEqgiiAyqIXa2qrtAlniH2KtLluKVRroKq6uVigLCg6FYEjQgogJCVUIEgSDIQFCYkYIgYTkDfeen3+cbycfm33u8PLue+e+t7+17rrv3eEM+7e/ebhApEiRIkWKFClSpEiRIkWKFClSpEiRIkWKFCnSPpCMhJskuec+RYQR4OEBagIgUVDLgdcJgCKSRoBbC9g2HziSEwG0K9iban0+AlxcMSwOKJJvB3AugCMBnANgrH70PgAvA1gK4CEReU4/X7KcHqmgOpbkLJILWB+9TvImktMMN0cqoK4FybEesCnJMsk+/Tv1Xiubz75K8nK3WeyGiVQAziU5huQSBavsgVeNUgXb0Y1200QaYnBJlkjub8DtYf8oNd+9SY8dxXUBrGWQXKjA9HLfyXHzh6NOLga4l5OsDBC41GOVSW4jOZFkEvXx0IjmhOQEkpsMMANFjov/3rlPcdWHhns/2ARw3fFSkltJTml1oytp4Wv+BLJwY9qE41cAvAXAB1p4nVrvwlUflkkeCOBsZJG4ZhhCTu/OdKeOAA8SaTaoD8D4Zp5Gnz+sz2kEeHCozSy8qChtppX7eqvbLEmLXu9MBbsS12d43YAD9Jf6d7MDEWkEeHDJLfhDqofbmmwA7RcBHhoa3WTudZvmx9FNGmQLWiNLWwH8XIGoNBHgpzyrOgI8SED3AZivCz/Qi5+qdPgDgP/zdH+kZpOJRY8muVpDi82IRV+h54ux6DqBKQ1UdsbEo//CA2Ug4tAVkhu0QmSgrldItg3b9KO/SAp2W3+D+GbBukjON6U4+0ou7fg3+8K9Rsq0DXsJYGqmLiU5g+SEvN3dCODmuG0kN+9j0r9ipMDXrZRoRKrkAarq5EMkz7TXPizEsj5/1tRLbSP5XyTPITk9BJzhcKljUYXk+0juNOK60g+dS5JfrRdcUzKUBCRUB8njSH6O5PdIrtHjrw9JtFYGuF2f/9NUM/r0EMnbSc7RWubQQrbn6UPDydNJ/m+AKyteVaWtrHQbYTPJq/PEsqu01A3VnnOvp5A8n+S9JJ/IqftaM9zEswN4nhGhqbfwvg78le78uaHFNByeWDFtOPqTeox6aSHJY31wa+lQLfa7hORdJH+TA6jbZG5jPzfYGAyWAZCYgIHoeVPjXzrObAdwoj4AYAPJpwEsAbAYwEoR2WJClhbcdgBlEbmD5A8AnA9gOoA/AzDZfCcBsALAIwB+ISIPme+n7ngiUvEAnQTg/QCmATgPwBQAk7zgSOoFSkp6viGLaUuzOVhE+rTe+AsAyjmbKtXHnqYw/ds3RroBLASwHsAtAF4WkXWeuE6Q9RpVzGvtXqCkx5MyaQDQaQAOBnAhgKMAnAyg07uesreGedft7u15ETliOHKwHwYUAL8FsBHA6Ro5SryFSw3YVJC6lHsA4O8AvEpyKYDvA9goIssC3E0AfSKSuv4lp1dFhBoVA8mjkPUxfQzA4XpdIaAq5nV3L75RtgXAEwDOHGo1OdgAuzDgegDvUu4+RkXdpwF8EMBBADoCnFLxxF8bgAOQJf9dHfNv9Ry3aKhxgYh021h29jGWAIwjeQ6AowF8BMBheryQZHHSzgfUPffohn0CwCIA/y8iG0neCuBSvf6OkQCwW6geBbdNRFYBWAXgYZJjdZEvAnCocut45VxLFV14MYAnAP5E/75enzeRnK9gfx/AHOXSTwA4EMCEwHFRBVBLawD8D4C1AO5VdVH2pMfWkcbBexZPRWTFOP2JiOwAsAPAdbpIVwI4FlkFxxwAxwM4wVtwl1Gy5TsOmMkAPqevXZMjGazx576XeLp1J4DVAB4A8DSAFwAsCejtkh6jTUR681yqkQDwnlEKpvE6NX6ua8ruQ5aye0rFLkieqKL8JH28JXAffdhbs+U4vMNwfuJtkJJn7QPAsypZ5gNYrJImGMhxnO842GxajliAq4HuOMsYRc7VoIj8GsCv9f23Apio+vsQAHORVWG0e1zqrHNfd9oNsR3A3Sp67wWwXkRe8+LpieH01AAqnrooDBUGYLOAVgdWlMPf5PfqhtgAYAOAq/S9AwEcA+A0AKcAeA/eWF7rQK6oBf+AcuqPAGwVke1+KNT9qddR8QIhifGZWe99DuYgmFLBuLdSJaadWv/WE4XO992qhs1Sw+GzAXxF9TeUO78BYIWI9OaI3NTzpV1TuFMdFW8GyAEARovIhhpx5nSwp/yUhoAzQ+8DwP4A5qm78hqAm1X3vRKwTt1ipQYQX6RXlMNvIzkewA363jUi8oThQMfRDM3o8GZ32Os4CsB7AVwC4Ai1IaYD6A0EkJz4HkPyUBFZN1icXGoisAmAkrpDu6qFMdWafofqUkfnAthI8mUA/w3gfgBrRGRniONExHEHDeAd+reNQI3xwpFvCoxY7hSRsh5nnAmCnKNRrrHmuNv1fntIhlzDivr4MzWr1KmRudYDmGSii7Sb5Bjd6czh5FQ3wyq1lt9u9OUUfXxbuWe7+rU/Uzdls7ehxAOIChA9MVmxulz/Tq1INrHxv9Ko2UQFOeRmJcq5rOH/E8BZInI3gG69ZrbUcDYT/D+K5PUm02Jrp9YEuB0kDyL5KZK/ILmjRhboJZJ3kLyG5Iy8WLg+f8l8b5Z3nRboE0keaf4/IZA77jP3kpqBLjtIjjaSw2bR+kyGiSTvJ3lVQE21DLinmQS87eENAhy6SZJHkvyM5nhX1pH2W6JAzjT526oAm411lUkxvkZyqr7+TjPUJTXAhipHlpPsVN2eB7Dfz/wzkoe0xGQft2Ak301yl8nvVgI3FwRYE/udfgRIp+gcQ/JKkveR3F4F6G6Sk/V4HVUAduB/JVCTNUPfm6Hg9ubUfG0neTfJL5AcF9hY83KKAstm6MvDviQprA7WjM0/ARilwYP2Br7r2kKtAZVkb8lO1dHfBfBdtYpnATgDWZ/wFOxtM+kE0KVF8vWceq75ux3AgwDWmYBImwmMvKCx50WaWHhMRLYFNmutc7pj9gKYRfJqEfnnZkzbKw0Q9zpLeIrGjdN6j21EU0ldmS0A7hGRxwN6ugNZUv8VZHnhhVq/PA3AqWqFPwNgszNgqp1an8/TpMFvANwnIg+Y61qNrH1lmYK7wAdAs2GTAewSkccaXLo2Nb4uIHmDAl5I8eyK6y4LDBdjNRFtxNl/eJ9dRvI2kh8jOSpwzk4tbpMq11XTyApt1hqlOm/VsqDrST7iGYOX6mdG1RDRfmkPSR7nBW8K6Sb1Zwc6TlrtuR8n6+NiAOtIbgDwQxXVv9TMk91gNmBRaWBzusBIm6qDHu/9CQCO09DnqaoaJubc+0Y9XmHcnoEGuAsNlgGpn9omItfp7v2sRoZgMjWH6uMkfW0zyR9ppmetiKw2CYr+GCu0YUvlpk9pAsNNqq12X88CuEJEHtDzVxrc3DsB9BTWkjbuxuE62LMcqJisZUXbQvaPaGXl4oD1mgaOuYjk50ke318RTfJkkt9S1VCLtpH8KckLSJ4auIf2OkW086kXeZG5QuvhfzXuSt0Au2ME/OHjSZ6u+nhDoKi97Lk5N2snQVIDYHe9B2vgodomKpN8UgF7D8nDQno7sLFqAezcsgub6SoNWFJBuW+C4YIeD4CaHOwZUL4/PJ7kESS/pkbZSzkbaKoXUQoB7N77ZGCjUAeh3U3yr0lOJdnpSwe9xo4qxl1eoKPsDT9NWqKdxYz33Z/k0no52HzvMB2/73N1u7/A+t5YBehmks/rsXc3GOiYra+/QvJ3JK9ViTE2cL4uvRZfvB+uvjnqDHQ4+vdmWM6DpY/HkPyy6tG0ipvk+otmq8uxVjsG36RTDeeMCnB3l3ZDnBBY6Ko6mORZJI/Oic515bSznEzy4yTvUW5cUSNU6dZgJckHSV5sxHtr9SoF9Ojtns6xALvFWBAQlbtJPkry30ienSMOu6r0CzXkBztwqkiLizQ2vjygo/uqJBt6FOA/kOwazCRDU6w2DROKuk09Gp1Cjn9YVq7/ErJWE+sidWhkbCaAzwNYT/KHyOqq7wDwmojssrobWaK/3OCG7MDeIr9es/jTAHxU/eA5GrGyvnrJRKQWAuitIm4FwG4R6c5rj2kZgA3IZY1Pt9eIXycisorkbI0NfxpZ3fLbPH/4EABX6v/f0sDCTwHciqwEp7s/0sb5wNp/dBKyQvoTdGPZNbIVmSUAKwG8COAuALdqcUO1QEfiyoUxHMiIyBu9kftVrWj9f7T6w3eakf15bgxJPqW9uNP7oYPfr6J3Yw3/d7e6VPNInl7Hfc/z7nvYdhfWm4nqUA7pE5HXXUJBF+sdyEpmpiIr5/HbTI7Xx0VqMG2pEX1KAFRInoG903RC9ByyzsZfAfi5iDzrbcpE17FcxN9dKlpdtF/l2KniriIiK5C1fbry2DmqG52OdBw5FsCoOtKFDvwrvNd3IKu7XopsZOKjgbh3Yq43NWFSKVr5TSEANtbktQA2IyuwWy0iu72FLSnYW9XIAsl/UH15GrJGr2cAbK0jXejqtv4WWbrwcQCPAnhQRJ73LXU9Vtmr8JyErJDuMgC/F5HvFc2nLQ0lqMplrof4BgBfNB95muQ6ALcBWCoiL+CNZatu0XtFZDmA5QC+4/uxtQL9mqg4MWAPOIu81xpvWgN9KoA/1wzTZPPedhG5U1VN30gG2FYSumdbGdFndOpZyPqAH1euXYCsk6/bM2oS3QBEA5WKhuNclUWfWrm7zUY6G1mZ7GeQ9UIdEjhUBVk9d9TBAEoku0Sk26QLv65i+HLP34QaVB/Qx6sAtpF0YL+oBe57uLbBXxJ1myF1XKfJhIsVyPNUDOfRq8jSfVeIyKIG04XDzk2yA0kuMrrVxqP3I3mhhjkfr8N12UXyB1pue3gjkSwvdv5OklerG9RTJWNFkqtIPqy/2zTVnEeK5iYNhR+cklyvVYjt3kIngWNMInmuxqcfrVLyQi3VvVFj1TXTheorj8k5rk/3k7xFExEdVWLw4uLXJnU6YvxgF+VpBzDWdvO55mnvF7pTnapzjz5A8k+RVVucgaxbf7Q5/n7Ihr38i4isrZFAT1Q9fFMjVv6AmJc0QvU8gPki8kwAUDtBR0xVZLeVTiNJBzt3aBKAZTrD4k4Av/PcD/EWUlzsVkSeBHCVcud4ZGOSzlTL9iDVf711BPKdEbbLuE3LFdSVyEYsbQ9dB944Lkm8jsf9AbxLw52XGANuWOvgG7x5kKknYh8j+W0tmp/ic4oRp27IZyh9N47kxa6EpsFQ5QUuzegds2THFeZNjFW74b2al15bJQ++ergCfJMp4ymbFpBQInwLyZ+Q/Kg/uNQd0yz4nnmRNc5frTcpCYDaVmtirPZeXaa53d/n/C6xu09ne2wabiLaDVm5HsD7kKUD/WiS6453vb0HIssozUWWLXpE49F3Adjh5lpZvW3E+p4G7QZj4CXs7Td203sST/Tup2pgjl6b3z7qD3Nz8W5g7/CXJa6HuUFXrtBc7CzkLm0mu92U1/iuSNnULPUFKhlXkPxHHTzqFxW0+RNqGxDRwXHGJN+mk2y/Q3JdTlVk2bh/vju1k+Rz+v0PGakgw01Uh8CYpcVzj2iBW2h+czkH7FS7Aa/VKsfJOfqzUxfVAnyKvtaZI3qP1fHH8wNdhFb09nmlOBb0ZST/UhvmRsbPxVfTl9pC+XGSP67SF5xW0dubFJDzSI4LHP9K89mTAu+fqdJlseZ8Q6CmVXzkF7Wsd3ZOHdmQjfOXIQTcn2DjXj8Y2ZzIGchGDB5tdLQf+3X3YDfNRvVhb0U2RedJZOVA1+n7c5BljS5VPXo+smGjoWOHQHF6djGyDNQiZCnFkEvFoda1UhDudgsinj88F8BPkD+l1vq0bnhpyQPqSfW7D9b3X9fXDwgYSKEpdyHfuQzgUG+ERMkkOgpjQBUiH+xxsKuQaORHr+w8STt5p6SSwH5ujAHJWbqhEcC1mKJkas0KWc1RGIADbktF+437I2HeMDvLc8EsF+7rvVPz2EmRh6gM9x99Cv0ymmAEUYJIEeBIEeBIEeBI0cgK+51+cd5QX491xSLA+0gdxhIugvXrrqGzVaRfqcCcC2SzqV5GlpZLCwCyC1M+C2Bn0SbqVNuRxZXRWcd/V4E2ngB4RUR2FbFVpaVo2OVNIwfngly062Tk3EiRIkWKFClSpEiRIkWKFClSpEiRIkWKFClSpEiRIkWKFClS0+iPrrxdp4Y3iX0AAAAASUVORK5CYII='
 };
 const MENU=[
+  {t:'AI Assistant',       s:'Tanya apa saja tentang umrah & app',      c:'#0ea5e9', i:'ai',     v:'assistant'},
   {t:'Panduan Umrah',      s:'Info lengkap & tips umrah terkini',        c:'#1c7d54', i:'user',   v:'guide'},
   {t:'Kirim Doa',          s:'Hantar doa anda ke Tanah Suci',            c:'#6d4bb0', i:'dua',    v:'dua'},
   {t:'Agensi Umrah',       s:'Cari & pilih agensi berdaftar',            c:'#10808e', i:'plane',  v:'agency'},
@@ -1462,6 +1544,7 @@ const MENU=[
   {t:'Penginapan',         s:'Hotel & penginapan pilihan terbaik',       c:'#d99a2b', i:'bed',    v:'stay'},
   {t:'Orang Hilang',       s:'Pusat maklumat & bantuan',                 c:'#d32f2f', i:'pin',    v:'lost'},
   {t:'Berita Umrah',       s:'Berita & info terkini umrah & haji',       c:'#2d63b8', i:'book',   v:'news'},
+  {t:'Diari Umrah',        s:'Catat perjalanan & memori umrah anda',    c:'#d97706', i:'book',   v:'diari', soon:true},
 ];
 const MY_NEGERI=['Johor','Kedah','Kelantan','Melaka','Negeri Sembilan','Pahang','Perak','Perlis','Pulau Pinang','Sabah','Sarawak','Selangor','Terengganu','W.P. Kuala Lumpur','W.P. Labuan','W.P. Putrajaya'];
 const DAERAH={
@@ -2510,7 +2593,7 @@ function dirTab(t,el){
   el.classList.add('on');
 }
 function renderMed(){
-  const types=[...new Set(HOSPITALS.map(h=>h.type))];
+  const types=[...new Set(['Hospital','Farmasi','Insurans',...HOSPITALS.map(h=>h.type)])];
   const sel=state.medFilter||'all';
   const list=HOSPITALS.filter(h=>sel==='all'||h.type===sel);
   const opts=`<option value="all"${sel==='all'?' selected':''}>Semua jenis</option>`+types.map(t=>`<option value="${t}"${sel===t?' selected':''}>${t}</option>`).join('');
