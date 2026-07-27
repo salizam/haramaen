@@ -821,6 +821,12 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div id="dir-svc"></div>
       </section>
 
+      <!-- BELI-BELAH -->
+      <section class="view" id="v-shop">
+        <div class="ktitle-row"><div class="section-title">Beli-Belah<span class="u"></span></div><button class="kbtn kbtn-daftar" onclick="openBizForm()">Promote bisnes anda di sini</button></div>
+        <div id="shopList"></div>
+      </section>
+
       <!-- PANDUAN UMRAH -->
       <section class="view" id="v-guide">
         <div class="section-title">Panduan Umrah<span class="u"></span></div>
@@ -1088,6 +1094,35 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   </div>
 </div>
 
+<div class="modal" id="bizRegModal">
+  <div class="modal-box">
+    <h3>Promote Bisnes Anda</h3>
+    <div class="mh-sub">Isi maklumat bisnes anda. Maklumat akan disemak admin sebelum disiarkan di Beli-Belah. Pendaftaran percuma. 🛍️</div>
+    <label class="fl">Nama Bisnes <span style="color:#e74c3c">*</span></label>
+    <input id="bizNama" placeholder="cth: Kedai Kurma Barakah">
+    <div class="modal-row">
+      <div>
+        <label class="fl">Jenis Bisnes</label>
+        <input id="bizJenis" placeholder="cth: Kurma, Air Zam-Zam, Oleh-oleh">
+      </div>
+      <div>
+        <label class="fl">Lokasi</label>
+        <input id="bizLokasi" placeholder="cth: Makkah / Madinah / Online">
+      </div>
+    </div>
+    <label class="fl">No. Telefon / WhatsApp</label>
+    <input id="bizContact" placeholder="cth: +9665XXXXXXXX atau 01X-XXXXXXX">
+    <label class="fl">Laman Web / Media Sosial <span style="font-weight:400;color:var(--muted)">(jika ada)</span></label>
+    <input id="bizWeb" placeholder="cth: https://instagram.com/bisnesanda">
+    <label class="fl">Keterangan Ringkas</label>
+    <textarea id="bizDesc" placeholder="Ceritakan tentang bisnes &amp; produk anda\u2026"></textarea>
+    <div class="modal-actions">
+      <button class="m-cancel" onclick="closeBizForm()">Batal</button>
+      <button class="m-save" id="bizSave" onclick="submitBizReg()">Hantar Permohonan</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: EDIT BERITA (ADMIN) -->
 <div class="modal" id="enModal">
   <div class="modal-box" style="max-width:540px">
@@ -1186,7 +1221,9 @@ const SVG={
   chev:'<path d="m9 18 6-6-6-6"/>',
   pic:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
   ai:'<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',
-  kursus:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>'
+  kursus:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+  shop:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+  wheelchair:'<circle cx="16" cy="4" r="1"/><path d="m18 19 1-7-6 1"/><path d="m5 8 3-3 5.5 3-2.36 3.5"/><path d="M4.24 14.5a5 5 0 0 0 6.88 6"/><path d="M13.76 17.5a5 5 0 0 0-6.88-6"/>'
 };
 function svg(k){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${SVG[k]||SVG.home}</svg>`;}
 /* fill data-i icon spans */
@@ -1200,7 +1237,7 @@ const NAV=[
   {v:'kursus', t:'Kursus Umrah',  i:'kursus', c:'#e91e8c'},
   {v:'stay',   t:'Penginapan',    i:'bed',    c:'#e8a020'},
   {v:'med',    t:'Perubatan',     i:'med',    c:'#e0335b'},
-  {v:'svc',    t:'Servis',        i:'bell',   c:'#c0620a'},
+  {v:'svc',    t:'Servis',        i:'wheelchair',   c:'#c0620a'},
   {v:'guide',  t:'Panduan Umrah', i:'book',   c:'#1c7d54'},
   {v:'news',   t:'Berita Umrah',  i:'news',   c:'#2d63b8'},
   {v:'lost',   t:'Orang Hilang',  i:'pin',    c:'#d32f2f'},
@@ -1214,7 +1251,7 @@ const BOTTOM=[
   {v:'kursus',t:'Kursus',i:'kursus',c:'#e91e8c'},
 ];
 const TITLES={home:"HARAMAEN",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
-  med:"Perubatan",svc:"Servis",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",kursus:"Kursus Umrah",mutawwif:"Kursus Mutawwif",assistant:"AI Assistant",admin:"Statistik Pelawat"};
+  med:"Perubatan",svc:"Servis",shop:"Beli-Belah",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",kursus:"Kursus Umrah",mutawwif:"Kursus Mutawwif",assistant:"AI Assistant",admin:"Statistik Pelawat"};
 const ADMIN_EMAILS=['salizam.oasys@gmail.com'];
 function isAdmin(){ return !!(state.user && ADMIN_EMAILS.includes((state.user.email||'').toLowerCase())); }
 function buildNav(){
@@ -1229,7 +1266,7 @@ function buildNav(){
   renderMoreSheet();
   paintIcons();
 }
-const VALID_VIEWS=['home','agency','dua','stay','med','svc','guide','news','lost','solah','kursus','mutawwif','assistant','admin'];
+const VALID_VIEWS=['home','agency','dua','stay','med','svc','shop','guide','news','lost','solah','kursus','mutawwif','assistant','admin'];
 function go(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   const el=document.getElementById('v-'+v); if(el) el.classList.add('active');
@@ -1241,6 +1278,7 @@ function go(v){
   if(v==='kursus') renderKursusAll();
   if(v==='mutawwif') renderMutawwifAll();
   if(v==='assistant') renderAssistant();
+  if(v==='shop') renderShop();
   if(v==='admin') renderAdmin(); else if(admTimer){ clearInterval(admTimer); admTimer=null; }
   // Simpan view semasa dalam URL hash supaya refresh kembali ke page yang sama
   try{ history.replaceState(null,'',v==='home'?location.pathname+'#home':'#'+v); }catch(e){}
@@ -1546,7 +1584,8 @@ const MENU=[
   {t:'Kursus Umrah',       s:'Jadual & pendaftaran kursus umrah',        c:'#e91e8c', i:'kursus', v:'kursus'},
   {t:'Kursus Mutawwif',    s:'Jadual & pendaftaran kursus mutawwif',     c:'#8e44ad', i:'kursus', v:'mutawwif'},
   {t:'Perubatan',s:'Klinik, hospital & farmasi di Tanah Suci', c:'#a56a2e', i:'med',    v:'med'},
-  {t:'Servis',      s:'Mutawwif, dobi, transport & lain-lain',    c:'#0f8a7e', i:'bell',   v:'svc'},
+  {t:'Servis',      s:'Mutawwif, dobi, transport & lain-lain',    c:'#0f8a7e', i:'wheelchair',   v:'svc'},
+  {t:'Beli-Belah',  s:'Bisnes & peniaga di Tanah Suci',           c:'#e8590c', i:'shop',   v:'shop'},
   {t:'Waktu Solat',        s:'Waktu solat tempatan ikut lokasi anda',       c:'#2f74c0', i:'mosque', v:'solah'},
   {t:'Penginapan',         s:'Hotel & penginapan pilihan terbaik',       c:'#d99a2b', i:'bed',    v:'stay'},
   {t:'Orang Hilang',       s:'Pusat maklumat & bantuan',                 c:'#d32f2f', i:'pin',    v:'lost'},
@@ -2628,7 +2667,6 @@ function renderSvc(){
     {id:'mutawwif', key:['Mutawwif','Mutawwifah'], title:'🧕 Mutawwif / Mutawwifah', label:'Mutawwif / Mutawwifah'},
     {id:'dobi', key:['Dobi'], title:'🧺 Dobi (Laundry)', label:'Dobi'},
     {id:'transport', key:['Teksi','Pengangkutan','e-Hailing'], title:'🚕 Pengangkutan & Teksi', label:'Pengangkutan & Teksi'},
-    {id:'market', key:['Marketplace'], title:'🛍️ Beli-belah / Marketplace', label:'Marketplace'},
   ];
   const sel=state.svcFilter||'all';
   const opts=`<option value="all"${sel==='all'?' selected':''}>Semua kategori</option>`+cats.map(c=>`<option value="${c.id}"${sel===c.id?' selected':''}>${c.label}</option>`).join('');
@@ -2654,6 +2692,43 @@ function renderSvc(){
   });
   if(!shown) html+=`<div class="empty">Tiada rekod untuk kategori ini.</div>`;
   document.getElementById('dir-svc').innerHTML=html;
+}
+function renderShop(){
+  const el=document.getElementById('shopList'); if(!el) return;
+  const items=SERVICES.filter(s=>s.tag==='Marketplace');
+  const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:10px">Senarai bisnes &amp; peniaga (kurma, air zam-zam, makanan, oleh-oleh &amp; lain-lain) di Tanah Suci. Ada bisnes? Tekan \u201CPromote bisnes anda di sini\u201D untuk disenaraikan. 🛍️</div>`;
+  if(!items.length){ el.innerHTML=intro+`<div class="empty">Belum ada bisnes disenaraikan. Jadilah yang pertama! 🤍</div>`; return; }
+  el.innerHTML=intro+items.map(s=>`<div class="card"><div class="list-row">
+      <div class="thumb">${s.icon}</div><div style="flex:1">
+      <div class="row-between"><b>${esc(s.name)}</b>${s.price?`<span class="pill gold">${esc(s.price)}</span>`:''}</div>
+      <div class="tag">${esc(s.desc)}</div>
+      <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(s.name)}" data-text="${esc(s.name+(s.desc?' \u2014 '+s.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
+      </div></div></div>`).join('');
+}
+function openBizForm(){ const m=document.getElementById('bizRegModal'); if(m) m.classList.add('open'); }
+function closeBizForm(){
+  const m=document.getElementById('bizRegModal'); if(m) m.classList.remove('open');
+  ['bizNama','bizJenis','bizLokasi','bizContact','bizWeb','bizDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+async function submitBizReg(){
+  const nama=(document.getElementById('bizNama').value||'').trim();
+  if(!nama){toast('Sila isi nama bisnes.');return;}
+  const jenis=(document.getElementById('bizJenis').value||'').trim();
+  const lokasi=(document.getElementById('bizLokasi').value||'').trim();
+  const contact=(document.getElementById('bizContact').value||'').trim();
+  const web=(document.getElementById('bizWeb').value||'').trim();
+  const desc=(document.getElementById('bizDesc').value||'').trim();
+  const btn=document.getElementById('bizSave');
+  btn.disabled=true; btn.textContent='Menghantar\u2026';
+  const {error}=await sb.from('business_submissions').insert({
+    name:nama, category:jenis||null, location:lokasi||null,
+    contact:contact||null, website:web||null, description:desc||null,
+    user_id: state.user?state.user.id:null, status:'pending'
+  });
+  btn.disabled=false; btn.textContent='Hantar Permohonan';
+  if(error){toast('Gagal hantar. Cuba lagi.');return;}
+  closeBizForm();
+  toast('Terima kasih! Bisnes anda sedang disemak. 🙏');
 }
 
 /* ============ PANDUAN UMRAH ============ */
