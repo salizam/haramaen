@@ -81,6 +81,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .tb-ava{width:42px;height:42px;border-radius:50%;background:var(--green);color:#fff;border:0;cursor:pointer;
     display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;font-family:inherit;overflow:hidden;padding:0;box-sizing:border-box}
   .tb-ava img{width:42px;height:42px;object-fit:cover;display:block;flex:none}
+  .dua-ava{width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;flex:none;line-height:1}
+  .dua-ava img{width:22px;height:22px;object-fit:cover;display:block}
   .tb-menu-item.menu-green{color:var(--green)}
   .tb-menu-item.menu-green:hover{background:#eef6f2}
   .tb-user{position:relative}
@@ -778,7 +780,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
             <div class="muted" style="font-size:12.5px;margin-bottom:4px">
               Hantar doa anda. Mudah-mudahan ada sahabat Haramaen yang sudi memanjatkan doa anda khususnya di tempat-tempat mustajab. 🕋
             </div>
-            <div class="muted" style="font-size:12px;margin:6px 0 2px">Dihantar sebagai: <b id="duaAsName" style="color:var(--green)">—</b></div>
+            <div class="muted" style="font-size:12px;margin:6px 0 2px;display:flex;align-items:center;gap:7px">Dihantar sebagai: <span id="duaAva" class="dua-ava"></span><b id="duaAsName" style="color:var(--green)">—</b></div>
             <label class="f">Kategori</label>
             <select id="duaCat">
               <option>Kesihatan</option><option>Rezeki</option><option>Keluarga</option>
@@ -1117,7 +1119,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
       </div>
       <div>
         <label class="fl">Lokasi</label>
-        <input id="bizLokasi" placeholder="cth: Makkah / Madinah / Online">
+        <input id="bizLokasi">
       </div>
     </div>
     <label class="fl">No. Telefon / WhatsApp</label>
@@ -1261,7 +1263,7 @@ const BOTTOM=[
   {v:'dua',t:"Doa",i:'dua',c:'#6d4bb0'},
   {v:'__more',t:'Menu',center:true},
   {v:'agency',t:'Agensi',i:'plane',c:'#10808e'},
-  {v:'kursus',t:'Kursus',i:'kursus',c:'#e91e8c'},
+  {v:'assistant',t:'AI',i:'ai',c:'#0ea5e9'},
 ];
 const TITLES={home:"HARAMAEN",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
   med:"Perubatan",svc:"Servis",shop:"Beli-Belah",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",kursus:"Kursus Umrah",mutawwif:"Kursus Mutawwif",assistant:"AI Assistant",admin:"Statistik Pelawat"};
@@ -1284,10 +1286,10 @@ function go(v){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   const el=document.getElementById('v-'+v); if(el) el.classList.add('active');
   document.querySelectorAll('[data-v]').forEach(t=>t.classList.toggle('active', t.getAttribute('data-v')===v));
-  const _cb=document.querySelector('.bn-center'); if(_cb) _cb.classList.toggle('active', !['home','dua','agency','kursus'].includes(v));
+  const _cb=document.querySelector('.bn-center'); if(_cb) _cb.classList.toggle('active', !['home','dua','agency','assistant'].includes(v));
   const m=document.getElementById('main'); if(m) m.scrollTop=0; window.scrollTo(0,0);
   if(v==='solah') fetchSolah(state.solCity);
-  if(v==='dua'){ const e=document.getElementById('duaAsName'); if(e) e.textContent=actorName(); }
+  if(v==='dua'){ const e=document.getElementById('duaAsName'); if(e) e.textContent=actorName(); setDuaAva(); }
   if(v==='kursus') renderKursusAll();
   if(v==='mutawwif') renderMutawwifAll();
   if(v==='assistant') renderAssistant();
@@ -1299,7 +1301,7 @@ function go(v){
 }
 function jump(v){ go(v); }
 const GRID_SVG='<svg viewBox="0 0 44 44" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="7" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect><rect x="23" y="7" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect><rect x="7" y="23" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect><rect x="23" y="23" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect></svg>';
-const BOTTOM_MAIN=['home','dua','agency','kursus'];
+const BOTTOM_MAIN=['home','dua','agency','assistant'];
 function moreList(){ const h=MENU.slice(); if(isAdmin()) h.push({v:'admin',t:'Statistik',i:'book',c:'#555'}); return h; }
 function renderMoreSheet(){ const g=document.getElementById('moreGrid'); if(!g) return;
   g.innerHTML=moreList().map(function(m){ const ic=ICONS[m.i]?`<img class="fimg" src="${ICONS[m.i]}" alt="" draggable="false">`:svg(m.i); const badge=m.soon?`<span class="soon-badge">Akan datang</span>`:''; const click=m.soon?`toast('${m.t} akan datang, nantikan!')`:`pickMore('${m.v}')`; return `<button class="more-item${m.soon?' soon':''}" data-v="${m.v}" onclick="${click}"><span class="fi" style="background:${m.c}">${ic}</span><span>${m.t}${badge}</span></button>`; }).join('');
@@ -2421,6 +2423,19 @@ function actorName(){
   const md=u.user_metadata||{};
   return (md.full_name||md.name||(u.email?u.email.split('@')[0]:'')||'Hamba Allah');
 }
+function duaAvatarUrl(){
+  const img=document.querySelector('#tbAva img');
+  if(img && img.getAttribute('src')) return img.getAttribute('src');
+  const md=(state.user&&state.user.user_metadata)||{};
+  return md.avatar_url||md.picture||null;
+}
+function setDuaAva(){
+  const el=document.getElementById('duaAva'); if(!el) return;
+  const nm=actorName(); const url=duaAvatarUrl();
+  const ini=((nm||'S').trim()[0]||'S').toUpperCase();
+  if(url){ el.innerHTML='<img src="'+esc(url)+'" alt="" onerror="this.parentNode.textContent=\''+ini+'\'">'; }
+  else { el.textContent=ini; }
+}
 async function toggleAmiin(id,btn){
   btn.disabled=true;
   try{
@@ -2710,7 +2725,7 @@ function renderSvc(){
 function renderShop(){
   const el=document.getElementById('shopList'); if(!el) return;
   const items=SERVICES.filter(s=>s.tag==='Marketplace');
-  const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:10px">Senarai bisnes &amp; peniaga (kurma, air zam-zam, makanan, oleh-oleh &amp; lain-lain) di Tanah Suci. Ada bisnes? Tekan \u201CPromote bisnes anda di sini\u201D untuk disenaraikan. 🛍️</div>`;
+  const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:10px">Senarai bisnes &amp; peniaga (kurma, air zam-zam, makanan, oleh-oleh &amp; lain-lain) yang berkaitan dengan umrah dan haji. Ada bisnes? Tekan \u201CPromote bisnes anda di sini\u201D untuk disenaraikan. 🛍️</div>`;
   if(!items.length){ el.innerHTML=intro+`<div class="empty">Belum ada bisnes disenaraikan. Jadilah yang pertama! 🤍</div>`; return; }
   el.innerHTML=intro+items.map(s=>`<div class="card"><div class="list-row">
       <div class="thumb">${s.icon}</div><div style="flex:1">
