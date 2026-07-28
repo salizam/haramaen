@@ -83,6 +83,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .tb-ava img{width:42px;height:42px;object-fit:cover;display:block;flex:none}
   .dua-ava{width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;flex:none;line-height:1}
   .dua-ava img{width:22px;height:22px;object-fit:cover;display:block}
+  .dua-name{display:flex;align-items:center;gap:8px;min-width:0}
   .tb-menu-item.menu-green{color:var(--green)}
   .tb-menu-item.menu-green:hover{background:#eef6f2}
   .tb-user{position:relative}
@@ -782,7 +783,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
             <div class="muted" style="font-size:12.5px;margin-bottom:4px">
               Hantar doa anda. Mudah-mudahan ada sahabat Haramaen yang sudi memanjatkan doa anda khususnya di tempat-tempat mustajab. 🕋
             </div>
-            <div class="muted" style="font-size:12px;margin:6px 0 2px;display:flex;align-items:center;gap:7px">Dihantar sebagai: <span id="duaAva" class="dua-ava"></span><b id="duaAsName" style="color:var(--green)">—</b></div>
+            <div class="muted" style="font-size:12px;margin:6px 0 2px">Dihantar sebagai: <b id="duaAsName" style="color:var(--green)">—</b></div>
             <label class="f">Kategori</label>
             <select id="duaCat">
               <option>Kesihatan</option><option>Rezeki</option><option>Keluarga</option>
@@ -1291,7 +1292,7 @@ function go(v){
   const _cb=document.querySelector('.bn-center'); if(_cb) _cb.classList.toggle('active', !['home','dua','agency','assistant'].includes(v));
   const m=document.getElementById('main'); if(m) m.scrollTop=0; window.scrollTo(0,0);
   if(v==='solah') fetchSolah(state.solCity);
-  if(v==='dua'){ const e=document.getElementById('duaAsName'); if(e) e.textContent=actorName(); setDuaAva(); }
+  if(v==='dua'){ const e=document.getElementById('duaAsName'); if(e) e.textContent=actorName(); }
   if(v==='kursus') renderKursusAll();
   if(v==='mutawwif') renderMutawwifAll();
   if(v==='assistant') renderAssistant();
@@ -2390,8 +2391,10 @@ function deliveredHTML(list){
 }
 function duaCard(d){
   const list=(d.delivered_list||[]);
+  const ini=((d.name||'H').trim()[0]||'H').toUpperCase().replace(/'/g,'');
+  const ava=d.avatar_url?`<img src="${esc(d.avatar_url)}" alt="" loading="lazy" onerror="this.parentNode.textContent='${ini||'H'}'">`:(ini||'H');
   return `<div class="card" data-dua="${d.id}">
-    <div class="row-between"><b style="font-size:13.5px">${esc(d.name||'Hamba Allah')}</b><span class="pill gold">${esc(d.category||'Umum')}</span></div>
+    <div class="row-between"><span class="dua-name"><span class="dua-ava">${ava}</span><b style="font-size:13.5px">${esc(d.name||'Hamba Allah')}</b></span><span class="pill gold">${esc(d.category||'Umum')}</span></div>
     <div style="font-size:13.5px;margin:6px 0">"${esc(d.dua_text)}"</div>
     <div class="dua-foot">
       <span class="tag">${relTime(d.created_at)}</span>
@@ -2423,19 +2426,6 @@ function actorName(){
   const u=state.user; if(!u) return 'Hamba Allah';
   const md=u.user_metadata||{};
   return (md.full_name||md.name||(u.email?u.email.split('@')[0]:'')||'Hamba Allah');
-}
-function duaAvatarUrl(){
-  const img=document.querySelector('#tbAva img');
-  if(img && img.getAttribute('src')) return img.getAttribute('src');
-  const md=(state.user&&state.user.user_metadata)||{};
-  return md.avatar_url||md.picture||null;
-}
-function setDuaAva(){
-  const el=document.getElementById('duaAva'); if(!el) return;
-  const nm=actorName(); const url=duaAvatarUrl();
-  const ini=((nm||'S').trim()[0]||'S').toUpperCase();
-  if(url){ el.innerHTML='<img src="'+esc(url)+'" alt="" onerror="this.parentNode.textContent=\''+ini+'\'">'; }
-  else { el.textContent=ini; }
 }
 async function toggleAmiin(id,btn){
   btn.disabled=true;
