@@ -1125,7 +1125,10 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <label class="fl">Laman Web / Media Sosial <span style="font-weight:400;color:var(--muted)">(jika ada)</span></label>
     <input id="bizWeb" placeholder="cth: https://instagram.com/bisnesanda">
     <label class="fl">Keterangan Ringkas</label>
-    <textarea id="bizDesc" placeholder="Ceritakan tentang bisnes &amp; produk anda\u2026"></textarea>
+    <textarea id="bizDesc" placeholder="Ceritakan tentang bisnes &amp; produk anda…"></textarea>
+    <label class="fl">Gambar Signboard / Logo Bisnes <span style="font-weight:400;color:var(--muted)">(jika ada)</span></label>
+    <input type="file" id="bizImg" accept="image/jpeg,image/png,image/webp" onchange="previewBizImg(this)">
+    <img id="bizImgPreview" class="up-preview" alt="Preview gambar">
     <div class="modal-actions">
       <button class="m-cancel" onclick="closeBizForm()">Batal</button>
       <button class="m-save" id="bizSave" onclick="submitBizReg()">Hantar Permohonan</button>
@@ -2717,9 +2720,16 @@ function renderShop(){
       </div></div></div>`).join('');
 }
 function openBizForm(){ const m=document.getElementById('bizRegModal'); if(m) m.classList.add('open'); }
+function previewBizImg(input){
+  const prev=document.getElementById('bizImgPreview');
+  if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; }
+  else { prev.style.display='none'; }
+}
 function closeBizForm(){
   const m=document.getElementById('bizRegModal'); if(m) m.classList.remove('open');
   ['bizNama','bizJenis','bizLokasi','bizContact','bizWeb','bizDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const fi=document.getElementById('bizImg'); if(fi) fi.value='';
+  const lp=document.getElementById('bizImgPreview'); if(lp){ lp.src=''; lp.style.display='none'; }
 }
 async function submitBizReg(){
   const nama=(document.getElementById('bizNama').value||'').trim();
@@ -2731,15 +2741,31 @@ async function submitBizReg(){
   const desc=(document.getElementById('bizDesc').value||'').trim();
   const btn=document.getElementById('bizSave');
   btn.disabled=true; btn.textContent='Menghantar\u2026';
-  const {error}=await sb.from('business_submissions').insert({
-    name:nama, category:jenis||null, location:lokasi||null,
-    contact:contact||null, website:web||null, description:desc||null,
-    user_id: state.user?state.user.id:null, status:'pending'
-  });
+  try{
+    let signUrl=null;
+    const fi=document.getElementById('bizImg');
+    const imgFile=fi&&fi.files?fi.files[0]:null;
+    if(imgFile){
+      if(imgFile.size>5*1024*1024){ toast('Gambar terlalu besar — maks 5MB.'); btn.disabled=false; btn.textContent='Hantar Permohonan'; return; }
+      const ext=(imgFile.name.split('.').pop()||'jpg').toLowerCase();
+      const path='biz-'+Date.now()+'.'+ext;
+      const {error:upErr}=await sb.storage.from('business-signboards').upload(path,imgFile,{contentType:imgFile.type,upsert:false});
+      if(upErr) throw upErr;
+      const {data:{publicUrl}}=sb.storage.from('business-signboards').getPublicUrl(path);
+      signUrl=publicUrl;
+    }
+    const {error}=await sb.from('business_submissions').insert({
+      name:nama, category:jenis||null, location:lokasi||null,
+      contact:contact||null, website:web||null, description:desc||null,
+      signboard_url:signUrl, user_id: state.user?state.user.id:null, status:'pending'
+    });
+    if(error) throw error;
+    closeBizForm();
+    toast('Terima kasih! Bisnes anda sedang disemak. 🙏');
+  }catch(e){
+    toast('Gagal hantar. Cuba lagi.');
+  }
   btn.disabled=false; btn.textContent='Hantar Permohonan';
-  if(error){toast('Gagal hantar. Cuba lagi.');return;}
-  closeBizForm();
-  toast('Terima kasih! Bisnes anda sedang disemak. 🙏');
 }
 
 /* ============ PANDUAN UMRAH ============ */
