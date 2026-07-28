@@ -268,6 +268,14 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .sol-row .nm .di-img{width:41px;height:41px;display:grid;place-items:center}
   .sol-row .nm .di-img img{width:41px;height:41px;object-fit:contain}
   .sol-row .tm{font-weight:800; color:var(--green); font-size:16px}
+  .wx-head{font-weight:800;font-size:14px;color:var(--green);margin:20px 0 8px;display:flex;align-items:center;gap:6px}
+  .wx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .wx-card{background:linear-gradient(135deg,#eaf4ff,#f7fbff);border:1px solid #dcebfb;border-radius:14px;padding:12px 8px;text-align:center}
+  .wx-card .wx-city{font-size:12px;font-weight:700;color:var(--muted)}
+  .wx-card .wx-emoji{font-size:30px;line-height:1.15;margin:4px 0}
+  .wx-card .wx-temp{font-size:19px;font-weight:800;color:var(--ink)}
+  .wx-card .wx-cond{font-size:11px;color:var(--muted);margin-top:2px;min-height:28px;display:flex;align-items:center;justify-content:center}
+  .wx-card .wx-hum{font-size:10.5px;color:var(--muted);margin-top:2px}
 
   /* ---------- Guide / News / Lost ---------- */
   .step{display:flex; gap:14px; margin-bottom:14px}
@@ -898,6 +906,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div class="muted" id="solDate" style="font-size:13px;margin-bottom:12px"></div>
         <div id="solNext"></div>
         <div id="solList"></div>
+        <div id="solWeather"></div>
       </section>
 
       <!-- ADMIN — STATISTIK PELAWAT -->
@@ -1291,7 +1300,7 @@ function go(v){
   document.querySelectorAll('[data-v]').forEach(t=>t.classList.toggle('active', t.getAttribute('data-v')===v));
   const _cb=document.querySelector('.bn-center'); if(_cb) _cb.classList.toggle('active', !['home','dua','agency','assistant'].includes(v));
   const m=document.getElementById('main'); if(m) m.scrollTop=0; window.scrollTo(0,0);
-  if(v==='solah') fetchSolah(state.solCity);
+  if(v==='solah'){ fetchSolah(state.solCity); loadWeather(); }
   if(v==='dua'){ const e=document.getElementById('duaAsName'); if(e) e.textContent=actorName(); }
   if(v==='kursus') renderKursusAll();
   if(v==='mutawwif') renderMutawwifAll();
@@ -3150,7 +3159,7 @@ async function fetchSolah(city, silent){
   let method=(city==='me')?localMethod():(CITY[city].method||4);
   if(city==='me'){
     try{ const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:8000,maximumAge:3600000}));
-      lat=pos.coords.latitude; lng=pos.coords.longitude; }
+      lat=pos.coords.latitude; lng=pos.coords.longitude; state.userLoc={lat,lng}; }
     catch(e){ if(!silent) toast('Lokasi tidak dibenarkan — papar waktu Makkah.'); state.solCity='makkah'; city='makkah'; lat=CITY.makkah.lat; lng=CITY.makkah.lng; method=4; renderSolCity(); }
   } else { lat=CITY[city].lat; lng=CITY[city].lng; }
   prayerTimings=null; prayerData=null; let done=false;
@@ -3208,6 +3217,48 @@ function renderSolList(){
     const ic=PSVG[r[1]]?`<span class="di-img">${PSVG[r[1]]}</span>`:`<span class="di">${svg(PICON[r[1]]||'mosque')}</span>`;
     return `<div class="sol-row ${on?'on':''}"><div class="nm">${ic} ${r[1]}</div><div class="tm">${fmtT(d)}</div></div>`;}).join('')
     + (praySrc?`<div class="tag" style="text-align:center;margin-top:10px;opacity:.8">Sumber: ${praySrc}</div>`:'');
+}
+/* ---- Cuaca Terkini (Open-Meteo, tanpa API key) ---- */
+function wxDesc(c){
+  c=Number(c);
+  if(c===0) return {icon:'☀️',text:'Cerah'};
+  if(c===1) return {icon:'🌤️',text:'Cerah sebahagian'};
+  if(c===2) return {icon:'⛅',text:'Berawan sebahagian'};
+  if(c===3) return {icon:'☁️',text:'Mendung'};
+  if(c===45||c===48) return {icon:'🌫️',text:'Berkabus'};
+  if(c>=51&&c<=57) return {icon:'🌦️',text:'Gerimis'};
+  if(c>=61&&c<=67) return {icon:'🌧️',text:'Hujan'};
+  if(c>=71&&c<=77) return {icon:'❄️',text:'Salji'};
+  if(c>=80&&c<=82) return {icon:'🌦️',text:'Hujan renyai'};
+  if(c===85||c===86) return {icon:'🌨️',text:'Hujan salji'};
+  if(c>=95) return {icon:'⛈️',text:'Ribut petir'};
+  return {icon:'🌡️',text:'—'};
+}
+function wxCard(id,city){
+  return `<div class="wx-card" id="wx-${id}"><div class="wx-city">${city}</div><div class="wx-emoji">⏳</div><div class="wx-temp">—</div><div class="wx-cond">Memuat…</div><div class="wx-hum"></div></div>`;
+}
+async function fetchWx(lat,lng){
+  try{
+    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lng+'&current=temperature_2m,relative_humidity_2m,weather_code');
+    const j=await r.json(); return (j&&j.current)?j.current:null;
+  }catch(e){ return null; }
+}
+function fillWx(id,w,note){
+  const el=document.getElementById('wx-'+id); if(!el) return;
+  const em=el.querySelector('.wx-emoji'), tp=el.querySelector('.wx-temp'), cd=el.querySelector('.wx-cond'), hu=el.querySelector('.wx-hum');
+  if(!w){ em.textContent='📍'; tp.textContent='—'; cd.textContent=note||'Tiada data'; hu.textContent=''; return; }
+  const d=wxDesc(w.weather_code);
+  em.textContent=d.icon; tp.textContent=Math.round(w.temperature_2m)+'°C'; cd.textContent=d.text;
+  hu.textContent=(w.relative_humidity_2m!=null)?'💧 '+Math.round(w.relative_humidity_2m)+'%':'';
+}
+async function loadWeather(){
+  const box=document.getElementById('solWeather'); if(!box) return;
+  box.innerHTML='<div class="wx-head">🌤️ Cuaca Terkini</div><div class="wx-grid">'+wxCard('me','Lokasi Saya')+wxCard('makkah','Makkah')+wxCard('madinah','Madinah')+'</div>';
+  fetchWx(21.4225,39.8262).then(w=>fillWx('makkah',w));
+  fetchWx(24.4672,39.6111).then(w=>fillWx('madinah',w));
+  let loc=state.userLoc;
+  if(!loc){ try{ const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:8000,maximumAge:3600000})); loc={lat:pos.coords.latitude,lng:pos.coords.longitude}; state.userLoc=loc; }catch(e){ loc=null; } }
+  if(loc){ fetchWx(loc.lat,loc.lng).then(w=>fillWx('me',w)); } else { fillWx('me',null,'Benarkan lokasi'); }
 }
 
 /* ============ HELPERS ============ */
