@@ -1,8 +1,8 @@
 // Haramaen Umrah — service worker
 // Network-first for the page (HTML) so updates always show after a refresh;
 // cache-first for other assets; cache as offline fallback.
-const CACHE = 'haramaen-umrah-v18';
-const ASSETS = ['./', './index.html', './manifest.json?v=3'];
+const CACHE = 'haramaen-umrah-v19';
+const ASSETS = ['./', './index.html', './manifest.json?v=4'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.all(ASSETS.map(u => c.add(new Request(u, {cache: 'reload'}))))).then(() => self.skipWaiting()));
