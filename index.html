@@ -210,7 +210,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .brandblock{margin:0 0 22px}
   .brandblock h2{margin:0; color:var(--green); font-size:34px; letter-spacing:1px; font-weight:800}
   .brandrow{display:flex; align-items:center; gap:12px}
-  .brand-logo{width:52px;height:52px;flex:none;background:var(--logo) center/contain no-repeat}
+  .brand-logo{width:36px;height:36px;flex:none;background:var(--logo) center/contain no-repeat}
   .brandblock .u{width:60px;height:4px;background:var(--gold);border-radius:2px;margin:9px 0 8px}
   .brandblock p{margin:0; color:var(--muted); font-size:14px}
 
@@ -286,6 +286,16 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     display:grid;place-items:center;font-weight:800}
   .step .sc{flex:1;background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 15px;box-shadow:var(--shadow)}
   .step .sc b{font-size:14.5px} .step .sc p{margin:5px 0 0; font-size:13px; color:var(--muted)}
+  .g-steps{margin:8px 0 0;padding-left:18px;font-size:13.2px;color:#2c3a33;line-height:1.6}
+  .g-steps li{margin-bottom:5px}
+  .g-doa{background:#faf7ff;border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:8px 0 0}
+  .g-doa .gl{font-size:11.5px;font-weight:700;color:var(--green);margin-bottom:3px}
+  .g-ar{font-size:21px;line-height:1.95;text-align:right;direction:rtl;color:var(--ink);margin:2px 0;font-family:"Traditional Arabic","Amiri","Scheherazade New","Segoe UI",serif}
+  .g-rumi{font-size:12.5px;font-style:italic;color:#6a4bb0;margin:3px 0}
+  .g-mean{font-size:12.5px;color:var(--muted);line-height:1.55}
+  .g-larangan{margin-top:6px}
+  .g-larangan .ll{font-weight:700;color:var(--danger);font-size:12.8px;margin-top:8px}
+  .g-larangan .ld{font-size:13px;color:#2c3a33;line-height:1.55}
   /* News portal layout — mobile: imej atas, desktop: thumbnail 200x200 kiri */
   .news .card{cursor:default; padding:0; overflow:hidden}
   .n-card-top{display:block}
@@ -436,6 +446,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     .hero{padding:20px; min-height:130px; border-radius:18px}
     .hero .h-info b{font-size:28px}
     .brandblock h2{font-size:26px}
+    .brand-logo{width:28px;height:28px}
     .section-title{font-size:17px}
     /* Feature tiles: icon + title only */
     .feat-grid{grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:26px}
@@ -1386,6 +1397,7 @@ let MUTAWWIF=[];
 let NEWS=[], LATEST_DUAS=[], AG_REVIEW_SUMMARY={};
 let admTimer=null;
 const MED_MAP={hospital:{t:'Hospital',i:'🏥'}, pharmacy:{t:'Farmasi',i:'💊'}, insurance:{t:'Insurans',i:'🛡️'}};
+function _todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 const SVC_ICON={wheelchair:'♿', kaaba:'🕋', guide:'🧕', exchange:'💱', laundry:'🧺', car:'🚕', shop:'🛍️'};
 async function loadData(){
   const [ag,ho,vo,me,sv,cr,co,nw,rv] = await Promise.all([
@@ -1405,11 +1417,13 @@ async function loadData(){
   COURSES=(co.data||[]).map(c=>({tarikh:c.tarikh_label, date:c.tarikh_date||'', masa:c.masa||'', lokasi:c.lokasi||'',
     daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||'', created:c.created_at||'',
     poster_url:c.poster_url||''}))
+    .filter(c=> !c.date || c.date>=_todayISO())
     .sort((a,b)=> (a.date||'').localeCompare(b.date||''));
   try{ const mc=await sb.from('mutawwif_courses').select('*').eq('status','approved');
     MUTAWWIF=(mc.data||[]).map(c=>({tarikh:c.tarikh_label, date:c.tarikh_date||'', masa:c.masa||'', lokasi:c.lokasi||'',
       daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||'', created:c.created_at||'',
       poster_url:c.poster_url||''}))
+      .filter(c=> !c.date || c.date>=_todayISO())
       .sort((a,b)=> (a.date||'').localeCompare(b.date||'')); }catch(e){ MUTAWWIF=[]; }
   try{ const r=await sb.rpc('list_duas',{p_visitor:vid()}); LATEST_DUAS=(r&&r.data)||[]; }catch(e){ LATEST_DUAS=[]; }
   AGENCIES=(ag.data||[]).map(a=>({id:a.id, name:a.name, rating:Number(a.rating), reviews:Number(a.reviews_count||0),
@@ -2788,10 +2802,34 @@ async function submitBizReg(){
 
 /* ============ PANDUAN UMRAH ============ */
 const GUIDE=[
-  {t:'1. Ihram & Niat', d:'Berihram dari miqat yang ditetapkan. Pakai 2 helai kain putih tidak berjahit (lelaki), lafazkan niat umrah: "Labbaikallahumma umrah". Mula bertalbiah.'},
-  {t:'2. Tawaf', d:'Mengelilingi Kaabah 7 pusingan bermula dari Hajar Aswad, mengikut arah lawan jam. Bermula & berakhir di garisan Hajar Aswad. Solat sunat 2 rakaat di belakang Maqam Ibrahim selepas selesai.'},
-  {t:'3. Sa’ie', d:'Berjalan antara bukit Safa dan Marwah sebanyak 7 kali (Safa→Marwah = 1). Bermula di Safa, berakhir di Marwah. Lelaki berlari-lari anak di kawasan lampu hijau.'},
-  {t:'4. Tahallul', d:'Bercukur (tahliq) atau menggunting rambut (taqsir). Lelaki digalakkan bercukur, wanita menggunting hujung rambut sekadar seruas jari. Dengan ini selesai umrah & larangan ihram tamat.'},
+  {t:`Ihram (Rukun)`, d:`Berihram ialah niat masuk ke dalam ibadah umrah, bermula dari miqat yang ditetapkan.`,
+   steps:[`Mandi sunat dan solat sunat safar sebelum berangkat dari hotel.`,`Solat sunat ihram 2 rakaat (contoh di Masjid Bir Ali / miqat).`,`Lelaki: pakai 2 helai kain putih tidak berjahit — bahagian bawah (izar) & atas (rida'). Ikat dengan tali pinggang ihram. Pakai selipar/sandal yang tidak menutup buku lali.`,`Wanita: pakaian menutup aurat sempurna kecuali muka & tapak tangan. Tanggalkan niqab & sarung tangan ketika melaksanakan rukun.`,`Lafazkan niat umrah, kemudian mula bertalbiah sepanjang perjalanan.`,`Baca doa memasuki Tanah Haram, doa masuk Masjidil Haram (melalui Babussalam), dan doa ketika mula melihat Kaabah.`],
+   doa:[
+     {l:`Niat Solat Sunat Ihram`, r:`Usolli sunnatal-ihraami rak'ataini lillaahi ta'aala.`, m:`Sahaja aku solat sunat ihram dua rakaat kerana Allah Ta'ala.`},
+     {l:`Niat Umrah`, a:`نَوَيْتُ الْعُمْرَةَ وَأَحْرَمْتُ بِهَا لِلّٰهِ تَعَالَى`, r:`Nawaitul-'umrata wa ahramtu bihaa lillaahi ta'aala.`, m:`Sahaja aku mengerjakan umrah dan berihram dengannya kerana Allah Ta'ala.`},
+     {l:`Talbiah (dibaca sepanjang perjalanan)`, a:`لَبَّيْكَ اللّٰهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لَا شَرِيكَ لَكَ`, r:`Labbaikallaahumma labbaik, labbaika laa syariika laka labbaik, innal-hamda wan-ni'mata laka wal-mulk, laa syariika lak.`, m:`Aku sahut panggilan-Mu ya Allah, aku sahut panggilan-Mu. Tiada sekutu bagi-Mu, aku sahut panggilan-Mu. Sesungguhnya segala puji, nikmat dan kerajaan adalah milik-Mu, tiada sekutu bagi-Mu.`},
+     {l:`Doa Ketika Melihat Kaabah`, a:`اللّٰهُ أَكْبَرُ`, r:`Allaahu Akbar (3 kali).`, m:`Allah Maha Besar (dibaca 3 kali).`}
+   ]},
+  {t:`Tawaf Umrah (Rukun)`, d:`Mengelilingi Kaabah 7 pusingan mengikut arah lawan jam, bermula & berakhir di garisan Hajar Aswad (Kaabah di sebelah kiri).`,
+   steps:[`Niatkan tawaf sebelum tapak kaki memijak garisan Hajar Aswad.`,`Setiap pusingan bermula dengan istilam Hajar Aswad — melambai/mengucup tangan ke arahnya sambil membaca "Bismillaahi Allaahu Akbar".`,`Lelaki disunatkan raml (jalan cepat) pada 3 pusingan pertama dan idtibaa' (mendedahkan bahu kanan).`,`Baca doa/zikir sepanjang tawaf — setiap pusingan ada doa tersendiri; boleh juga membaca al-Quran atau zikir lain.`,`Antara Rukun Yamani dan Hajar Aswad, baca doa "Rabbanaa aatinaa fid-dunyaa hasanah...".`,`Selepas cukup 7 pusingan: solat sunat 2 rakaat (di belakang Maqam Ibrahim jika mampu), kemudian minum air zam-zam.`],
+   doa:[
+     {l:`Niat Tawaf Umrah`, r:`Allaahumma innii uriidu tawaafa baitikal-haraami sab'ata asywaath, tawaaful-'umrati, fa yassirhu lii wa taqabbalhu minnii.`, m:`Ya Allah, aku ingin bertawaf di rumah-Mu yang suci sebanyak 7 pusingan sebagai tawaf umrah, maka permudahkanlah ia untukku dan terimalah ia daripadaku.`},
+     {l:`Istilam Hajar Aswad (setiap pusingan)`, r:`Bismillaahi wallaahu Akbar.`, m:`Dengan nama Allah, dan Allah Maha Besar.`},
+     {l:`Doa Antara Rukun Yamani & Hajar Aswad`, a:`رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ`, r:`Rabbanaa aatinaa fid-dunyaa hasanah wa fil-aakhirati hasanah wa qinaa 'azaaban-naar.`, m:`Wahai Tuhan kami, kurniakanlah kami kebaikan di dunia dan kebaikan di akhirat, dan peliharalah kami daripada azab api neraka.`}
+   ]},
+  {t:`Sa'i Umrah (Rukun)`, d:`Berjalan antara bukit Safa dan Marwah sebanyak 7 kali. Safa→Marwah = pusingan 1, Marwah→Safa = pusingan 2, dan seterusnya sehingga berakhir di Marwah pada pusingan ke-7.`,
+   steps:[`Mula di bukit Safa (ikut papan tanda "To Masaa" / "Safa Start"). Sa'i tidak memerlukan wuduk.`,`Naik ke Safa, mengadap Kaabah, bertakbir 3 kali dan berdoa.`,`Berjalan menuju Marwah; lelaki disunatkan berlari anak antara dua lampu hijau (tanda tempat Siti Hajar berlari mencari air).`,`Baca doa/zikir sepanjang sa'i. Ulang sehingga cukup 7 kali.`,`Pusingan ke-7 berakhir di bukit Marwah.`],
+   doa:[
+     {l:`Doa Mula Sa'i di Safa (al-Baqarah: 158)`, r:`Innas-safaa wal-marwata min sya'aa-irillaah...`, m:`Sesungguhnya Safa dan Marwah adalah sebahagian daripada syiar-syiar (tanda kebesaran) Allah. Maka sesiapa yang mengerjakan haji ke Baitullah atau berumrah, tidak ada dosa baginya mengerjakan sa'i antara keduanya.`},
+     {l:`Doa Ketika Berlari (kawasan lampu hijau)`, r:`Rabbighfir warham wa'fu wa takarram wa tajaawaz 'ammaa ta'lam, innaka ta'lamu maa laa na'lam, innaka antal-a'azzul-akram.`, m:`Ya Tuhanku, ampunilah, rahmatilah, maafkanlah dan kurniakanlah kemurahan-Mu, serta ampunkanlah atas segala yang Engkau ketahui. Sesungguhnya Engkau mengetahui apa yang kami tidak ketahui; sesungguhnya Engkau Maha Mulia lagi Maha Terpuji.`}
+   ]},
+  {t:`Tahallul (Rukun)`, d:`Bercukur (tahliq) atau menggunting rambut (taqsir). Dengan ini selesailah umrah dan segala larangan ihram tamat.`,
+   steps:[`Lelaki afdal bercukur seluruh kepala; jika menggunting, ratakan seluruh kepala.`,`Wanita menggunting hujung rambut sekadar seruas jari.`,`Jika kepala botak, cukup dilalukan pisau cukur/gunting di atas kulit kepala sebagai tanda tahallul.`,`Selesai tahallul — jemaah bebas semula daripada larangan ihram. Umrah anda sempurna. 🤍`]}
+];
+const LARANGAN=[
+  {h:`Lelaki`, d:`Memakai pakaian berjahit/bersarung (kemeja, seluar, stokin bersarung) dan menutup kepala.`},
+  {h:`Wanita`, d:`Menutup muka (niqab/purdah) dan memakai sarung tangan.`},
+  {h:`Lelaki & Wanita`, d:`Memakai wangian, memotong kuku, mencabut/mencukur rambut, memburu/membunuh binatang buruan, memotong/mencabut tumbuhan Tanah Haram, akad nikah/meminang, berjimak dan pendahuluannya, serta bertengkar/mencaci/mengumpat.`}
 ];
 const KIT_L=['Kain Ihram (2 pasang)','Cawat Ihram (2 helai)','Tali Pinggang Ihram','Botol Spray Wuduk','Beg Uncang Kasut','Selipar Jepun','Kopiah','Kemeja / Kurta (3 pasang)','Seluar (3 pasang)','Kain Pelikat (2 pasang)','Baju Tidur / Singlet (2 pasang)','Set Toiletries / Mandian','Buku Panduan Umrah','Buku Doa Kecil (Tawaf & Saie)','Mangga Kecil Kunci Luggage (2-3 biji)','Sarung Luggage','Tag Luggage','Gunting Kecil (Tahalul)','Pemotong Kuku'];
 const KIT_W=['Telekung (2 pasang)','Mini Telekung (2 pasang)','T-shirt Lengan Panjang / Inner (2)','Handsock (2 pasang)','Stokin Wudhuk (2 pasang)','Stokin Biasa (2 pasang)','Jubah Seluar (2 pasang)','Baju Tidur (2 pasang)','Kasut Tawaf','Set Toiletries / Mandian','Buku Panduan Umrah','Buku Doa Kecil (Tawaf & Saie)','Mangga Kecil Kunci Luggage (2-3 biji)','Sarung Luggage','Tag Luggage','Gunting Kecil (Tahalul)','Pakaian Santai bersesuaian','Pad Wanita','Pemotong Kuku'];
@@ -2800,8 +2838,14 @@ function checkList(arr){return arr.map(c=>`
     <label style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13.5px">
       <input type="checkbox" style="width:auto;margin-top:2px"> <span>${c}</span></label>`).join('');}
 function renderGuide(){
-  document.getElementById('guideSteps').innerHTML=GUIDE.map((g,i)=>`
-    <div class="step"><div class="n">${i+1}</div><div class="sc"><b>${g.t.replace(/^\d+\.\s*/,'')}</b><p>${g.d}</p></div></div>`).join('');
+  const doaHTML=d=>`<div class="g-doa"><div class="gl">🤲 ${d.l}</div>${d.a?`<div class="g-ar">${d.a}</div>`:''}${d.r?`<div class="g-rumi">${d.r}</div>`:''}<div class="g-mean">${d.m}</div></div>`;
+  document.getElementById('guideSteps').innerHTML=GUIDE.map((g,i)=>{
+    const steps=(g.steps||[]).map(x=>`<li>${x}</li>`).join('');
+    const doa=(g.doa||[]).map(doaHTML).join('');
+    return `<div class="step"><div class="n">${i+1}</div><div class="sc"><b>${g.t}</b><p>${g.d}</p>${steps?`<ul class="g-steps">${steps}</ul>`:''}${doa}</div></div>`;
+  }).join('')
+  + `<div class="card g-larangan"><b style="font-size:14px;color:var(--danger)">⛔ Larangan Ketika Ihram</b>`+LARANGAN.map(x=>`<div class="ll">${x.h}</div><div class="ld">${x.d}</div>`).join('')+`</div>`
+  + `<div class="tag" style="text-align:center;margin-top:12px;opacity:.85">Sumber: eBook Panduan Ibadah Umrah — Oasys Umrah</div>`;
   document.getElementById('guideCheck').innerHTML=
     `<b style="font-size:13.5px;color:var(--green)">👳 Kelengkapan Lelaki</b>${checkList(KIT_L)}`+
     `<b style="font-size:13.5px;color:var(--green);display:block;margin-top:14px">🧕 Kelengkapan Wanita</b>${checkList(KIT_W)}`+
