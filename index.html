@@ -280,12 +280,13 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .sol-row .tm{font-weight:800; color:var(--green); font-size:16px}
   .wx-head{font-weight:800;font-size:14px;color:var(--green);margin:20px 0 8px;display:flex;align-items:center;gap:6px}
   .wx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .wx-card{background:linear-gradient(135deg,#eaf4ff,#f7fbff);border:1px solid #dcebfb;border-radius:14px;padding:12px 8px;text-align:center}
+  .wx-card{background:linear-gradient(135deg,#eaf4ff,#f7fbff);border:1px solid #dcebfb;border-radius:14px;padding:12px 8px;text-align:center;min-width:0}
   .wx-card .wx-city{font-size:12px;font-weight:700;color:var(--muted)}
   .wx-card .wx-emoji{font-size:30px;line-height:1.15;margin:4px 0}
   .wx-card .wx-temp{font-size:19px;font-weight:800;color:var(--ink)}
   .wx-card .wx-cond{font-size:11px;color:var(--muted);margin-top:2px;min-height:28px;display:flex;align-items:center;justify-content:center}
   .wx-card .wx-hum{font-size:10.5px;color:var(--muted);margin-top:2px}
+  @media(max-width:430px){ .wx-grid{gap:6px} .wx-card{padding:12px 5px} .wx-card .wx-city{font-size:11px;white-space:nowrap} .wx-card .wx-temp{font-size:17px} .wx-card .wx-emoji{font-size:26px} }
 
   /* ---------- Guide / News / Lost ---------- */
   .step{display:flex; gap:14px; margin-bottom:14px}
@@ -726,7 +727,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
               <defs><linearGradient id="kg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20201f"/><stop offset="1" stop-color="#000"/></linearGradient></defs>
             </svg>
             <div class="h-wx" id="heroWx">
-              <div class="hwx-row" id="hwx-me"><span class="hwx-ic">⏳</span><span class="hwx-t">—</span><span class="hwx-c">Saya</span></div>
+              <div class="hwx-row" id="hwx-me"><span class="hwx-ic">⏳</span><span class="hwx-t">—</span><span class="hwx-c">Lokal</span></div>
               <div class="hwx-row" id="hwx-makkah"><span class="hwx-ic">⏳</span><span class="hwx-t">—</span><span class="hwx-c">Makkah</span></div>
               <div class="hwx-row" id="hwx-madinah"><span class="hwx-ic">⏳</span><span class="hwx-t">—</span><span class="hwx-c">Madinah</span></div>
             </div>
@@ -3319,7 +3320,7 @@ function fillWx(id,w,note){
 }
 async function loadWeather(){
   const box=document.getElementById('solWeather'); if(!box) return;
-  box.innerHTML='<div class="wx-head">🌤️ Cuaca Terkini</div><div class="wx-grid">'+wxCard('me','Lokasi Saya')+wxCard('makkah','Makkah')+wxCard('madinah','Madinah')+'</div>';
+  box.innerHTML='<div class="wx-head">🌤️ Cuaca Terkini</div><div class="wx-grid">'+wxCard('me','Lokal')+wxCard('makkah','Makkah')+wxCard('madinah','Madinah')+'</div>';
   fetchWx(21.4225,39.8262).then(w=>fillWx('makkah',w));
   fetchWx(24.4672,39.6111).then(w=>fillWx('madinah',w));
   let loc=state.userLoc;
