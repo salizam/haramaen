@@ -996,6 +996,10 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         </div>
         <div class="adm-h">Kursus menunggu kelulusan</div>
         <div id="admPending"><div class="empty">Memuatkan…</div></div>
+        <div class="adm-h">Bisnes menunggu kelulusan</div>
+        <div id="admPendingBiz"><div class="empty">Memuatkan…</div></div>
+        <div class="adm-h">Servis menunggu kelulusan</div>
+        <div id="admPendingSvc"><div class="empty">Memuatkan…</div></div>
         <div class="adm-h" style="display:flex;align-items:center;justify-content:space-between"><span>Maklum Balas Pengguna</span><span id="fbCount" style="font-size:12px;font-weight:400;color:var(--muted)"></span></div>
         <div class="fb-filter" id="fbFilter"><button class="on" onclick="filterFb('all',this)">Semua</button><button onclick="filterFb('5',this)">★★★★★</button><button onclick="filterFb('4',this)">★★★★</button><button onclick="filterFb('3',this)">★★★</button><button onclick="filterFb('unrated',this)">Tanpa rating</button></div>
         <div id="admFeedback"><div class="empty">Memuatkan…</div></div>
@@ -1442,7 +1446,7 @@ function toggleUserMenu(e){ if(e) e.stopPropagation(); document.getElementById('
 document.addEventListener('click', function(e){ const m=document.getElementById('tbMenu'); if(m && m.classList.contains('open') && !e.target.closest('.tb-user')) m.classList.remove('open'); const p=document.getElementById('notifPanel'); if(p && p.classList.contains('open') && !e.target.closest('.tb-notif')) p.classList.remove('open'); });
 
 /* ============ LIVE DATA (Supabase) ============ */
-let AGENCIES=[], HOTELS=[], VOLUNTEERS=[], HOSPITALS=[], SERVICES=[], COURSES=[], SAR_RATE=1.27;
+let AGENCIES=[], HOTELS=[], VOLUNTEERS=[], HOSPITALS=[], SERVICES=[], COURSES=[], BIZ=[], SVCSUB=[], SAR_RATE=1.27;
 let MUTAWWIF=[];
 let NEWS=[], LATEST_DUAS=[], AG_REVIEW_SUMMARY={};
 let admTimer=null;
@@ -1484,6 +1488,8 @@ async function loadData(){
   HOSPITALS=(me.data||[]).map(m=>{const k=MED_MAP[m.type]||{t:m.type,i:'🏥'};
     return {name:m.name, type:k.t, icon:k.i, dist:m.distance_km===null?null:Number(m.distance_km), tel:m.phone, tag:m.tag||'', apply_url:m.apply_url||''};});
   SERVICES=(sv.data||[]).map(s=>({name:s.name, icon:SVC_ICON[s.icon]||'🕋', desc:s.description||'', price:s.price_label||'', tag:s.tag||''}));
+  try{ const bz=await sb.from('business_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); BIZ=(bz.data||[]).map(b=>({id:b.id, name:b.name||'', category:b.category||'', location:b.location||'', contact:b.contact||'', website:b.website||'', desc:b.description||'', signboard:b.signboard_url||''})); }catch(e){ BIZ=[]; }
+  try{ const ss=await sb.from('service_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); SVCSUB=(ss.data||[]).map(x=>({id:x.id, name:x.name||'', category:x.category||'', location:x.location||'', contact:x.contact||'', desc:x.description||'', photo:x.photo_url||''})); }catch(e){ SVCSUB=[]; }
   if(cr.data && cr.data[0]) SAR_RATE=Number(cr.data[0].rate);
   checkContentNotifs();
 }
@@ -2031,6 +2037,8 @@ async function renderAdmin(){
   if(admTimer) clearInterval(admTimer);
   admTimer=setInterval(()=>{ const a=document.getElementById('v-admin'); if(a&&a.classList.contains('active')) loadAdminStats(true); else { clearInterval(admTimer); admTimer=null; } }, 30000);
   loadPendingCourses();
+  loadPendingBusiness();
+  loadPendingService();
   loadFeedback();
 }
 async function loadAdminStats(quiet){
@@ -2085,6 +2093,69 @@ async function setCourse(id,status,btn){
       try{ await loadData(); renderPosterCarousel(); renderKursusAll(); }catch(e){}
     }
     loadPendingCourses();
+  }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
+}
+async function loadPendingBusiness(){
+  const box=document.getElementById('admPendingBiz'); if(!box) return;
+  try{
+    const {data,error}=await sb.from('business_submissions').select('*').eq('status','pending').order('created_at',{ascending:false});
+    if(error) throw error;
+    const list=data||[];
+    box.innerHTML = list.length ? list.map(b=>`
+      <div class="pend" data-id="${esc(String(b.id))}">
+        ${b.signboard_url?`<img class="pend-poster" src="${esc(b.signboard_url)}" alt="Signboard" loading="lazy" onerror="this.style.display='none'">`:''}
+        <h4>🛍️ ${esc(b.name||'Bisnes')}${b.category?` <span style="font-weight:600;color:var(--muted);font-size:12px">(${esc(b.category)})</span>`:''}</h4>
+        <div class="pmeta"><b>Lokasi:</b> ${esc(b.location||'-')}<br>
+        <b>Hubungi:</b> ${esc(b.contact||'-')}<br>
+        ${b.website?`<b>Web/Sosial:</b> ${esc(b.website)}<br>`:''}
+        ${b.description?`<b>Keterangan:</b> ${esc(b.description)}`:''}</div>
+        <div class="pend-act">
+          <button class="b-approve" onclick="setBusiness('${esc(String(b.id))}','approved',this)">✓ Lulus</button>
+          <button class="b-reject" onclick="setBusiness('${esc(String(b.id))}','rejected',this)">✕ Tolak</button>
+        </div>
+      </div>`).join('') : '<div class="empty">Tiada bisnes menunggu kelulusan.</div>';
+  }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat senarai (pastikan login sebagai admin).</div>'; }
+}
+async function setBusiness(id,status,btn){
+  if(status==='rejected' && !confirm('Adakah anda pasti untuk menolak bisnes ini?')) return;
+  if(btn) btn.disabled=true;
+  try{
+    const {error}=await sb.from('business_submissions').update({status:status}).eq('id',id);
+    if(error) throw error;
+    toast(status==='approved'?'Bisnes diluluskan & kini dipapar di Beli-Belah.':'Bisnes ditolak.');
+    if(status==='approved'){ try{ await loadData(); renderShop(); }catch(e){} }
+    loadPendingBusiness();
+  }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
+}
+async function loadPendingService(){
+  const box=document.getElementById('admPendingSvc'); if(!box) return;
+  try{
+    const {data,error}=await sb.from('service_submissions').select('*').eq('status','pending').order('created_at',{ascending:false});
+    if(error) throw error;
+    const list=data||[];
+    box.innerHTML = list.length ? list.map(x=>`
+      <div class="pend" data-id="${esc(String(x.id))}">
+        ${x.photo_url?`<img class="pend-poster" src="${esc(x.photo_url)}" alt="Gambar" loading="lazy" onerror="this.style.display='none'">`:''}
+        <h4>♿ ${esc(x.name||'Servis')}${x.category?` <span style="font-weight:600;color:var(--muted);font-size:12px">(${esc(x.category)})</span>`:''}</h4>
+        <div class="pmeta"><b>Lokasi:</b> ${esc(x.location||'-')}<br>
+        <b>Hubungi:</b> ${esc(x.contact||'-')}<br>
+        ${x.description?`<b>Keterangan:</b> ${esc(x.description)}`:''}</div>
+        <div class="pend-act">
+          <button class="b-approve" onclick="setService('${esc(String(x.id))}','approved',this)">✓ Lulus</button>
+          <button class="b-reject" onclick="setService('${esc(String(x.id))}','rejected',this)">✕ Tolak</button>
+        </div>
+      </div>`).join('') : '<div class="empty">Tiada servis menunggu kelulusan.</div>';
+  }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat senarai (pastikan login sebagai admin).</div>'; }
+}
+async function setService(id,status,btn){
+  if(status==='rejected' && !confirm('Adakah anda pasti untuk menolak servis ini?')) return;
+  if(btn) btn.disabled=true;
+  try{
+    const {error}=await sb.from('service_submissions').update({status:status}).eq('id',id);
+    if(error) throw error;
+    toast(status==='approved'?'Servis diluluskan & kini dipapar di page Servis.':'Servis ditolak.');
+    if(status==='approved'){ try{ await loadData(); renderSvc(); }catch(e){} }
+    loadPendingService();
   }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
 }
 let _fbAll=[];
@@ -2773,10 +2844,25 @@ function renderSvc(){
       <div class="kv"><span>1 SAR (Riyal Saudi)</span><b>RM ${SAR_RATE.toFixed(2)}</b></div>
       <div class="kv"><span>RM 1,000 ≈</span><b>SAR ${(1000/SAR_RATE).toFixed(0)}</b></div>
     </div>`;
+  function svcCard(o){
+    const img=o.photo?`<img src="${esc(o.photo)}" alt="${esc(o.name)}" style="width:52px;height:52px;object-fit:cover;border-radius:10px;flex:none" loading="lazy" onerror="this.style.display='none'">`:`<div class="thumb">${o.icon||'🛎️'}</div>`;
+    const wa=o.contact?`<div style="margin-top:4px"><a href="${esc(waLink(o.contact))}" target="_blank" rel="noopener" class="wa-link">${WA_ICON}${esc(o.contact)}</a></div>`:'';
+    return `<div class="card"><div class="list-row">
+      ${img}<div style="flex:1">
+      <div class="row-between"><b>${esc(o.name)}</b>${o.pill?`<span class="pill gold">${esc(o.pill)}</span>`:''}</div>
+      ${o.desc?`<div class="tag">${esc(o.desc)}</div>`:''}
+      ${wa}
+      <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(o.name)}" data-text="${esc(o.name+(o.desc?' — '+o.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
+      </div></div></div>`;
+  }
+  const matchCat=(c,txt)=>c.key.some(k=>(txt||'').toLowerCase().includes(k.toLowerCase()));
+  const used=new Set();
   let anySection=false;
   cats.forEach(c=>{
     if(sel!=='all'&&sel!==c.id) return;
-    const items=SERVICES.filter(s=>c.key.includes(s.tag));
+    const legacy=SERVICES.filter(s=>c.key.includes(s.tag)).map(s=>({name:s.name,icon:s.icon,desc:s.desc,pill:s.price,contact:'',photo:''}));
+    const subs=(SVCSUB||[]).filter(x=>matchCat(c,x.category)).map(x=>{used.add(x.id);return {name:x.name,icon:'♿',desc:x.desc,pill:[x.category,x.location].filter(Boolean).join(' · '),contact:x.contact,photo:x.photo};});
+    const items=subs.concat(legacy);
     if(!items.length && !c.always) return;
     anySection=true;
     html+=`<div class="section-title" style="font-size:15px;margin-top:6px">${c.title}</div>`;
@@ -2784,27 +2870,37 @@ function renderSvc(){
       html+=`<div class="empty">Belum ada penyedia servis ini disenaraikan. Jadilah yang pertama — tekan “Kongsi servis anda” di atas. 🤍</div>`;
       return;
     }
-    html+=items.map(s=>`<div class="card"><div class="list-row">
-      <div class="thumb">${s.icon}</div><div style="flex:1">
-      <div class="row-between"><b>${s.name}</b>${s.price?`<span class="pill gold">${s.price}</span>`:''}</div>
-      <div class="tag">${s.desc}</div>
-      <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(s.name)}" data-text="${esc(s.name+(s.desc?' — '+s.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
-      </div></div></div>`).join('');
+    html+=items.map(svcCard).join('');
   });
+  const rest=(SVCSUB||[]).filter(x=>!used.has(x.id));
+  if(sel==='all' && rest.length){
+    anySection=true;
+    html+=`<div class="section-title" style="font-size:15px;margin-top:6px">🛎️ Servis Lain</div>`;
+    html+=rest.map(x=>svcCard({name:x.name,icon:'🛎️',desc:x.desc,pill:[x.category,x.location].filter(Boolean).join(' · '),contact:x.contact,photo:x.photo})).join('');
+  }
   if(!anySection) html+=`<div class="empty">Tiada rekod untuk kategori ini.</div>`;
   document.getElementById('dir-svc').innerHTML=html;
 }
 function renderShop(){
   const el=document.getElementById('shopList'); if(!el) return;
-  const items=SERVICES.filter(s=>s.tag==='Marketplace');
-  const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:10px">Senarai bisnes &amp; peniaga (kurma, air zam-zam, makanan, oleh-oleh &amp; lain-lain) yang berkaitan dengan umrah dan haji. Ada bisnes? Tekan \u201CPromote bisnes anda di sini\u201D untuk disenaraikan. 🛍️</div>`;
+  const svc=SERVICES.filter(s=>s.tag==='Marketplace').map(s=>({name:s.name, category:'', location:'', contact:'', website:'', desc:s.desc, signboard:'', icon:s.icon}));
+  const biz=(BIZ||[]).map(b=>({name:b.name, category:b.category, location:b.location, contact:b.contact, website:b.website, desc:b.desc, signboard:b.signboard, icon:'🛍️'}));
+  const items=biz.concat(svc);
+  const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:10px">Senarai bisnes &amp; peniaga (kurma, air zam-zam, makanan, oleh-oleh &amp; lain-lain) yang berkaitan dengan umrah dan haji. Ada bisnes? Tekan “Promote bisnes anda di sini” untuk disenaraikan. 🛍️</div>`;
   if(!items.length){ el.innerHTML=intro+`<div class="empty">Belum ada bisnes disenaraikan. Jadilah yang pertama! 🤍</div>`; return; }
-  el.innerHTML=intro+items.map(s=>`<div class="card"><div class="list-row">
-      <div class="thumb">${s.icon}</div><div style="flex:1">
-      <div class="row-between"><b>${esc(s.name)}</b>${s.price?`<span class="pill gold">${esc(s.price)}</span>`:''}</div>
-      <div class="tag">${esc(s.desc)}</div>
-      <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(s.name)}" data-text="${esc(s.name+(s.desc?' \u2014 '+s.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
-      </div></div></div>`).join('');
+  el.innerHTML=intro+items.map(b=>{
+    const img=b.signboard?`<img src="${esc(b.signboard)}" alt="${esc(b.name)}" style="width:52px;height:52px;object-fit:cover;border-radius:10px;flex:none" loading="lazy" onerror="this.style.display='none'">`:`<div class="thumb">${b.icon||'🛍️'}</div>`;
+    const wa=b.contact?`<div style="margin-top:4px"><a href="${esc(waLink(b.contact))}" target="_blank" rel="noopener" class="wa-link">${WA_ICON}${esc(b.contact)}</a></div>`:'';
+    const web=b.website?`<a href="${esc(b.website.match(/^https?:\/\//)?b.website:'https://'+b.website)}" target="_blank" rel="noopener" style="color:var(--green);font-weight:600;font-size:12px;text-decoration:none">🔗 Web/Sosial</a>`:'';
+    const catLoc=[b.category,b.location].filter(Boolean).join(' · ');
+    return `<div class="card"><div class="list-row">
+      ${img}<div style="flex:1">
+      <div class="row-between"><b>${esc(b.name)}</b>${catLoc?`<span class="pill gold">${esc(catLoc)}</span>`:''}</div>
+      ${b.desc?`<div class="tag">${esc(b.desc)}</div>`:''}
+      ${wa}
+      <div style="margin-top:8px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">${web}<button class="shr-sm" data-title="${esc(b.name)}" data-text="${esc(b.name+(b.desc?' — '+b.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
+      </div></div></div>`;
+  }).join('');
 }
 function openBizForm(){ const m=document.getElementById('bizRegModal'); if(m) m.classList.add('open'); }
 function previewBizImg(input){
