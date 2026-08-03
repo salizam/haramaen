@@ -2950,24 +2950,36 @@ function renderSvc(){
 }
 function renderShop(){
   const el=document.getElementById('shopList'); if(!el) return;
-  const svc=SERVICES.filter(s=>s.tag==='Marketplace').map(s=>({name:s.name, category:'', location:'', contact:'', website:'', desc:s.desc, signboard:'', icon:s.icon}));
-  const biz=(BIZ||[]).map(b=>({name:b.name, category:b.category, location:b.location, contact:b.contact, website:b.website, desc:b.desc, signboard:b.signboard, icon:'🛍️'}));
+  const svc=SERVICES.filter(s=>s.tag==='Marketplace').map(s=>({name:s.name, category:'', location:'', contact:'', website:'', desc:s.desc, signboard:''}));
+  const biz=(BIZ||[]).map(b=>({name:b.name, category:b.category, location:b.location, contact:b.contact, website:b.website, desc:b.desc, signboard:b.signboard}));
   const items=biz.concat(svc);
   const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:10px">Senarai bisnes &amp; peniaga (kurma, air zam-zam, makanan, oleh-oleh &amp; lain-lain) yang berkaitan dengan umrah dan haji. Ada bisnes? Tekan “Promote bisnes anda di sini” untuk disenaraikan. 🛍️</div>`;
   if(!items.length){ el.innerHTML=intro+`<div class="empty">Belum ada bisnes disenaraikan. Jadilah yang pertama! 🤍</div>`; return; }
-  el.innerHTML=intro+items.map(b=>{
-    const img=b.signboard?`<img src="${esc(b.signboard)}" alt="${esc(b.name)}" style="width:52px;height:52px;object-fit:cover;border-radius:10px;flex:none" loading="lazy" onerror="this.style.display='none'">`:`<div class="thumb">${b.icon||'🛍️'}</div>`;
-    const wa=b.contact?`<div style="margin-top:4px"><a href="${esc(waLink(b.contact))}" target="_blank" rel="noopener" class="wa-link">${WA_ICON}${esc(b.contact)}</a></div>`:'';
-    const web=b.website?`<a href="${esc(b.website.match(/^https?:\/\//)?b.website:'https://'+b.website)}" target="_blank" rel="noopener" style="color:var(--green);font-weight:600;font-size:12px;text-decoration:none">🔗 Web/Sosial</a>`:'';
-    const catLoc=[b.category,b.location].filter(Boolean).join(' · ');
-    return `<div class="card"><div class="list-row">
-      ${img}<div style="flex:1">
-      <div class="row-between"><b>${esc(b.name)}</b>${catLoc?`<span class="pill gold">${esc(catLoc)}</span>`:''}</div>
-      ${b.desc?`<div class="tag">${esc(b.desc)}</div>`:''}
-      ${wa}
-      <div style="margin-top:8px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">${web}<button class="shr-sm" data-title="${esc(b.name)}" data-text="${esc(b.name+(b.desc?' — '+b.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
-      </div></div></div>`;
-  }).join('');
+  function shopCard(b){
+    const img=b.signboard?`<img src="${esc(b.signboard)}" alt="${esc(b.name)}" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.parentNode.textContent='🛍️'">`:'🛍️';
+    const mapQ=b.location?encodeURIComponent(b.name+' '+b.location):'';
+    const webUrl=b.website?(b.website.match(/^https?:\/\//)?b.website:'https://'+b.website):'';
+    const hasIcon=b.location||b.website||b.contact;
+    const icons=`<div class="ag-icon-wrap">
+      ${b.location?`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Lokasi">${ICO_PIN}</a>`:''}
+      ${b.website?`<a class="ag-icon-btn" href="${esc(webUrl)}" target="_blank" rel="noopener" data-tip="Web/Sosial">${ICO_GLOBE}</a>`:''}
+      ${b.contact?`<a class="ag-icon-btn" href="${esc(waLink(b.contact))}" target="_blank" rel="noopener" data-tip="WhatsApp">${ICO_PHONE}</a>`:''}
+    </div>`;
+    const shr=`<button class="shr-sm" data-title="${esc(b.name)}" data-text="${esc(b.name+(b.desc?' — '+b.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>`;
+    return `<div class="card"><div class="list-row" style="align-items:flex-start">
+      <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+        <div class="thumb" style="margin-bottom:0">${img}</div>
+        ${hasIcon?icons:''}
+      </div>
+      <div style="flex:1;min-width:0;padding-left:12px">
+        <b style="font-size:13.5px;line-height:1.3;display:block">${esc(b.name)}</b>
+        ${b.category?`<div class="tag" style="margin-top:2px">${esc(b.category)}</div>`:''}
+        ${b.desc?`<div class="tag" style="margin-top:4px">${esc(b.desc)}</div>`:''}
+        <div style="margin-top:8px">${shr}</div>
+      </div>
+    </div></div>`;
+  }
+  el.innerHTML=intro+items.map(shopCard).join('');
 }
 function openBizForm(){ const m=document.getElementById('bizRegModal'); if(m) m.classList.add('open'); }
 function previewBizImg(input){
