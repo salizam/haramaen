@@ -869,7 +869,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
 
       <!-- SERVIS -->
       <section class="view" id="v-svc">
-        <div class="section-title">Servis<span class="u"></span></div>
+        <div class="ktitle-row"><div class="section-title">Servis<span class="u"></span></div><button class="kbtn kbtn-daftar" onclick="openSvcForm()">Kongsi servis anda</button></div>
         <div id="dir-svc"></div>
       </section>
 
@@ -1180,6 +1180,36 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <div class="modal-actions">
       <button class="m-cancel" onclick="closeBizForm()">Batal</button>
       <button class="m-save" id="bizSave" onclick="submitBizReg()">Hantar Permohonan</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="svcRegModal">
+  <div class="modal-box">
+    <h3>Kongsi Servis Anda</h3>
+    <div class="mh-sub">Tawarkan servis anda kepada jemaah (cth: tolak kerusi roda, dobi, teksi, pemandu pelancong). Maklumat akan disemak admin sebelum disiarkan. Percuma. ♿</div>
+    <label class="fl">Nama Penyedia / Servis <span style="color:#e74c3c">*</span></label>
+    <input id="svcNama" placeholder="cth: Ahmad — Servis Tolak Kerusi Roda">
+    <div class="modal-row">
+      <div>
+        <label class="fl">Jenis Servis</label>
+        <input id="svcJenis" value="Tolak Kerusi Roda">
+      </div>
+      <div>
+        <label class="fl">Lokasi / Kawasan</label>
+        <input id="svcLokasi" placeholder="cth: Makkah / Madinah">
+      </div>
+    </div>
+    <label class="fl">No. Telefon / WhatsApp</label>
+    <input id="svcContact" placeholder="cth: +9665XXXXXXXX atau 01X-XXXXXXX">
+    <label class="fl">Keterangan Ringkas</label>
+    <textarea id="svcDesc" placeholder="Ceritakan tentang servis anda, kadar harga, waktu tersedia…"></textarea>
+    <label class="fl">Gambar <span style="font-weight:400;color:var(--muted)">(jika ada)</span></label>
+    <input type="file" id="svcImg" accept="image/jpeg,image/png,image/webp" onchange="previewSvcImg(this)">
+    <img id="svcImgPreview" class="up-preview" alt="Preview gambar">
+    <div class="modal-actions">
+      <button class="m-cancel" onclick="closeSvcForm()">Batal</button>
+      <button class="m-save" id="svcSave" onclick="submitSvcReg()">Hantar Permohonan</button>
     </div>
   </div>
 </div>
@@ -2730,6 +2760,7 @@ function renderMed(){
 }
 function renderSvc(){
   const cats=[
+    {id:'kerusi', key:['Kerusi Roda','Tolak Kerusi Roda'], title:'♿ Tolak Kerusi Roda', label:'Tolak Kerusi Roda', always:true},
     {id:'mutawwif', key:['Mutawwif','Mutawwifah'], title:'🧕 Mutawwif / Mutawwifah', label:'Mutawwif / Mutawwifah'},
     {id:'dobi', key:['Dobi'], title:'🧺 Dobi (Laundry)', label:'Dobi'},
     {id:'transport', key:['Teksi','Pengangkutan','e-Hailing'], title:'🚕 Pengangkutan & Teksi', label:'Pengangkutan & Teksi'},
@@ -2742,13 +2773,17 @@ function renderSvc(){
       <div class="kv"><span>1 SAR (Riyal Saudi)</span><b>RM ${SAR_RATE.toFixed(2)}</b></div>
       <div class="kv"><span>RM 1,000 ≈</span><b>SAR ${(1000/SAR_RATE).toFixed(0)}</b></div>
     </div>`;
-  let shown=0;
+  let anySection=false;
   cats.forEach(c=>{
     if(sel!=='all'&&sel!==c.id) return;
     const items=SERVICES.filter(s=>c.key.includes(s.tag));
-    if(!items.length) return;
-    shown+=items.length;
+    if(!items.length && !c.always) return;
+    anySection=true;
     html+=`<div class="section-title" style="font-size:15px;margin-top:6px">${c.title}</div>`;
+    if(!items.length){
+      html+=`<div class="empty">Belum ada penyedia servis ini disenaraikan. Jadilah yang pertama — tekan “Kongsi servis anda” di atas. 🤍</div>`;
+      return;
+    }
     html+=items.map(s=>`<div class="card"><div class="list-row">
       <div class="thumb">${s.icon}</div><div style="flex:1">
       <div class="row-between"><b>${s.name}</b>${s.price?`<span class="pill gold">${s.price}</span>`:''}</div>
@@ -2756,7 +2791,7 @@ function renderSvc(){
       <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(s.name)}" data-text="${esc(s.name+(s.desc?' — '+s.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
       </div></div></div>`).join('');
   });
-  if(!shown) html+=`<div class="empty">Tiada rekod untuk kategori ini.</div>`;
+  if(!anySection) html+=`<div class="empty">Tiada rekod untuk kategori ini.</div>`;
   document.getElementById('dir-svc').innerHTML=html;
 }
 function renderShop(){
@@ -2814,6 +2849,55 @@ async function submitBizReg(){
     if(error) throw error;
     closeBizForm();
     toast('Terima kasih! Bisnes anda sedang disemak. 🙏');
+  }catch(e){
+    toast('Gagal hantar. Cuba lagi.');
+  }
+  btn.disabled=false; btn.textContent='Hantar Permohonan';
+}
+
+function openSvcForm(){ const m=document.getElementById('svcRegModal'); if(m) m.classList.add('open'); }
+function closeSvcForm(){
+  const m=document.getElementById('svcRegModal'); if(m) m.classList.remove('open');
+  ['svcNama','svcContact','svcLokasi','svcDesc'].forEach(id=>{const e=document.getElementById(id); if(e) e.value='';});
+  const jz=document.getElementById('svcJenis'); if(jz) jz.value='Tolak Kerusi Roda';
+  const fi=document.getElementById('svcImg'); if(fi) fi.value='';
+  const lp=document.getElementById('svcImgPreview'); if(lp){ lp.src=''; lp.style.display='none'; }
+}
+function previewSvcImg(inp){
+  const prev=document.getElementById('svcImgPreview');
+  const f=inp.files&&inp.files[0];
+  if(f){ prev.src=URL.createObjectURL(f); prev.style.display='block'; } else { prev.src=''; prev.style.display='none'; }
+}
+async function submitSvcReg(){
+  const nama=(document.getElementById('svcNama').value||'').trim();
+  if(!nama){toast('Sila isi nama penyedia / servis.');return;}
+  const jenis=(document.getElementById('svcJenis').value||'').trim();
+  const lokasi=(document.getElementById('svcLokasi').value||'').trim();
+  const contact=(document.getElementById('svcContact').value||'').trim();
+  const desc=(document.getElementById('svcDesc').value||'').trim();
+  const btn=document.getElementById('svcSave');
+  btn.disabled=true; btn.textContent='Menghantar…';
+  try{
+    let photoUrl=null;
+    const fi=document.getElementById('svcImg');
+    const imgFile=fi&&fi.files?fi.files[0]:null;
+    if(imgFile){
+      if(imgFile.size>5*1024*1024){ toast('Gambar terlalu besar — maks 5MB.'); btn.disabled=false; btn.textContent='Hantar Permohonan'; return; }
+      const ext=(imgFile.name.split('.').pop()||'jpg').toLowerCase();
+      const path='svc-'+Date.now()+'.'+ext;
+      const {error:upErr}=await sb.storage.from('service-photos').upload(path,imgFile,{contentType:imgFile.type,upsert:false});
+      if(upErr) throw upErr;
+      const {data:{publicUrl}}=sb.storage.from('service-photos').getPublicUrl(path);
+      photoUrl=publicUrl;
+    }
+    const {error}=await sb.from('service_submissions').insert({
+      name:nama, category:jenis||null, location:lokasi||null,
+      contact:contact||null, description:desc||null,
+      photo_url:photoUrl, user_id: state.user?state.user.id:null, status:'pending'
+    });
+    if(error) throw error;
+    closeSvcForm();
+    toast('Terima kasih! Servis anda sedang disemak. 🙏');
   }catch(e){
     toast('Gagal hantar. Cuba lagi.');
   }
