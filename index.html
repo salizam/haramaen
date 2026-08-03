@@ -1000,6 +1000,10 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div id="admPendingBiz"><div class="empty">Memuatkan…</div></div>
         <div class="adm-h">Servis menunggu kelulusan</div>
         <div id="admPendingSvc"><div class="empty">Memuatkan…</div></div>
+        <div class="adm-h">Agensi menunggu kelulusan</div>
+        <div id="admPendingAgency"><div class="empty">Memuatkan…</div></div>
+        <div class="adm-h">Kursus Mutawwif menunggu kelulusan</div>
+        <div id="admPendingMutawwif"><div class="empty">Memuatkan…</div></div>
         <div class="adm-h" style="display:flex;align-items:center;justify-content:space-between"><span>Maklum Balas Pengguna</span><span id="fbCount" style="font-size:12px;font-weight:400;color:var(--muted)"></span></div>
         <div class="fb-filter" id="fbFilter"><button class="on" onclick="filterFb('all',this)">Semua</button><button onclick="filterFb('5',this)">★★★★★</button><button onclick="filterFb('4',this)">★★★★</button><button onclick="filterFb('3',this)">★★★</button><button onclick="filterFb('unrated',this)">Tanpa rating</button></div>
         <div id="admFeedback"><div class="empty">Memuatkan…</div></div>
@@ -2039,6 +2043,8 @@ async function renderAdmin(){
   loadPendingCourses();
   loadPendingBusiness();
   loadPendingService();
+  loadPendingAgency();
+  loadPendingMutawwif();
   loadFeedback();
 }
 async function loadAdminStats(quiet){
@@ -2156,6 +2162,67 @@ async function setService(id,status,btn){
     toast(status==='approved'?'Servis diluluskan & kini dipapar di page Servis.':'Servis ditolak.');
     if(status==='approved'){ try{ await loadData(); renderSvc(); }catch(e){} }
     loadPendingService();
+  }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
+}
+async function loadPendingAgency(){
+  const box=document.getElementById('admPendingAgency'); if(!box) return;
+  try{
+    const {data,error}=await sb.from('agencies').select('*').eq('status','pending').order('created_at',{ascending:false});
+    if(error) throw error;
+    const list=data||[];
+    box.innerHTML = list.length ? list.map(a=>`
+      <div class="pend" data-id="${esc(String(a.id))}">
+        <h4>🏢 ${esc(a.name||'Agensi')}${a.motac_licensed?` <span style="font-weight:600;color:#1f9d55;font-size:12px">(Berlesen MOTAC)</span>`:''}</h4>
+        <div class="pmeta"><b>Lesen MOTAC:</b> ${esc(a.motac_license||'-')}<br>
+        <b>Rating:</b> ${a.rating!=null&&a.rating!==''?esc(String(a.rating)):'-'}<br>
+        ${a.note?`<b>Nota:</b> ${esc(a.note)}`:''}</div>
+        <div class="pend-act">
+          <button class="b-approve" onclick="setAgency('${esc(String(a.id))}','approved',this)">✓ Lulus</button>
+          <button class="b-reject" onclick="setAgency('${esc(String(a.id))}','rejected',this)">✕ Tolak</button>
+        </div>
+      </div>`).join('') : '<div class="empty">Tiada agensi menunggu kelulusan.</div>';
+  }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat senarai (pastikan login sebagai admin).</div>'; }
+}
+async function setAgency(id,status,btn){
+  if(status==='rejected' && !confirm('Adakah anda pasti untuk menolak agensi ini?')) return;
+  if(btn) btn.disabled=true;
+  try{
+    const {error}=await sb.from('agencies').update({status:status}).eq('id',id);
+    if(error) throw error;
+    toast(status==='approved'?'Agensi diluluskan & kini disiarkan.':'Agensi ditolak.');
+    if(status==='approved'){ try{ await loadData(); renderAgencies(); }catch(e){} }
+    loadPendingAgency();
+  }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
+}
+async function loadPendingMutawwif(){
+  const box=document.getElementById('admPendingMutawwif'); if(!box) return;
+  try{
+    const {data,error}=await sb.from('mutawwif_courses').select('*').eq('status','pending').order('created_at',{ascending:false});
+    if(error) throw error;
+    const list=data||[];
+    box.innerHTML = list.length ? list.map(c=>`
+      <div class="pend" data-id="${esc(String(c.id))}">
+        ${c.poster_url?`<img class="pend-poster" src="${esc(c.poster_url)}" alt="Poster" loading="lazy" onerror="this.style.display='none'">`:''}
+        <h4>🧕 ${esc(c.anjuran||'Kursus Mutawwif')}${c.penganjur_jenis?` <span style="font-weight:600;color:var(--muted);font-size:12px">(${esc(c.penganjur_jenis)})</span>`:''}</h4>
+        <div class="pmeta"><b>Tarikh:</b> ${esc(c.tarikh_label||'-')} &nbsp;·&nbsp; <b>Masa:</b> ${esc(c.masa||'-')}<br>
+        <b>Lokasi:</b> ${esc(c.lokasi||'-')} ${c.daerah||c.negeri?`(${esc([c.daerah,c.negeri].filter(Boolean).join(', '))})`:''}<br>
+        <b>Hubungi:</b> ${esc(c.hubungi||'-')}</div>
+        <div class="pend-act">
+          <button class="b-approve" onclick="setMutawwif('${esc(String(c.id))}','approved',this)">✓ Lulus</button>
+          <button class="b-reject" onclick="setMutawwif('${esc(String(c.id))}','rejected',this)">✕ Tolak</button>
+        </div>
+      </div>`).join('') : '<div class="empty">Tiada kursus mutawwif menunggu kelulusan.</div>';
+  }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat senarai (pastikan login sebagai admin).</div>'; }
+}
+async function setMutawwif(id,status,btn){
+  if(status==='rejected' && !confirm('Adakah anda pasti untuk menolak kursus ini?')) return;
+  if(btn) btn.disabled=true;
+  try{
+    const {error}=await sb.from('mutawwif_courses').update({status:status}).eq('id',id);
+    if(error) throw error;
+    toast(status==='approved'?'Kursus mutawwif diluluskan & kini dipapar.':'Kursus mutawwif ditolak.');
+    if(status==='approved'){ try{ await loadData(); renderMutawwifAll(); }catch(e){} }
+    loadPendingMutawwif();
   }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
 }
 let _fbAll=[];
