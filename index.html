@@ -345,9 +345,9 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .k-map-link{display:inline-block;margin-top:3px;font-size:11.5px;color:#1a73e8;font-weight:600;text-decoration:none}
   .k-map-link:hover{text-decoration:underline}
   .k-poster-link:hover{text-decoration:underline}
-  .th-poster{width:108px;padding:6px 4px}
+  .th-poster{width:78px;padding:6px 4px}
   .k-poster-td{padding:6px 4px;vertical-align:middle}
-  .k-poster-thumb{width:100px;height:56px;object-fit:cover;border-radius:6px;cursor:zoom-in;display:block;box-shadow:0 1px 5px rgba(0,0,0,.2)}
+  .k-poster-thumb{width:64px;height:80px;object-fit:cover;border-radius:8px;cursor:zoom-in;display:block;box-shadow:0 1px 5px rgba(0,0,0,.2)}
   .k-poster-thumb:hover{opacity:.85}
   .k-lb{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10000;display:none;align-items:center;justify-content:center;cursor:zoom-out;padding:16px}
   .k-lb img{max-width:92vw;max-height:88vh;border-radius:14px;box-shadow:0 8px 48px rgba(0,0,0,.6);object-fit:contain}
@@ -741,6 +741,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         </div>
 
         <div class="terkini" id="terkiniBox"></div>
+        <div id="bizPosterHome"></div>
 
         <div id="posterCarousel"></div>
       </section>
@@ -1185,6 +1186,9 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <label class="fl">Gambar Signboard / Logo Bisnes <span style="font-weight:400;color:var(--muted)">(jika ada)</span></label>
     <input type="file" id="bizImg" accept="image/jpeg,image/png,image/webp" onchange="previewBizImg(this)">
     <img id="bizImgPreview" class="up-preview" alt="Preview gambar">
+    <label class="fl">Poster Iklan (potret) <span style="font-weight:400;color:var(--muted)">(pilihan — 4:5, JPG/PNG maks 5MB)</span></label>
+    <input type="file" id="bizPoster" accept="image/jpeg,image/png,image/webp" onchange="previewBizPoster(this)">
+    <img id="bizPosterPreview" class="up-preview" alt="Preview poster">
     <div class="modal-actions">
       <button class="m-cancel" onclick="closeBizForm()">Batal</button>
       <button class="m-save" id="bizSave" onclick="submitBizReg()">Hantar Permohonan</button>
@@ -1492,7 +1496,7 @@ async function loadData(){
   HOSPITALS=(me.data||[]).map(m=>{const k=MED_MAP[m.type]||{t:m.type,i:'🏥'};
     return {name:m.name, type:k.t, icon:k.i, dist:m.distance_km===null?null:Number(m.distance_km), tel:m.phone, tag:m.tag||'', apply_url:m.apply_url||''};});
   SERVICES=(sv.data||[]).map(s=>({name:s.name, icon:SVC_ICON[s.icon]||'🕋', desc:s.description||'', price:s.price_label||'', tag:s.tag||''}));
-  try{ const bz=await sb.from('business_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); BIZ=(bz.data||[]).map(b=>({id:b.id, name:b.name||'', category:b.category||'', location:b.location||'', contact:b.contact||'', website:b.website||'', desc:b.description||'', signboard:b.signboard_url||''})); }catch(e){ BIZ=[]; }
+  try{ const bz=await sb.from('business_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); BIZ=(bz.data||[]).map(b=>({id:b.id, name:b.name||'', category:b.category||'', location:b.location||'', contact:b.contact||'', website:b.website||'', desc:b.description||'', signboard:b.signboard_url||'', poster:b.poster_url||''})); }catch(e){ BIZ=[]; }
   try{ const ss=await sb.from('service_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); SVCSUB=(ss.data||[]).map(x=>({id:x.id, name:x.name||'', category:x.category||'', location:x.location||'', contact:x.contact||'', desc:x.description||'', photo:x.photo_url||''})); }catch(e){ SVCSUB=[]; }
   if(cr.data && cr.data[0]) SAR_RATE=Number(cr.data[0].rate);
   checkContentNotifs();
@@ -2979,7 +2983,7 @@ function renderShop(){
       </div>
     </div></div>`;
   }
-  el.innerHTML=intro+items.map(shopCard).join('');
+  el.innerHTML=bizPosters('shop')+intro+items.map(shopCard).join('');
 }
 function openBizForm(){ const m=document.getElementById('bizRegModal'); if(m) m.classList.add('open'); }
 function previewBizImg(input){
@@ -2987,11 +2991,26 @@ function previewBizImg(input){
   if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; }
   else { prev.style.display='none'; }
 }
+function previewBizPoster(input){
+  const prev=document.getElementById('bizPosterPreview');
+  if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; }
+  else { prev.style.display='none'; }
+}
+function bizPosters(where){
+  const posters=(BIZ||[]).filter(b=>b.poster);
+  if(!posters.length) return '';
+  const head = where==='home'
+    ? `<div class="tk-head" style="margin-top:16px"><span class="dot"></span> Iklan Bisnes</div>`
+    : `<div class="section-title" style="font-size:15px;margin:2px 0 8px">Poster Iklan Bisnes</div>`;
+  return head+`<div class="p-carousel">${posters.map(b=>`<img class="p-car-img" src="${esc(b.poster)}" alt="Poster ${esc(b.name)}" loading="lazy" onclick="go('shop')">`).join('')}</div>`;
+}
 function closeBizForm(){
   const m=document.getElementById('bizRegModal'); if(m) m.classList.remove('open');
   ['bizNama','bizJenis','bizLokasi','bizContact','bizWeb','bizDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const fi=document.getElementById('bizImg'); if(fi) fi.value='';
   const lp=document.getElementById('bizImgPreview'); if(lp){ lp.src=''; lp.style.display='none'; }
+  const pf=document.getElementById('bizPoster'); if(pf) pf.value='';
+  const pp=document.getElementById('bizPosterPreview'); if(pp){ pp.src=''; pp.style.display='none'; }
 }
 async function submitBizReg(){
   const nama=(document.getElementById('bizNama').value||'').trim();
@@ -3016,10 +3035,22 @@ async function submitBizReg(){
       const {data:{publicUrl}}=sb.storage.from('business-signboards').getPublicUrl(path);
       signUrl=publicUrl;
     }
+    let posterUrl=null;
+    const pf=document.getElementById('bizPoster');
+    const posterFile=pf&&pf.files?pf.files[0]:null;
+    if(posterFile){
+      if(posterFile.size>5*1024*1024){ toast('Poster terlalu besar — maks 5MB.'); btn.disabled=false; btn.textContent='Hantar Permohonan'; return; }
+      const pext=(posterFile.name.split('.').pop()||'jpg').toLowerCase();
+      const ppath='bizposter-'+Date.now()+'.'+pext;
+      const {error:pErr}=await sb.storage.from('business-signboards').upload(ppath,posterFile,{contentType:posterFile.type,upsert:false});
+      if(pErr) throw pErr;
+      const {data:{publicUrl:pu}}=sb.storage.from('business-signboards').getPublicUrl(ppath);
+      posterUrl=pu;
+    }
     const {error}=await sb.from('business_submissions').insert({
       name:nama, category:jenis||null, location:lokasi||null,
       contact:contact||null, website:web||null, description:desc||null,
-      signboard_url:signUrl, user_id: state.user?state.user.id:null, status:'pending'
+      signboard_url:signUrl, poster_url:posterUrl, user_id: state.user?state.user.id:null, status:'pending'
     });
     if(error) throw error;
     closeBizForm();
@@ -3307,6 +3338,7 @@ function openDuaFeed(){
 }
 function renderTerkini(){
   const el=document.getElementById('terkiniBox'); if(!el) return;
+  const _bph=document.getElementById('bizPosterHome'); if(_bph) _bph.innerHTML=bizPosters('home');
   const news=NEWS.slice(0,2);
   const duas=(LATEST_DUAS||[]).slice(0,2);
   const crs=(COURSES||[]).slice().sort((a,b)=>String(b.created||'').localeCompare(String(a.created||''))).slice(0,2);
