@@ -349,6 +349,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .k-poster-td{padding:6px 4px;vertical-align:middle}
   .k-poster-thumb{width:64px;height:80px;object-fit:cover;border-radius:8px;cursor:zoom-in;display:block;box-shadow:0 1px 5px rgba(0,0,0,.2)}
   .k-poster-thumb:hover{opacity:.85}
+  #v-agency img,#v-stay img,#v-med img,#v-svc img,#v-shop img:not(.p-car-img),#v-mutawwif img{cursor:zoom-in}
   .k-lb{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10000;display:none;align-items:center;justify-content:center;cursor:zoom-out;padding:16px}
   .k-lb img{max-width:92vw;max-height:88vh;border-radius:14px;box-shadow:0 8px 48px rgba(0,0,0,.6);object-fit:contain}
   #posterCarousel{padding:0 0 6px}
@@ -691,7 +692,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
             <div class="tb-menu-name" id="tbMenuName">Sahabat Haramaen</div>
             <button class="tb-menu-item menu-green" onclick="document.getElementById('tbMenu').classList.remove('open');document.getElementById('avatarInput').click()"><span class="ico" data-i="pic"></span> Tukar Foto Profil</button>
             <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="changeAvatar(this)">
-            <button class="tb-menu-item" id="tbStatItem" style="display:none" onclick="document.getElementById('tbMenu').classList.remove('open');go('admin')"><span class="ico" data-i="book"></span> Statistik Pelawat</button>
+            <button class="tb-menu-item" id="tbStatItem" style="display:none" onclick="document.getElementById('tbMenu').classList.remove('open');go('admin')"><span class="ico" data-i="book"></span> Admin Dashboard</button>
             <button class="tb-menu-item" id="pushToggleBtn" onclick="togglePush()" style="display:none"><span class="ico" data-i="bell"></span> <span id="pushToggleLbl">Notifikasi Push</span></button>
             <button class="tb-menu-item" onclick="document.getElementById('tbMenu').classList.remove('open');openFeedback()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="vertical-align:-3px;margin-right:2px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Maklum Balas</button>
             <button class="tb-menu-item" onclick="logout()"><span class="ico" data-i="logout"></span> Log keluar</button>
@@ -742,8 +743,6 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
 
         <div class="terkini" id="terkiniBox"></div>
         <div id="bizPosterHome"></div>
-
-        <div id="posterCarousel"></div>
       </section>
 
       <!-- SEMUA KURSUS -->
@@ -946,7 +945,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
 
       <!-- ADMIN — STATISTIK PELAWAT -->
       <section class="view" id="v-admin">
-        <div class="section-title">Statistik Pelawat<span class="u"></span></div>
+        <div class="section-title">Admin Dashboard<span class="u"></span></div>
         <div class="adm-grid" id="admStats">
           <div class="adm-stat"><div class="n">…</div><div class="l">Memuatkan…</div></div>
         </div>
@@ -1354,11 +1353,11 @@ const BOTTOM=[
   {v:'assistant',t:'AI',i:'ai',c:'#0ea5e9'},
 ];
 const TITLES={home:"HARAMAEN",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
-  med:"Perubatan",svc:"Servis",shop:"Beli-Belah",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",kursus:"Kursus Umrah",mutawwif:"Kursus Mutawwif",assistant:"AI Assistant",admin:"Statistik Pelawat"};
+  med:"Perubatan",svc:"Servis",shop:"Beli-Belah",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",kursus:"Kursus Umrah",mutawwif:"Kursus Mutawwif",assistant:"AI Assistant",admin:"Admin Dashboard"};
 const ADMIN_EMAILS=['salizam.oasys@gmail.com'];
 function isAdmin(){ return !!(state.user && ADMIN_EMAILS.includes((state.user.email||'').toLowerCase())); }
 function buildNav(){
-  const navList = NAV.concat(isAdmin()?[{v:'admin',t:'📊 Statistik (Admin)',i:'book'}]:[]);
+  const navList = NAV.concat(isAdmin()?[{v:'admin',t:'📊 Admin Dashboard',i:'book'}]:[]);
   const si=document.getElementById('tbStatItem'); if(si) si.style.display=isAdmin()?'flex':'none';
   document.getElementById('sbNav').innerHTML=navList.map(n=>
     `<button class="sb-link" data-v="${n.v}" onclick="go('${n.v}')"><span class="ico" data-i="${n.i}" style="background:${n.c||'rgba(255,255,255,.15)'}"></span> ${n.t}</button>`).join('');
@@ -1390,7 +1389,7 @@ function go(v){
 function jump(v){ go(v); }
 const GRID_SVG='<svg viewBox="0 0 44 44" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="7" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect><rect x="23" y="7" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect><rect x="7" y="23" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect><rect x="23" y="23" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect></svg>';
 const BOTTOM_MAIN=['home','dua','agency','assistant'];
-function moreList(){ const h=MENU.slice(); if(isAdmin()) h.push({v:'admin',t:'Statistik',i:'book',c:'#555'}); return h; }
+function moreList(){ const h=MENU.slice(); if(isAdmin()) h.push({v:'admin',t:'Admin Dashboard',i:'book',c:'#555'}); return h; }
 function renderMoreSheet(){ const g=document.getElementById('moreGrid'); if(!g) return;
   g.innerHTML=moreList().map(function(m){ const ic=ICONS[m.i]?`<img class="fimg" src="${ICONS[m.i]}" alt="" draggable="false">`:svg(m.i); const badge=m.soon?`<span class="soon-badge">Akan datang</span>`:''; const click=m.soon?`toast('${m.t} akan datang, nantikan!')`:`pickMore('${m.v}')`; return `<button class="more-item${m.soon?' soon':''}" data-v="${m.v}" onclick="${click}"><span class="fi" style="background:${m.c}">${ic}</span><span>${m.t}${badge}</span></button>`; }).join('');
   paintIcons(); }
@@ -1496,7 +1495,7 @@ async function loadData(){
   HOSPITALS=(me.data||[]).map(m=>{const k=MED_MAP[m.type]||{t:m.type,i:'🏥'};
     return {name:m.name, type:k.t, icon:k.i, dist:m.distance_km===null?null:Number(m.distance_km), tel:m.phone, tag:m.tag||'', apply_url:m.apply_url||''};});
   SERVICES=(sv.data||[]).map(s=>({name:s.name, icon:SVC_ICON[s.icon]||'🕋', desc:s.description||'', price:s.price_label||'', tag:s.tag||''}));
-  try{ const bz=await sb.from('business_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); BIZ=(bz.data||[]).map(b=>({id:b.id, name:b.name||'', category:b.category||'', location:b.location||'', contact:b.contact||'', website:b.website||'', desc:b.description||'', signboard:b.signboard_url||'', poster:b.poster_url||''})); }catch(e){ BIZ=[]; }
+  try{ const bz=await sb.from('business_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); BIZ=(bz.data||[]).map(b=>({id:b.id, name:b.name||'', category:b.category||'', location:b.location||'', contact:b.contact||'', website:b.website||'', desc:b.description||'', signboard:b.signboard_url||'', poster:b.poster_url||'', created:b.created_at||''})); }catch(e){ BIZ=[]; }
   try{ const ss=await sb.from('service_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); SVCSUB=(ss.data||[]).map(x=>({id:x.id, name:x.name||'', category:x.category||'', location:x.location||'', contact:x.contact||'', desc:x.description||'', photo:x.photo_url||''})); }catch(e){ SVCSUB=[]; }
   if(cr.data && cr.data[0]) SAR_RATE=Number(cr.data[0].rate);
   checkContentNotifs();
@@ -2997,12 +2996,17 @@ function previewBizPoster(input){
   else { prev.style.display='none'; }
 }
 function bizPosters(where){
+  if(where==='home'){
+    const items=[];
+    (BIZ||[]).forEach(b=>{ if(b.poster) items.push({url:b.poster, name:b.name, view:'shop', ts:b.created||''}); });
+    (COURSES||[]).forEach(c=>{ if(c.poster_url) items.push({url:c.poster_url, name:'Kursus', view:'kursus', ts:c.created||''}); });
+    if(!items.length) return '';
+    items.sort((a,b)=>String(a.ts).localeCompare(String(b.ts)));
+    return `<div class="p-carousel" style="margin-top:16px">${items.map(it=>`<img class="p-car-img" src="${esc(it.url)}" alt="Poster ${esc(it.name)}" loading="lazy" onclick="go('${it.view}')">`).join('')}</div>`;
+  }
   const posters=(BIZ||[]).filter(b=>b.poster);
   if(!posters.length) return '';
-  const head = where==='home'
-    ? `<div class="tk-head" style="margin-top:16px"><span class="dot"></span> Iklan Bisnes</div>`
-    : `<div class="section-title" style="font-size:15px;margin:2px 0 8px">Poster Iklan Bisnes</div>`;
-  return head+`<div class="p-carousel">${posters.map(b=>`<img class="p-car-img" src="${esc(b.poster)}" alt="Poster ${esc(b.name)}" loading="lazy" onclick="go('shop')">`).join('')}</div>`;
+  return `<div class="p-carousel">${posters.map(b=>`<img class="p-car-img" src="${esc(b.poster)}" alt="Poster ${esc(b.name)}" loading="lazy" onclick="go('shop')">`).join('')}</div>`;
 }
 function closeBizForm(){
   const m=document.getElementById('bizRegModal'); if(m) m.classList.remove('open');
@@ -3180,6 +3184,16 @@ function openPoster(url){
   document.getElementById('kLbImg').src=url;
   lb.style.display='flex';
 }
+/* Lightbox zoom untuk semua imej dalam senarai entiti (semua kategori) */
+document.addEventListener('click',function(e){
+  const img=e.target.closest('img');
+  if(!img) return;
+  if(!img.closest('#v-agency,#v-stay,#v-med,#v-svc,#v-shop,#v-kursus,#v-mutawwif')) return;
+  if(img.getAttribute('onclick')) return;
+  const src=img.currentSrc||img.src;
+  if(!src||img.naturalWidth===0) return;
+  openPoster(src);
+});
 function closeShare(){
   document.getElementById('shSheet').style.display='none';
   document.getElementById('shOverlay').style.display='none';
