@@ -1739,7 +1739,7 @@ function fmtBody(txt){
   }
   return paras.map(p=>`<p>${p}</p>`).join('');
 }
-function waLink(phone){let d=String(phone||'').replace(/[^\d]/g,'');if(!d)return '';if(d[0]==='0')d='60'+d.slice(1);else if(d.slice(0,2)!=='60')d='60'+d;return 'https://wa.me/'+d;}
+function waLink(phone){let d=String(phone||'').replace(/[^\d]/g,'');if(!d)return '';if(d[0]==='0')d='60'+d.slice(1);return 'https://wa.me/'+d;}
 const WA_ICON='<svg viewBox="0 0 24 24" width="14" height="14" fill="#25D366" style="vertical-align:-2px;margin-right:4px"><path d="M17.5 6.4A7.9 7.9 0 0 0 12 4a7.9 7.9 0 0 0-6.8 11.9L4 20l4.2-1.1A7.9 7.9 0 1 0 17.5 6.4Zm-5.5 12a6.5 6.5 0 0 1-3.3-.9l-.24-.14-2.45.64.65-2.39-.16-.25A6.5 6.5 0 1 1 12 18.4Zm3.6-4.9c-.2-.1-1.17-.57-1.35-.64s-.31-.1-.44.1-.5.63-.62.76-.23.15-.42.05a5.3 5.3 0 0 1-1.56-.96 5.9 5.9 0 0 1-1.08-1.35c-.11-.19 0-.3.09-.39l.29-.34c.1-.12.13-.2.2-.33a.36.36 0 0 0 0-.35c-.05-.1-.44-1.05-.6-1.44s-.32-.33-.44-.33h-.37a.71.71 0 0 0-.52.24 2.16 2.16 0 0 0-.67 1.6 3.75 3.75 0 0 0 .79 2 8.6 8.6 0 0 0 3.3 2.9c.46.2.82.32 1.1.4.46.15.88.13 1.21.08.37-.05 1.15-.47 1.31-.92s.17-.85.12-.93-.18-.13-.38-.23Z"/></svg>';
 function today(){ const d=new Date(); const p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
 /* Koordinat pusat/bandar utama setiap negeri — untuk anggaran "kursus berhampiran saya" */
@@ -2953,8 +2953,8 @@ function renderSvc(){
 }
 function renderShop(){
   const el=document.getElementById('shopList'); if(!el) return;
-  const svc=SERVICES.filter(s=>s.tag==='Marketplace').map(s=>({name:s.name, category:'', location:'', contact:'', website:'', desc:s.desc, signboard:''}));
-  const biz=(BIZ||[]).map(b=>({name:b.name, category:b.category, location:b.location, contact:b.contact, website:b.website, desc:b.desc, signboard:b.signboard}));
+  const svc=SERVICES.filter(s=>s.tag==='Marketplace').map(s=>{ const ph=(((s.desc||'').match(/\+?(9\d{8,14})/)||[])[1])||''; let d=s.desc||''; if(ph){ d=d.replace(new RegExp('\\+?'+ph),'').replace(/\s*•\s*•\s*/g,' • ').replace(/(^\s*•\s*)|(\s*•\s*$)/g,'').replace(/\s{2,}/g,' ').trim(); } return {name:s.name, category:'', location:'', contact:ph, website:'', desc:d, signboard:'', _biz:false}; });
+  const biz=(BIZ||[]).map(b=>({id:b.id, name:b.name, category:b.category, location:b.location, contact:b.contact, website:b.website, desc:b.desc, signboard:b.signboard, _biz:true}));
   const items=biz.concat(svc);
   const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:10px">Senarai bisnes &amp; peniaga (kurma, air zam-zam, makanan, oleh-oleh &amp; lain-lain) yang berkaitan dengan umrah dan haji. Ada bisnes? Tekan “Promote bisnes anda di sini” untuk disenaraikan. 🛍️</div>`;
   if(!items.length){ el.innerHTML=intro+`<div class="empty">Belum ada bisnes disenaraikan. Jadilah yang pertama! 🤍</div>`; return; }
@@ -2978,13 +2978,52 @@ function renderShop(){
         <b style="font-size:13.5px;line-height:1.3;display:block">${esc(b.name)}</b>
         ${b.category?`<div class="tag" style="margin-top:2px">${esc(b.category)}</div>`:''}
         ${b.desc?`<div class="tag" style="margin-top:4px">${esc(b.desc)}</div>`:''}
-        <div style="margin-top:8px">${shr}</div>
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${shr}${(isAdmin()&&b._biz&&b.id)?`<button class="shr-sm" style="border-color:#c9a227;color:#8a6d1a" onclick="openBizEdit('${b.id}')">✏️ Edit</button><button class="shr-sm" style="border-color:#e0b4b4;color:#c0392b" data-id="${b.id}" onclick="delBiz(this)">🗑️ Padam</button>`:''}</div>
       </div>
     </div></div>`;
   }
-  el.innerHTML=bizPosters('shop')+intro+items.map(shopCard).join('');
+  const admBar=isAdmin()?`<div style="margin-bottom:12px"><button class="kbtn kbtn-daftar" onclick="openBizAdd()">➕ Tambah Bisnes</button></div>`:'';
+  el.innerHTML=admBar+bizPosters('shop')+intro+items.map(shopCard).join('');
 }
-function openBizForm(){ const m=document.getElementById('bizRegModal'); if(m) m.classList.add('open'); }
+let bizEditId=null;
+function fillBizForm(b){
+  const g=id=>document.getElementById(id);
+  if(g('bizNama'))g('bizNama').value=(b&&b.name)||'';
+  if(g('bizJenis'))g('bizJenis').value=(b&&b.category)||'';
+  if(g('bizLokasi'))g('bizLokasi').value=(b&&b.location)||'';
+  if(g('bizContact'))g('bizContact').value=(b&&b.contact)||'';
+  if(g('bizWeb'))g('bizWeb').value=(b&&b.website)||'';
+  if(g('bizDesc'))g('bizDesc').value=(b&&b.desc)||'';
+  const lp=g('bizImgPreview'); if(lp){ if(b&&b.signboard){ lp.src=b.signboard; lp.style.display='block'; } else { lp.src=''; lp.style.display='none'; } }
+  const pp=g('bizPosterPreview'); if(pp){ pp.src=''; pp.style.display='none'; }
+  if(g('bizImg'))g('bizImg').value='';
+  if(g('bizPoster'))g('bizPoster').value='';
+}
+function openBizAdd(){
+  bizEditId=null; fillBizForm(null);
+  const h=document.querySelector('#bizRegModal h3'); if(h)h.textContent='Tambah Bisnes';
+  const sv=document.getElementById('bizSave'); if(sv)sv.textContent='Simpan';
+  const m=document.getElementById('bizRegModal'); if(m)m.classList.add('open');
+}
+function openBizEdit(id){
+  const b=(BIZ||[]).find(x=>x.id===id); if(!b){ toast('Bisnes tidak dijumpai.'); return; }
+  bizEditId=id; fillBizForm(b);
+  const h=document.querySelector('#bizRegModal h3'); if(h)h.textContent='Edit Bisnes';
+  const sv=document.getElementById('bizSave'); if(sv)sv.textContent='Simpan';
+  const m=document.getElementById('bizRegModal'); if(m)m.classList.add('open');
+}
+async function delBiz(btn){
+  const id=btn.getAttribute('data-id');
+  if(btn.getAttribute('data-armed')!=='1'){ btn.setAttribute('data-armed','1'); btn.textContent='Pasti? Padam'; setTimeout(()=>{ if(btn&&btn.getAttribute('data-armed')==='1'){ btn.removeAttribute('data-armed'); btn.textContent='🗑️ Padam'; } },3500); return; }
+  btn.disabled=true; btn.textContent='Memadam…';
+  try{
+    const {error}=await sb.from('business_submissions').delete().eq('id',id);
+    if(error) throw error;
+    await loadData(); renderShop(); if(typeof renderAdmin==='function') renderAdmin();
+    toast('Bisnes dipadam. 🗑️');
+  }catch(e){ toast('Gagal padam — semak kebenaran admin.'); btn.disabled=false; btn.textContent='🗑️ Padam'; btn.removeAttribute('data-armed'); }
+}
+function openBizForm(){ bizEditId=null; fillBizForm(null); const h=document.querySelector('#bizRegModal h3'); if(h)h.textContent='Promote Bisnes Anda'; const sv=document.getElementById('bizSave'); if(sv)sv.textContent='Hantar Permohonan'; const m=document.getElementById('bizRegModal'); if(m) m.classList.add('open'); }
 function previewBizImg(input){
   const prev=document.getElementById('bizImgPreview');
   if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; }
@@ -3009,6 +3048,7 @@ function bizPosters(where){
   return `<div class="p-carousel">${posters.map(b=>`<img class="p-car-img" src="${esc(b.poster)}" alt="Poster ${esc(b.name)}" loading="lazy" onclick="go('shop')">`).join('')}</div>`;
 }
 function closeBizForm(){
+  bizEditId=null;
   const m=document.getElementById('bizRegModal'); if(m) m.classList.remove('open');
   ['bizNama','bizJenis','bizLokasi','bizContact','bizWeb','bizDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const fi=document.getElementById('bizImg'); if(fi) fi.value='';
@@ -3051,18 +3091,28 @@ async function submitBizReg(){
       const {data:{publicUrl:pu}}=sb.storage.from('business-signboards').getPublicUrl(ppath);
       posterUrl=pu;
     }
-    const {error}=await sb.from('business_submissions').insert({
-      name:nama, category:jenis||null, location:lokasi||null,
-      contact:contact||null, website:web||null, description:desc||null,
-      signboard_url:signUrl, poster_url:posterUrl, user_id: state.user?state.user.id:null, status:'pending'
-    });
+    let error;
+    if(bizEditId){
+      const upd={ name:nama, category:jenis||null, location:lokasi||null, contact:contact||null, website:web||null, description:desc||null };
+      if(signUrl) upd.signboard_url=signUrl;
+      if(posterUrl) upd.poster_url=posterUrl;
+      ({error}=await sb.from('business_submissions').update(upd).eq('id',bizEditId));
+    } else {
+      ({error}=await sb.from('business_submissions').insert({
+        name:nama, category:jenis||null, location:lokasi||null,
+        contact:contact||null, website:web||null, description:desc||null,
+        signboard_url:signUrl, poster_url:posterUrl, user_id: state.user?state.user.id:null, status: isAdmin()?'approved':'pending'
+      }));
+    }
     if(error) throw error;
+    const wasEdit=!!bizEditId, wasAdmin=isAdmin();
     closeBizForm();
-    toast('Terima kasih! Bisnes anda sedang disemak. 🙏');
+    try{ await loadData(); renderShop(); if(typeof renderAdmin==='function') renderAdmin(); }catch(e){}
+    toast(wasEdit?'Bisnes dikemas kini. ✅':(wasAdmin?'Bisnes ditambah. ✅':'Terima kasih! Bisnes anda sedang disemak. 🙏'));
   }catch(e){
-    toast('Gagal hantar. Cuba lagi.');
+    toast('Gagal simpan. Cuba lagi.');
   }
-  btn.disabled=false; btn.textContent='Hantar Permohonan';
+  btn.disabled=false; btn.textContent='Simpan';
 }
 
 function openSvcForm(){ const m=document.getElementById('svcRegModal'); if(m) m.classList.add('open'); }
