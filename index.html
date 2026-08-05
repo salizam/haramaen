@@ -1378,7 +1378,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <label class="fl">Tajuk</label>
     <input id="enTitle" class="f" placeholder="Tajuk artikel…">
     <label class="fl">Kandungan</label>
-    <textarea id="enBody" class="f" rows="8" placeholder="Isi kandungan…" style="resize:vertical"></textarea>
+    <div class="rte-tb"><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'bold')" title="Tebal"><b>B</b></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'italic')" title="Italik"><i>I</i></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'underline')" title="Garis bawah"><u>U</u></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'h4')" title="Tajuk">Tajuk</button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'ul')" title="Senarai">• Senarai</button></div>
+    <div id="enBody" class="rte" contenteditable="true" data-ph="Isi kandungan…" style="min-height:150px"></div>
     <div style="display:flex;gap:8px">
       <div style="flex:1">
         <label class="fl">Penulis</label>
@@ -1405,6 +1406,32 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <div class="modal-actions">
       <button class="m-cancel" onclick="closeEditNews()">Batal</button>
       <button class="m-save" id="enSave" onclick="submitEditNews()">💾 Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="etModal">
+  <div class="modal-box" style="max-width:540px">
+    <h3>✏️ Edit Tip Umrah</h3>
+    <label class="fl">Tajuk</label>
+    <input id="etTitle" class="f" placeholder="Tajuk tip…">
+    <label class="fl">Kandungan</label>
+    <div class="rte-tb"><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'bold')" title="Tebal"><b>B</b></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'italic')" title="Italik"><i>I</i></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'underline')" title="Garis bawah"><u>U</u></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'h4')" title="Tajuk">Tajuk</button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'ul')" title="Senarai">• Senarai</button></div>
+    <div id="etBody" class="rte" contenteditable="true" data-ph="Isi kandungan tip…" style="min-height:150px"></div>
+    <label class="fl">Gambar Tip</label>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <img id="etImgPreview" style="width:90px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:none" alt="preview">
+      <div style="flex:1">
+        <input type="file" id="etImg" accept="image/jpeg,image/png,image/webp" class="f" style="font-size:12px;padding:5px" onchange="previewEtImg(this)">
+        <div style="margin-top:4px;display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="etClearImg" style="width:auto">
+          <label for="etClearImg" style="font-size:12px;color:var(--muted)">Buang gambar sedia ada</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="m-cancel" onclick="closeEditTip()">Batal</button>
+      <button class="m-save" id="etSave" onclick="submitEditTip()">💾 Simpan Perubahan</button>
     </div>
   </div>
 </div>
@@ -3566,7 +3593,7 @@ function renderArticle(){
   const author=item.author||'Haramaen';
   const tagPill=kind==='tip'?(item.category?`<span class="pill" style="background:#fff3d6;color:#8a6d1a">${esc(item.category)}</span>`:''):`<span class="pill ${newsTagCls(item.tag)}">${esc(item.tag||'Info')}</span>`;
   const img=item.image_url?`<img class="art-img" src="${esc(item.image_url)}" alt="${esc(item.title)}" onerror="this.style.display='none'">`:'';
-  const adminBtns=(kind==='news'&&isAdmin())?`<div class="art-admin"><button class="n-edit" onclick="openEditNews(${item.id})">✏️ Edit</button><button class="n-del" onclick="delNews(${item.id},this)">🗑️ Padam</button></div>`:'';
+  const adminBtns=!isAdmin()?'':(kind==='news'?`<div class="art-admin"><button class="n-edit" onclick="openEditNews(${item.id})">✏️ Edit</button><button class="n-del" onclick="delNews(${item.id},this)">🗑️ Padam</button></div>`:`<div class="art-admin"><button class="n-edit" onclick="openEditTip('${item.id}')">✏️ Edit</button><button class="n-del" onclick="delTip('${item.id}',this)">🗑️ Padam</button></div>`);
   const shrUrl=esc(location.href);
   const shr=`<button class="shr-sm" data-title="${esc(item.title)}" data-text="${esc(item.title)}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>`;
   el.innerHTML=topBar+
@@ -3596,7 +3623,7 @@ function openEditNews(id){
   _enId=id;
   const setVal=(elId,val)=>{const el=document.getElementById(elId);if(el)el.value=val||'';};
   setVal('enTitle',n.title);
-  setVal('enBody',n.body);
+  const eb=document.getElementById('enBody'); if(eb) eb.innerHTML=n.body||'';
   setVal('enAuthor',n.author||'Haramaen');
   setVal('enSrcName',n.source_name||'');
   setVal('enSrcUrl',n.source_url||'');
@@ -3617,10 +3644,64 @@ function previewEnImg(input){
   const prev=document.getElementById('enImgPreview');
   if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; }
 }
+function previewEtImg(input){
+  const prev=document.getElementById('etImgPreview');
+  if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; }
+}
+let _etId=null;
+function openEditTip(id){
+  const t=(TIPS||[]).find(x=>String(x.id)===String(id)); if(!t) return;
+  _etId=t.id;
+  const tt=document.getElementById('etTitle'); if(tt) tt.value=t.title||'';
+  const eb=document.getElementById('etBody'); if(eb) eb.innerHTML=t.body||'';
+  const prev=document.getElementById('etImgPreview'); if(prev){ if(t.image_url){prev.src=t.image_url;prev.style.display='block';}else{prev.src='';prev.style.display='none';} }
+  const imgInput=document.getElementById('etImg'); if(imgInput) imgInput.value='';
+  const clr=document.getElementById('etClearImg'); if(clr) clr.checked=false;
+  document.getElementById('etModal').classList.add('open');
+}
+function closeEditTip(){ const m=document.getElementById('etModal'); if(m) m.classList.remove('open'); _etId=null; }
+async function submitEditTip(){
+  if(!_etId) return;
+  const title=(document.getElementById('etTitle').value||'').trim();
+  const body=rteVal('etBody');
+  if(!title||!body){ toast('Tajuk dan kandungan wajib diisi.'); return; }
+  const btn=document.getElementById('etSave'); btn.disabled=true; btn.textContent='Menyimpan…';
+  try{
+    let imgUrl=null; const clearImg=document.getElementById('etClearImg').checked;
+    const imgFile=document.getElementById('etImg').files[0];
+    if(imgFile&&!clearImg){
+      if(imgFile.size>5*1024*1024){ toast('Gambar terlalu besar — maks 5MB.'); btn.disabled=false; btn.textContent='💾 Simpan Perubahan'; return; }
+      const ext=imgFile.name.split('.').pop()||'jpg'; const path='tip-edit-'+_etId+'-'+Date.now()+'.'+ext;
+      const {error:upErr}=await sb.storage.from('news-images').upload(path,imgFile,{contentType:imgFile.type,upsert:true});
+      if(upErr) throw upErr; const {data:{publicUrl}}=sb.storage.from('news-images').getPublicUrl(path); imgUrl=publicUrl;
+    }
+    const patch={title:title, body:body};
+    if(clearImg) patch.image_url=null; else if(imgUrl) patch.image_url=imgUrl;
+    const {data,error}=await sb.from('umrah_tips').update(patch).eq('id',_etId).select();
+    if(error) throw error;
+    if(!data||!data.length){ toast('Gagal simpan — kebenaran RLS tidak mengizinkan.'); btn.disabled=false; btn.textContent='💾 Simpan Perubahan'; return; }
+    const idx=(TIPS||[]).findIndex(x=>String(x.id)===String(_etId));
+    if(idx>=0) TIPS[idx]={...TIPS[idx],title,body,image_url:clearImg?null:(imgUrl||TIPS[idx].image_url)};
+    const wasArticle=(state.article&&state.article.kind==='tip'&&String(state.article.id)===String(_etId));
+    renderTerkini(); if(document.getElementById('tipsListBox')) renderTipsList();
+    closeEditTip();
+    if(wasArticle) renderArticle();
+    toast('Tip dikemas kini. ✅');
+  }catch(e){ toast('Gagal simpan tip — semak kebenaran.'); btn.disabled=false; btn.textContent='💾 Simpan Perubahan'; }
+}
+async function delTip(id,btn){
+  if(!confirm('Adakah anda pasti untuk padam tip ini?')) return;
+  if(btn){ btn.disabled=true; btn.textContent='Memadam…'; }
+  const {data,error}=await sb.from('umrah_tips').delete().eq('id',id).select();
+  if(error||!data||!data.length){ toast('Gagal padam tip — semak kebenaran RLS.'); if(btn){btn.disabled=false;btn.textContent='🗑️ Padam';} return; }
+  TIPS=(TIPS||[]).filter(t=>String(t.id)!==String(id));
+  renderTerkini(); go('tips');
+  toast('Tip dipadam.');
+}
 async function submitEditNews(){
   if(!_enId) return;
   const title=(document.getElementById('enTitle').value||'').trim();
-  const body=(document.getElementById('enBody').value||'').trim();
+  const body=rteVal('enBody');
   if(!title||!body){ toast('Tajuk dan kandungan wajib diisi.'); return; }
   const btn=document.getElementById('enSave'); btn.disabled=true; btn.textContent='Menyimpan…';
   try{
