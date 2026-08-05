@@ -1369,7 +1369,7 @@ function buildNav(){
   paintIcons();
 }
 const VALID_VIEWS=['home','agency','dua','stay','med','svc','shop','guide','news','lost','solah','kursus','mutawwif','assistant','admin'];
-function go(v){
+function go(v, fromHistory){
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   const el=document.getElementById('v-'+v); if(el) el.classList.add('active');
   document.querySelectorAll('[data-v]').forEach(t=>t.classList.toggle('active', t.getAttribute('data-v')===v));
@@ -1383,8 +1383,12 @@ function go(v){
   if(v==='shop') renderShop();
   if(v==='lost') loadLost();
   if(v==='admin') renderAdmin(); else if(admTimer){ clearInterval(admTimer); admTimer=null; }
-  // Simpan view semasa dalam URL hash supaya refresh kembali ke page yang sama
-  try{ history.replaceState(null,'',v==='home'?location.pathname+'#home':'#'+v); }catch(e){}
+  // Simpan view dalam sejarah pelayar supaya butang 'back' telefon kembali ke page sebelumnya
+  try{
+    var _u=v==='home'?location.pathname+'#home':'#'+v;
+    if(fromHistory || !window.__navReady){ history.replaceState({v:v},'',_u); window.__navReady=true; }
+    else { history.pushState({v:v},'',_u); }
+  }catch(e){}
 }
 function jump(v){ go(v); }
 const GRID_SVG='<svg viewBox="0 0 44 44" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="7" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect><rect x="23" y="7" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect><rect x="7" y="23" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect><rect x="23" y="23" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"></rect></svg>';
@@ -1445,9 +1449,12 @@ async function sendAI(){
   }
   aiBusy=false; if(btn) btn.disabled=false; aiBubbles();
 }
-window.addEventListener('popstate',function(){
-  const v=(location.hash||'').replace('#','');
-  if(v && VALID_VIEWS.includes(v) && (v!=='admin'||isAdmin())) go(v);
+window.addEventListener('popstate',function(e){
+  // Tutup lightbox dulu jika terbuka
+  const lb=document.getElementById('kLb');
+  if(lb && getComputedStyle(lb).display!=='none'){ lb.style.display='none'; return; }
+  const v=(e.state&&e.state.v)||(location.hash||'').replace('#','');
+  if(v && VALID_VIEWS.includes(v) && (v!=='admin'||isAdmin())) go(v, true);
 });
 function toggleUserMenu(e){ if(e) e.stopPropagation(); document.getElementById('tbMenu').classList.toggle('open'); }
 document.addEventListener('click', function(e){ const m=document.getElementById('tbMenu'); if(m && m.classList.contains('open') && !e.target.closest('.tb-user')) m.classList.remove('open'); const p=document.getElementById('notifPanel'); if(p && p.classList.contains('open') && !e.target.closest('.tb-notif')) p.classList.remove('open'); });
@@ -3234,17 +3241,22 @@ function openPoster(url){
   const lb=document.getElementById('kLb');
   document.getElementById('kLbImg').src=url;
   lb.style.display='flex';
+  try{ history.pushState({lb:1},'','#img'); }catch(e){}
 }
-/* Lightbox zoom untuk semua imej dalam senarai entiti (semua kategori) */
+/* Lightbox zoom untuk SEMUA imej dalam app (boleh besarkan ke saiz penuh) */
 document.addEventListener('click',function(e){
   const img=e.target.closest('img');
   if(!img) return;
-  if(!img.closest('#v-agency,#v-stay,#v-med,#v-svc,#v-shop,#v-kursus,#v-mutawwif')) return;
-  if(img.getAttribute('onclick')) return;
+  if(img.id==='kLbImg') return;                         // imej lightbox sendiri
+  if(img.getAttribute('onclick')) return;               // ada pengendali sendiri (cth navigate)
+  if(img.closest('a,button,.ag-icon-btn')) return;      // dalam pautan/butang
+  if(img.matches('.fimg,.ico,.avatar,.logo,.bn-ico,.tb-avatar,.di-img,.fi img,.n-avatar')) return;
   const src=img.currentSrc||img.src;
-  if(!src||img.naturalWidth===0) return;
+  if(!src || src.indexOf('data:')===0) return;          // langkau ikon data-URI
+  if(img.naturalWidth && img.naturalWidth<60) return;   // langkau ikon kecil
+  e.stopPropagation(); e.preventDefault();
   openPoster(src);
-});
+}, true);
 function closeShare(){
   document.getElementById('shSheet').style.display='none';
   document.getElementById('shOverlay').style.display='none';
@@ -3825,7 +3837,7 @@ if('serviceWorker' in navigator){
 }
 </script>
 <!-- Share Sheet -->
-<div id="kLb" class="k-lb" onclick="this.style.display='none'"><img id="kLbImg" src="" alt="Poster Kursus"></div>
+<div id="kLb" class="k-lb" onclick="if(history.state&&history.state.lb){history.back()}else{this.style.display='none'}"><img id="kLbImg" src="" alt="Imej penuh"></div>
 <div class="sh-overlay" id="shOverlay" onclick="closeShare()"></div>
 <div class="sh-sheet" id="shSheet">
   <div class="sh-drag"></div>
