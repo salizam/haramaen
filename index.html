@@ -40,6 +40,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     background:var(--logo) center/contain no-repeat}
   .sb-logo h1{margin:0; font-size:20px; letter-spacing:1.5px; font-weight:800}
   .sb-logo small{opacity:.72; font-size:11px; letter-spacing:.3px}
+  .sb-logo .sb-tag{display:block;opacity:.5;font-size:9.5px;margin-top:4px;letter-spacing:.2px;line-height:1.3}
   .sb-nav{display:flex; flex-direction:column; gap:4px; z-index:1}
   .sb-link{display:flex; align-items:center; gap:11px; width:100%; text-align:left; cursor:pointer;
     padding:6px 10px; border:0; border-radius:11px; background:none; color:rgba(255,255,255,.58);
@@ -353,6 +354,20 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .ag-price{margin-top:7px;font-weight:800;font-size:15.5px;color:var(--ink);letter-spacing:-.3px}
   .ag-price .ag-from{font-size:10.5px;font-weight:600;color:var(--muted)}
   .ag-price .ag-unit{font-size:10px;font-weight:500;color:var(--muted)}
+  .topag-wrap{margin:16px 0 6px}
+  .topag-h{display:flex;align-items:center;font-weight:800;font-size:14px;color:var(--green);margin-bottom:9px;gap:6px}
+  .topag-h .tk-more{margin-left:auto}
+  .topag-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .topag-card{position:relative;background:linear-gradient(160deg,#faf7ff,#f1ecfb);border:1px solid var(--line);border-radius:13px;padding:13px 9px 11px;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden}
+  .topag-card:hover{transform:translateY(-2px);box-shadow:0 7px 16px rgba(94,53,177,.16)}
+  .topag-rank{position:absolute;top:0;left:0;background:var(--green-l);color:#fff;font-size:10.5px;font-weight:800;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:0 0 9px 0;padding:0 3px}
+  .topag-card.r1 .topag-rank{background:#e8b923;color:#5a4600}
+  .topag-logo{width:40px;height:40px;border-radius:10px;object-fit:cover;margin:2px auto 7px;display:block;background:#fff;border:1px solid var(--line)}
+  .topag-ini{width:40px;height:40px;border-radius:10px;margin:2px auto 7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#fff;background:var(--green-l)}
+  .topag-name{font-weight:800;font-size:11.5px;line-height:1.25;color:var(--ink);margin-bottom:4px;min-height:29px;display:flex;align-items:center;justify-content:center}
+  .topag-meta{font-size:10.5px;color:var(--muted);margin-bottom:7px;min-height:14px}
+  .topag-price{font-weight:800;font-size:13px;color:var(--green);letter-spacing:-.2px}
+  .topag-price span{font-size:9px;font-weight:600;color:var(--muted)}
   .ag-best{display:inline-block;background:#e6f7ee;color:#1a9f5a;font-size:10px;font-weight:800;border-radius:5px;padding:2px 6px;margin-right:5px;vertical-align:1px}
   .ag-nop{margin-top:7px;font-size:11.5px;color:var(--muted)}
   .ag-sortrow{display:flex;gap:6px;margin:6px 0 2px}
@@ -371,10 +386,16 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .md-h2{font-weight:800;font-size:16px;margin:15px 0 6px;color:var(--ink)}
   .md-h3{font-weight:800;font-size:14.5px;margin:12px 0 4px;color:var(--ink)}
   .md-li{margin:3px 0 3px 4px}
-  .tip-tb{display:flex;gap:6px;margin:2px 0 6px;flex-wrap:wrap}
-  .tip-tbtn{background:#f4f1fe;border:1px solid var(--line);border-radius:7px;padding:5px 12px;font-size:12.5px;font-weight:700;color:var(--green-d);cursor:pointer}
-  .tip-tbtn:hover{background:#e9e3fb}
-  .tk-h-tip{}
+  .rte-tb{display:flex;gap:6px;margin:2px 0 6px;flex-wrap:wrap}
+  .rte-tb button{background:#f4f1fe;border:1px solid var(--line);border-radius:7px;padding:5px 12px;font-size:13.5px;font-weight:700;color:var(--green-d);cursor:pointer;min-width:34px;line-height:1}
+  .rte-tb button:hover{background:#e9e3fb}
+  .rte{border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-height:120px;font-size:14px;line-height:1.6;background:#fff;outline:none;color:var(--ink)}
+  .rte:focus{border-color:var(--green-l)}
+  .rte:empty:before{content:attr(data-ph);color:var(--muted)}
+  .rte h4{font-weight:800;font-size:15.5px;margin:10px 0 5px}
+  .rte ul,.rte ol{margin:6px 0 6px 20px}
+  .rte b,.rte strong{font-weight:800}
+  .tk-h-tip{background:var(--green-d); color:#fff}
   .k-lb{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10000;display:none;align-items:center;justify-content:center;cursor:zoom-out;padding:16px}
   .k-lb img{max-width:92vw;max-height:88vh;border-radius:14px;box-shadow:0 8px 48px rgba(0,0,0,.6);object-fit:contain}
   #posterCarousel{padding:0 0 6px}
@@ -690,7 +711,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   <aside class="sidebar">
     <div class="sb-logo">
       <span class="mark"></span>
-      <div><h1>HARAMAEN</h1><small>Panduan Umrah Anda</small></div>
+      <div><h1>HARAMAEN</h1><small>Panduan Umrah Anda</small><small class="sb-tag">Paparan terbaik menggunakan telefon pintar anda</small></div>
     </div>
     <nav class="sb-nav" id="sbNav"></nav>
     <div class="sb-foot">
@@ -767,6 +788,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         </div>
 
         <div class="terkini" id="terkiniBox"></div>
+        <div id="topAgHome"></div>
         <div id="bizPosterHome"></div>
       </section>
 
@@ -997,8 +1019,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
           <label>Tajuk</label>
           <input id="anTitle" placeholder="Tajuk berita…">
           <label>Kandungan</label>
-          <div class="tip-tb"><button type="button" class="tip-tbtn" onclick="fmtText(this,'bold')" title="Tebal"><b>B</b></button><button type="button" class="tip-tbtn" onclick="fmtText(this,'h2')" title="Tajuk">Tajuk</button><button type="button" class="tip-tbtn" onclick="fmtText(this,'h3')" title="Tajuk kecil">Tajuk kecil</button><button type="button" class="tip-tbtn" onclick="fmtText(this,'list')" title="Senarai berbulet">• Senarai</button></div>
-          <textarea id="anBody" placeholder="Isi kandungan berita…"></textarea>
+          <div class="rte-tb"><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'bold')" title="Tebal"><b>B</b></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'italic')" title="Italik"><i>I</i></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'underline')" title="Garis bawah"><u>U</u></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'h4')" title="Tajuk">Tajuk</button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'ul')" title="Senarai">• Senarai</button></div>
+          <div id="anBody" class="rte" contenteditable="true" data-ph="Isi kandungan berita…"></div>
           <div class="adm-news-row">
             <div>
               <label>Penulis</label>
@@ -1023,8 +1045,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
           <label>Tajuk Tip</label>
           <input id="atTitle" placeholder="cth: 5 Tip Persediaan Umrah Kali Pertama">
           <label>Kandungan Artikel</label>
-          <div class="tip-tb"><button type="button" class="tip-tbtn" onclick="fmtText(this,'bold')" title="Tebal"><b>B</b></button><button type="button" class="tip-tbtn" onclick="fmtText(this,'h2')" title="Tajuk">Tajuk</button><button type="button" class="tip-tbtn" onclick="fmtText(this,'h3')" title="Tajuk kecil">Tajuk kecil</button><button type="button" class="tip-tbtn" onclick="fmtText(this,'list')" title="Senarai berbulet">• Senarai</button></div>
-          <textarea id="atBody" placeholder="Tulis artikel tip umrah di sini…" style="min-height:170px"></textarea>
+          <div class="rte-tb"><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'bold')" title="Tebal"><b>B</b></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'italic')" title="Italik"><i>I</i></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'underline')" title="Garis bawah"><u>U</u></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'h4')" title="Tajuk">Tajuk</button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'ul')" title="Senarai">• Senarai</button></div>
+          <div id="atBody" class="rte" contenteditable="true" data-ph="Tulis artikel tip umrah di sini…" style="min-height:170px"></div>
           <label>Gambar <span style="font-weight:400;color:var(--muted)">(pilihan — JPG/PNG, maks 5MB)</span></label>
           <input type="file" id="atImg" accept="image/jpeg,image/png,image/webp" onchange="previewTipImg(this)">
           <img id="atImgPreview" class="up-preview" alt="Preview gambar">
@@ -1642,10 +1664,10 @@ async function changeAvatar(input){
 
 /* ---- Admin: Tambah Berita ---- */
 function previewTipImg(input){ const prev=document.getElementById('atImgPreview'); if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; } else prev.style.display='none'; }
-function clearTipForm(){ ['atTitle','atBody'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';}); const img=document.getElementById('atImg'); if(img) img.value=''; const p=document.getElementById('atImgPreview'); if(p){p.src='';p.style.display='none';} }
+function clearTipForm(){ ['atTitle'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';}); const tb=document.getElementById('atBody'); if(tb) tb.innerHTML=''; const img=document.getElementById('atImg'); if(img) img.value=''; const p=document.getElementById('atImgPreview'); if(p){p.src='';p.style.display='none';} }
 async function submitTip(){
   const title=(document.getElementById('atTitle').value||'').trim();
-  const body=(document.getElementById('atBody').value||'').trim();
+  const body=rteVal('atBody');
   if(!title||!body){ toast('Sila isi Tajuk dan Kandungan.'); return; }
   const btn=document.getElementById('atPost'); btn.disabled=true; btn.textContent='Menyiarkan…';
   try{
@@ -1676,26 +1698,11 @@ function mdRich(b){
   });
   return lines.join('<br>').replace(/<br>(<div class="md-)/g,'$1').replace(/(<\/div>)<br>/g,'$1');
 }
-function tipBodyHtml(b){ return mdRich(b); }
-function fmtText(btn,kind){
-  const ta=btn.closest('.tip-tb') && btn.closest('.tip-tb').nextElementSibling;
-  if(!ta || ta.tagName!=='TEXTAREA') return;
-  const s=ta.selectionStart, e=ta.selectionEnd, val=ta.value, sel=val.slice(s,e);
-  if(kind==='bold'){
-    const inner=sel||'teks';
-    ta.value=val.slice(0,s)+'**'+inner+'**'+val.slice(e);
-    ta.setSelectionRange(s+2, s+2+inner.length);
-  } else {
-    const before=val.slice(0,s); const ls=before.lastIndexOf('\n')+1;
-    const after=val.slice(e); const nl=after.indexOf('\n'); const le=nl<0?val.length:e+nl;
-    const block=val.slice(ls,le);
-    const pre=kind==='h2'?'## ':kind==='h3'?'### ':'- ';
-    const nb=block.split('\n').map(l=>pre+l.replace(/^(#{1,3}\s+|[-•]\s+)/,'')).join('\n');
-    ta.value=val.slice(0,ls)+nb+val.slice(le);
-    ta.setSelectionRange(ls, ls+nb.length);
-  }
-  ta.focus();
-}
+function tipBodyHtml(b){ return articleHtml(b); }
+function rteCmd(btn,cmd){ const rte=btn.closest('.rte-tb') && btn.closest('.rte-tb').nextElementSibling; if(!rte) return; rte.focus(); try{ document.execCommand('styleWithCSS',false,false); }catch(e){} if(cmd==='h4') document.execCommand('formatBlock',false,'h4'); else if(cmd==='ul') document.execCommand('insertUnorderedList',false,null); else document.execCommand(cmd,false,null); }
+function rteVal(id){ const el=document.getElementById(id); if(!el) return ''; if((el.textContent||'').trim()==='' && !/<img|<br/i.test(el.innerHTML)) return ''; return sanitizeHtml(el.innerHTML); }
+function sanitizeHtml(html){ const d=document.createElement('div'); d.innerHTML=html||''; const ALLOW={B:1,STRONG:1,I:1,EM:1,U:1,H3:1,H4:1,H5:1,UL:1,OL:1,LI:1,BR:1,P:1,DIV:1,SPAN:1,A:1}; let changed=true; while(changed){ changed=false; const all=d.querySelectorAll('*'); for(const c of all){ if(!ALLOW[c.tagName]){ while(c.firstChild) c.parentNode.insertBefore(c.firstChild,c); c.parentNode.removeChild(c); changed=true; break; } } } d.querySelectorAll('*').forEach(c=>{ [...c.attributes].forEach(a=>{ const n=a.name.toLowerCase(); if(c.tagName==='A'&&n==='href'){ if(/^\s*javascript:/i.test(a.value)) c.removeAttribute(a.name); } else c.removeAttribute(a.name); }); }); return d.innerHTML; }
+function articleHtml(b){ b=b||''; if(/<[a-z][\s\S]*>/i.test(b)) return sanitizeHtml(b); return mdRich(b); }
 function openTip(id){ const t=(TIPS||[]).find(x=>String(x.id)===String(id)); if(!t) return; const m=tipModalEl(); document.getElementById('tipModalBox').innerHTML=`<button class="tip-x" onclick="closeTip()">✕</button><h3 style="margin:0 24px 6px 0">${esc(t.title)}</h3><div style="font-size:11.5px;color:var(--muted);margin-bottom:12px">💡 Tip Umrah · ${esc(t.author||'Haramaen')} · ${relTime(t.created_at)}</div>${t.image_url?`<img src="${esc(t.image_url)}" style="width:100%;border-radius:10px;margin-bottom:12px" alt="">`:''}<div class="tip-body">${tipBodyHtml(t.body)}</div>`; m.classList.add('open'); }
 function openTipList(){ const m=tipModalEl(); const items=(TIPS||[]).map(t=>`<div class="tk-item" style="cursor:pointer" onclick="openTip('${t.id}')">${t.image_url?`<img class="tk-thumb" src="${esc(t.image_url)}" alt="" loading="lazy">`:`<span class="pill" style="background:#fff3d6;color:#8a6d1a">Tip</span>`}<div class="tk-tx"><b>${esc(t.title)}</b><small>${relTime(t.created_at)}</small></div></div>`).join('')||'<div class="empty">Belum ada tip.</div>'; document.getElementById('tipModalBox').innerHTML=`<button class="tip-x" onclick="closeTip()">✕</button><h3 style="margin:0 0 12px">💡 Semua Tip Umrah</h3>${items}`; m.classList.add('open'); }
 function previewNewsImg(input){
@@ -1704,7 +1711,7 @@ function previewNewsImg(input){
   else { prev.style.display='none'; }
 }
 function clearNewsForm(){
-  ['anTitle','anBody','anAuthor','anSrcName','anSrcUrl'].forEach(id=>{const el=document.getElementById(id); if(el) el.value=el.id==='anAuthor'?'Haramaen':'';});
+  ['anTitle','anAuthor','anSrcName','anSrcUrl'].forEach(id=>{const el=document.getElementById(id); if(el) el.value=el.id==='anAuthor'?'Haramaen':'';}); const nb=document.getElementById('anBody'); if(nb) nb.innerHTML='';
   const t=document.getElementById('anTag'); if(t) t.value='Info';
   const c=document.getElementById('anCat'); if(c) c.value='Umrah';
   const img=document.getElementById('anImg'); if(img) img.value='';
@@ -1712,7 +1719,7 @@ function clearNewsForm(){
 }
 async function submitNews(){
   const title=(document.getElementById('anTitle').value||'').trim();
-  const body=(document.getElementById('anBody').value||'').trim();
+  const body=rteVal('anBody');
   if(!title||!body){ toast('Sila isi Tajuk dan Kandungan.'); return; }
   const btn=document.getElementById('anPost'); btn.disabled=true; btn.textContent='Menyiarkan…';
   try{
@@ -3430,7 +3437,7 @@ function renderNews(){
             <span>·</span>
             <span>${relTime(n.published_at)}</span>
           </div>
-          <div class="n-body">${mdRich(n.body)}</div>
+          <div class="n-body">${articleHtml(n.body)}</div>
           <div class="n-foot">
             ${src}
             <button class="shr-btn" data-title="${esc(n.title)}" data-text="${esc(n.title)}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
@@ -3535,9 +3542,21 @@ function openDuaFeed(){
   const seg=document.querySelector('#v-dua .seg');
   if(seg){ const btns=seg.querySelectorAll('button'); if(btns[1]) duaTab('feed',btns[1]); }
 }
+function topAgHomeHtml(){
+  const priced=(AGENCIES||[]).filter(a=>Number(a.price)>0);
+  if(priced.length<3) return '';
+  priced.sort((a,b)=>{ const pa=Number(a.price)||Infinity, pb=Number(b.price)||Infinity; return (pa-pb) || ((b.rating||0)-(a.rating||0)); });
+  const cards=priced.slice(0,3).map((a,i)=>{
+    const logo=a.logo_url?`<img class="topag-logo" src="${esc(a.logo_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`:`<div class="topag-ini">${esc((a.name||'?').trim().charAt(0).toUpperCase())}</div>`;
+    const rate=a.rating>0?`⭐ ${Number(a.rating).toFixed(1)}`:'';
+    return `<div class="topag-card r${i+1}" onclick="go('agency')"><div class="topag-rank">${i+1}</div>${logo}<div class="topag-name">${esc(a.name||'')}</div><div class="topag-meta">${rate}</div><div class="topag-price"><span>dari</span> RM${Number(a.price).toLocaleString('en-US')} <span>/org</span></div></div>`;
+  }).join('');
+  return `<div class="topag-wrap"><div class="topag-h">🏷️ Agensi Pakej Termurah <button class="tk-more" onclick="go('agency')">Lihat semua</button></div><div class="topag-row">${cards}</div></div>`;
+}
 function renderTerkini(){
   const el=document.getElementById('terkiniBox'); if(!el) return;
   const _bph=document.getElementById('bizPosterHome'); if(_bph) _bph.innerHTML=bizPosters('home');
+  const _ta=document.getElementById('topAgHome'); if(_ta) _ta.innerHTML=topAgHomeHtml();
   const news=NEWS.slice(0,2);
   const duas=(LATEST_DUAS||[]).slice(0,2);
   const crs=(COURSES||[]).slice().sort((a,b)=>String(b.created||'').localeCompare(String(a.created||''))).slice(0,2);
