@@ -2609,6 +2609,60 @@ async function agPkgSave(id,b){
     toast('Pakej dikemas kini. ✅');
   }catch(e){ toast('Gagal simpan — semak kebenaran.'); b.disabled=false; b.textContent='Simpan Pakej'; }
 }
+function agLogoEdit(id){
+  const a=(AGENCIES||[]).find(x=>String(x.id)===String(id)); if(!a) return;
+  const m=tipModalEl();
+  document.getElementById('tipModalBox').innerHTML=`<button class="tip-x" onclick="closeTip()">✕</button>
+    <h3 style="margin:0 24px 4px 0">🖼️ Logo Agensi</h3>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px">${esc(a.name)}</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <img id="alPreview" src="${a.logo_url?esc(a.logo_url):''}" style="width:64px;height:64px;border-radius:12px;object-fit:contain;background:#fff;border:1px solid var(--line);${a.logo_url?'':'display:none'}" alt="">
+      <div id="alNoLogo" style="font-size:12px;color:var(--muted);${a.logo_url?'display:none':''}">Belum ada logo — inisial berwarna dipapar.</div>
+    </div>
+    <label class="fl">Muat naik fail logo (PNG/JPG, maks 5MB)</label>
+    <input type="file" id="alFile" accept="image/png,image/jpeg,image/webp" class="f" style="font-size:12px;padding:5px" onchange="agLogoPrev(this)">
+    <label class="fl" style="margin-top:10px">atau tampal URL logo</label>
+    <input id="alUrl" class="f" placeholder="https://…">
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn" id="alSave" style="flex:1" onclick="agLogoSave('${id}',this)">💾 Simpan Logo</button>
+      ${a.logo_url?`<button class="btn" style="flex:0 0 auto;background:#fff;color:var(--danger);border:1px solid var(--danger)" onclick="agLogoClear('${id}',this)">Buang</button>`:''}
+    </div>`;
+  m.classList.add('open');
+}
+function agLogoPrev(input){ const p=document.getElementById('alPreview'); const nl=document.getElementById('alNoLogo'); if(input.files&&input.files[0]){ p.src=URL.createObjectURL(input.files[0]); p.style.display='block'; if(nl) nl.style.display='none'; } }
+async function agLogoSave(id,btn){
+  btn.disabled=true; btn.textContent='Menyimpan…';
+  try{
+    let logoUrl=(document.getElementById('alUrl').value||'').trim();
+    const file=document.getElementById('alFile').files[0];
+    if(file){
+      if(file.size>5*1024*1024){ toast('Fail terlalu besar — maks 5MB.'); btn.disabled=false; btn.textContent='💾 Simpan Logo'; return; }
+      const ext=(file.name.split('.').pop()||'png'); const path='agency-logo-'+id+'-'+Date.now()+'.'+ext;
+      const {error:upErr}=await sb.storage.from('news-images').upload(path,file,{contentType:file.type,upsert:true});
+      if(upErr) throw upErr;
+      logoUrl=sb.storage.from('news-images').getPublicUrl(path).data.publicUrl;
+    }
+    if(!logoUrl){ toast('Pilih fail atau tampal URL dulu.'); btn.disabled=false; btn.textContent='💾 Simpan Logo'; return; }
+    const {data,error}=await sb.from('agencies').update({logo_url:logoUrl}).eq('id',id).select();
+    if(error) throw error;
+    if(!data||!data.length){ toast('Gagal — kebenaran RLS tidak mengizinkan.'); btn.disabled=false; btn.textContent='💾 Simpan Logo'; return; }
+    const a=(AGENCIES||[]).find(x=>String(x.id)===String(id)); if(a) a.logo_url=logoUrl;
+    closeTip(); renderAgencies(); renderTerkini();
+    toast('Logo dikemas kini. ✅');
+  }catch(e){ toast('Gagal simpan logo — '+((e&&e.message)||'cuba lagi.')); btn.disabled=false; btn.textContent='💾 Simpan Logo'; }
+}
+async function agLogoClear(id,btn){
+  if(!confirm('Buang logo agensi ini?')) return;
+  btn.disabled=true; btn.textContent='…';
+  try{
+    const {data,error}=await sb.from('agencies').update({logo_url:null}).eq('id',id).select();
+    if(error) throw error;
+    if(!data||!data.length){ toast('Gagal buang — kebenaran RLS.'); btn.disabled=false; btn.textContent='Buang'; return; }
+    const a=(AGENCIES||[]).find(x=>String(x.id)===String(id)); if(a) a.logo_url='';
+    closeTip(); renderAgencies(); renderTerkini();
+    toast('Logo dibuang.');
+  }catch(e){ toast('Gagal buang logo.'); btn.disabled=false; btn.textContent='Buang'; }
+}
 function agPriceEdit(id,btn){ const cur=((AGENCIES||[]).find(a=>a.id===id)||{}).price||''; const wrap=document.createElement('span'); wrap.style.display='inline-flex'; wrap.style.gap='4px'; wrap.innerHTML=`<input type="number" min="0" step="10" value="${cur}" placeholder="RM" style="width:78px;padding:3px 6px;font-size:11px;border:1px solid var(--line);border-radius:6px"><button class="shr-sm" onclick="agPriceSave('${id}',this)">✔ Simpan</button>`; btn.replaceWith(wrap); const ip=wrap.querySelector('input'); ip.focus(); ip.addEventListener('keydown',e=>{if(e.key==='Enter') wrap.querySelector('button').click();}); }
 async function agPriceSave(id,b){ const val=parseInt(b.previousElementSibling.value)||null; b.disabled=true; b.textContent='…'; try{ const {error}=await sb.from('agencies').update({price:val}).eq('id',id); if(error) throw error; await loadData(); renderAgencies(); toast('Harga dikemas kini. ✅'); }catch(e){ toast('Gagal simpan harga — semak kebenaran.'); b.disabled=false; b.textContent='✔ Simpan'; } }
 function setAgNegeri(n){state.agNegeri=n; state.agDaerah='all'; renderAgencyFilters(); renderAgencies();}
@@ -2641,6 +2695,7 @@ function agencyCardHtml(a, isPrem){
   const rvBtn=`<button class="rv-trigger" onclick="openReviews('${a.id}','${esc(a.name)}')">${rv?`<span style="color:#f5a623">★</span> ${rv.avg} · <span style="text-decoration:underline">${rv.count} ulasan</span>`:'✍️ Ulasan Haramaen'}</button>`;
   const shrBtn=`<button class="shr-sm" data-title="${esc(a.name)}" data-text="${shrTxt}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>`;
   const pkgBtn=isAdmin()&&a.id?`<button class="shr-sm" style="border-color:#5E35B1;color:#5E35B1" onclick="agPkgEdit('${a.id}')">💰 Edit pakej</button>`:'';
+  const logoBtn=isAdmin()&&a.id?`<button class="shr-sm" style="border-color:#0d8a6a;color:#0d8a6a" onclick="agLogoEdit('${a.id}')">🖼️ Logo</button>`:'';
   const tags=[];
   if(a.duration_days>0) tags.push(a.duration_days+' hari');
   if(a.flight_note) tags.push(esc(a.flight_note));
@@ -2671,7 +2726,7 @@ function agencyCardHtml(a, isPrem){
       ${priceHtml}
     </div>
     ${isCheapest?'<div class="agx-foot">✈️ Biasanya termasuk penerbangan + hotel + visa</div>':''}
-    <div class="agx-actions">${icons}${rvBtn}${shrBtn}${pkgBtn}${adminBtn}</div>
+    <div class="agx-actions">${icons}${rvBtn}${shrBtn}${pkgBtn}${logoBtn}${adminBtn}</div>
   </div>`;
 }
 function renderAgencies(){
