@@ -356,6 +356,19 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .ag-best{display:inline-block;background:#e6f7ee;color:#1a9f5a;font-size:10px;font-weight:800;border-radius:5px;padding:2px 6px;margin-right:5px;vertical-align:1px}
   .ag-nop{margin-top:7px;font-size:11.5px;color:var(--muted)}
   .ag-sortrow{display:flex;gap:6px;margin:6px 0 2px}
+  .acc{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden;background:#fff}
+  .acc-h{width:100%;background:#faf8ff;border:none;padding:13px 14px;font-size:14px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px;cursor:pointer;text-align:left}
+  .acc-h>span:first-child{flex:1}
+  .acc-arw{transition:transform .25s;color:var(--muted);font-size:11px}
+  .acc.open .acc-arw{transform:rotate(180deg)}
+  .acc-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+  .acc.open .acc-body{max-height:6000px}
+  .acc-inner{padding:6px 13px 14px}
+  .acc-badge{display:none;background:var(--danger);color:#fff;font-size:11px;font-weight:800;min-width:19px;height:19px;border-radius:10px;align-items:center;justify-content:center;padding:0 5px}
+  #tipModalBox{position:relative;max-height:84vh;overflow:auto}
+  .tip-x{position:absolute;top:8px;right:10px;background:none;border:none;font-size:19px;color:var(--muted);cursor:pointer;line-height:1}
+  .tip-body{font-size:14px;line-height:1.75;color:var(--ink);white-space:normal}
+  .tk-h-tip{}
   .k-lb{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10000;display:none;align-items:center;justify-content:center;cursor:zoom-out;padding:16px}
   .k-lb img{max-width:92vw;max-height:88vh;border-radius:14px;box-shadow:0 8px 48px rgba(0,0,0,.6);object-fit:contain}
   #posterCarousel{padding:0 0 6px}
@@ -957,8 +970,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         </div>
         <div class="adm-h">Trend 30 hari (pelawat unik)</div>
         <div class="adm-bars" id="admBars"></div>
-        <div class="adm-h">Tambah Berita</div>
-        <div class="adm-news-form">
+        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>✍️ Tulis Berita</span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div class="adm-news-form">
           <div class="adm-news-row">
             <div>
               <label>Tag</label>
@@ -999,20 +1011,27 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
             <button class="anb-batal" onclick="clearNewsForm()">Kosongkan</button>
             <button class="anb-post" id="anPost" onclick="submitNews()">📰 Siar Berita</button>
           </div>
-        </div>
-        <div class="adm-h">Kursus menunggu kelulusan</div>
-        <div id="admPending"><div class="empty">Memuatkan…</div></div>
-        <div class="adm-h">Bisnes menunggu kelulusan</div>
-        <div id="admPendingBiz"><div class="empty">Memuatkan…</div></div>
-        <div class="adm-h">Servis menunggu kelulusan</div>
-        <div id="admPendingSvc"><div class="empty">Memuatkan…</div></div>
-        <div class="adm-h">Agensi menunggu kelulusan</div>
-        <div id="admPendingAgency"><div class="empty">Memuatkan…</div></div>
-        <div class="adm-h">Kursus Mutawwif menunggu kelulusan</div>
-        <div id="admPendingMutawwif"><div class="empty">Memuatkan…</div></div>
-        <div class="adm-h" style="display:flex;align-items:center;justify-content:space-between"><span>Maklum Balas Pengguna</span><span id="fbCount" style="font-size:12px;font-weight:400;color:var(--muted)"></span></div>
-        <div class="fb-filter" id="fbFilter"><button class="on" onclick="filterFb('all',this)">Semua</button><button onclick="filterFb('5',this)">★★★★★</button><button onclick="filterFb('4',this)">★★★★</button><button onclick="filterFb('3',this)">★★★</button><button onclick="filterFb('unrated',this)">Tanpa rating</button></div>
-        <div id="admFeedback"><div class="empty">Memuatkan…</div></div>
+        </div></div></div></div>
+        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>💡 Tulis Tip Umrah</span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div class="adm-news-form">
+          <label>Tajuk Tip</label>
+          <input id="atTitle" placeholder="cth: 5 Tip Persediaan Umrah Kali Pertama">
+          <label>Kandungan Artikel</label>
+          <textarea id="atBody" placeholder="Tulis artikel tip umrah di sini…" style="min-height:170px"></textarea>
+          <label>Gambar <span style="font-weight:400;color:var(--muted)">(pilihan — JPG/PNG, maks 5MB)</span></label>
+          <input type="file" id="atImg" accept="image/jpeg,image/png,image/webp" onchange="previewTipImg(this)">
+          <img id="atImgPreview" class="up-preview" alt="Preview gambar">
+          <div class="adm-news-act">
+            <button class="anb-batal" onclick="clearTipForm()">Kosongkan</button>
+            <button class="anb-post" id="atPost" onclick="submitTip()">💡 Siar Tip</button>
+          </div>
+        </div></div></div></div>
+        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Kursus menunggu kelulusan</span><span class="acc-badge" id="bKursus"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPending"><div class="empty">Memuatkan…</div></div></div></div></div>
+        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Bisnes menunggu kelulusan</span><span class="acc-badge" id="bBiz"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingBiz"><div class="empty">Memuatkan…</div></div></div></div></div>
+        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Servis menunggu kelulusan</span><span class="acc-badge" id="bSvc"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingSvc"><div class="empty">Memuatkan…</div></div></div></div></div>
+        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Agensi menunggu kelulusan</span><span class="acc-badge" id="bAgency"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingAgency"><div class="empty">Memuatkan…</div></div></div></div></div>
+        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Kursus Mutawwif menunggu kelulusan</span><span class="acc-badge" id="bMutawwif"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingMutawwif"><div class="empty">Memuatkan…</div></div></div></div></div>
+        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Maklum Balas Pengguna</span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div class="fb-filter" id="fbFilter"><button class="on" onclick="filterFb('all',this)">Semua</button><button onclick="filterFb('5',this)">★★★★★</button><button onclick="filterFb('4',this)">★★★★</button><button onclick="filterFb('3',this)">★★★</button><button onclick="filterFb('unrated',this)">Tanpa rating</button></div>
+        <div id="admFeedback"><div class="empty">Memuatkan…</div></div></div></div></div>
       </section>
 
     </main>
@@ -1470,7 +1489,7 @@ document.addEventListener('click', function(e){ const m=document.getElementById(
 /* ============ LIVE DATA (Supabase) ============ */
 let AGENCIES=[], HOTELS=[], VOLUNTEERS=[], HOSPITALS=[], SERVICES=[], COURSES=[], BIZ=[], SVCSUB=[], SAR_RATE=1.27;
 let MUTAWWIF=[];
-let NEWS=[], LATEST_DUAS=[], AG_REVIEW_SUMMARY={};
+let NEWS=[], LATEST_DUAS=[], TIPS=[], AG_REVIEW_SUMMARY={};
 let admTimer=null;
 const MED_MAP={hospital:{t:'Hospital',i:'🏥'}, pharmacy:{t:'Farmasi',i:'💊'}, insurance:{t:'Insurans',i:'🛡️'}};
 function _todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -1502,6 +1521,7 @@ async function loadData(){
       .filter(c=> !c.date || c.date>=_todayISO())
       .sort((a,b)=> (a.date||'').localeCompare(b.date||'')); }catch(e){ MUTAWWIF=[]; }
   try{ const r=await sb.rpc('list_duas',{p_visitor:vid()}); LATEST_DUAS=(r&&r.data)||[]; }catch(e){ LATEST_DUAS=[]; }
+  try{ const r=await sb.from('umrah_tips').select('*').eq('status','published').order('created_at',{ascending:false}).limit(50); TIPS=(r&&r.data)||[]; }catch(e){ TIPS=[]; }
   AGENCIES=(ag.data||[]).map(a=>({id:a.id, name:a.name, rating:Number(a.rating), reviews:Number(a.reviews_count||0),
     motac:a.motac_licensed, lic:a.motac_license||'—', price:Number(a.price), tier:a.tier, note:a.note||'', logo_url:a.logo_url||'', premium:!!a.is_premium}));
   HOTELS=(ho.data||[]).map(h=>({name:h.name, dist:Number(h.distance_km), price:Number(h.price_per_night),
@@ -1613,6 +1633,32 @@ async function changeAvatar(input){
 }
 
 /* ---- Admin: Tambah Berita ---- */
+function previewTipImg(input){ const prev=document.getElementById('atImgPreview'); if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; } else prev.style.display='none'; }
+function clearTipForm(){ ['atTitle','atBody'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';}); const img=document.getElementById('atImg'); if(img) img.value=''; const p=document.getElementById('atImgPreview'); if(p){p.src='';p.style.display='none';} }
+async function submitTip(){
+  const title=(document.getElementById('atTitle').value||'').trim();
+  const body=(document.getElementById('atBody').value||'').trim();
+  if(!title||!body){ toast('Sila isi Tajuk dan Kandungan.'); return; }
+  const btn=document.getElementById('atPost'); btn.disabled=true; btn.textContent='Menyiarkan…';
+  try{
+    let imgUrl=null; const imgFile=document.getElementById('atImg').files[0];
+    if(imgFile){ if(imgFile.size>5*1024*1024){ toast('Gambar terlalu besar — maks 5MB.'); btn.disabled=false; btn.textContent='💡 Siar Tip'; return; }
+      const ext=(imgFile.name.split('.').pop()||'jpg'); const path='tip-'+Date.now()+'.'+ext;
+      const {error:upErr}=await sb.storage.from('news-images').upload(path,imgFile,{contentType:imgFile.type,upsert:false});
+      if(upErr) throw upErr; const {data:{publicUrl}}=sb.storage.from('news-images').getPublicUrl(path); imgUrl=publicUrl;
+    }
+    const {error}=await sb.from('umrah_tips').insert({title:title, body:body, image_url:imgUrl, author:'Haramaen', status:'published'});
+    if(error) throw error;
+    clearTipForm(); await loadData(); renderTerkini();
+    toast('Tip Umrah disiarkan! 💡');
+  }catch(e){ toast('Gagal siar — pastikan jadual umrah_tips telah dibuat.'); }
+  btn.disabled=false; btn.textContent='💡 Siar Tip';
+}
+function tipModalEl(){ let m=document.getElementById('tipModal'); if(!m){ m=document.createElement('div'); m.id='tipModal'; m.className='modal'; m.innerHTML='<div class="modal-box" id="tipModalBox"></div>'; document.body.appendChild(m); m.addEventListener('click',function(e){ if(e.target===m) closeTip(); }); } return m; }
+function closeTip(){ const m=document.getElementById('tipModal'); if(m) m.classList.remove('open'); }
+function tipBodyHtml(b){ return esc(b||'').replace(/\n/g,'<br>'); }
+function openTip(id){ const t=(TIPS||[]).find(x=>String(x.id)===String(id)); if(!t) return; const m=tipModalEl(); document.getElementById('tipModalBox').innerHTML=`<button class="tip-x" onclick="closeTip()">✕</button><h3 style="margin:0 24px 6px 0">${esc(t.title)}</h3><div style="font-size:11.5px;color:var(--muted);margin-bottom:12px">💡 Tip Umrah · ${esc(t.author||'Haramaen')} · ${relTime(t.created_at)}</div>${t.image_url?`<img src="${esc(t.image_url)}" style="width:100%;border-radius:10px;margin-bottom:12px" alt="">`:''}<div class="tip-body">${tipBodyHtml(t.body)}</div>`; m.classList.add('open'); }
+function openTipList(){ const m=tipModalEl(); const items=(TIPS||[]).map(t=>`<div class="tk-item" style="cursor:pointer" onclick="openTip('${t.id}')">${t.image_url?`<img class="tk-thumb" src="${esc(t.image_url)}" alt="" loading="lazy">`:`<span class="pill" style="background:#fff3d6;color:#8a6d1a">Tip</span>`}<div class="tk-tx"><b>${esc(t.title)}</b><small>${relTime(t.created_at)}</small></div></div>`).join('')||'<div class="empty">Belum ada tip.</div>'; document.getElementById('tipModalBox').innerHTML=`<button class="tip-x" onclick="closeTip()">✕</button><h3 style="margin:0 0 12px">💡 Semua Tip Umrah</h3>${items}`; m.classList.add('open'); }
 function previewNewsImg(input){
   const prev=document.getElementById('anImgPreview');
   if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; }
@@ -2053,9 +2099,20 @@ function startTracking(){
 }
 
 /* ---- Admin: statistik pelawat + kelulusan kursus ---- */
-async function renderAdmin(){
+async function accToggle(btn){ const a=btn.closest('.acc'); if(a) a.classList.toggle('open'); }
+function setBadge(id,n){ const el=document.getElementById(id); if(!el) return; if(n>0){ el.textContent=n; el.style.display='inline-flex'; } else { el.textContent=''; el.style.display='none'; } }
+async function refreshAdminBadges(){
+  if(!isAdmin()) return;
+  const q=(t)=>sb.from(t).select('id',{count:'exact',head:true}).eq('status','pending');
+  try{
+    const [c,b,sv,ag,mu]=await Promise.all([sb.rpc('admin_list_pending_courses'),q('business_submissions'),q('service_submissions'),q('agencies'),q('mutawwif_courses')]);
+    setBadge('bKursus',(c.data&&c.data.length)||0); setBadge('bBiz',b.count||0); setBadge('bSvc',sv.count||0); setBadge('bAgency',ag.count||0); setBadge('bMutawwif',mu.count||0);
+  }catch(e){}
+}
+function renderAdmin(){
   if(!isAdmin()){ document.getElementById('admStats').innerHTML='<div class="empty">Akses admin sahaja.</div>'; return; }
   loadAdminStats();
+  refreshAdminBadges();
   if(admTimer) clearInterval(admTimer);
   admTimer=setInterval(()=>{ const a=document.getElementById('v-admin'); if(a&&a.classList.contains('active')) loadAdminStats(true); else { clearInterval(admTimer); admTimer=null; } }, 30000);
   loadPendingCourses();
@@ -3445,8 +3502,13 @@ function renderTerkini(){
   const news=NEWS.slice(0,2);
   const duas=(LATEST_DUAS||[]).slice(0,2);
   const crs=(COURSES||[]).slice().sort((a,b)=>String(b.created||'').localeCompare(String(a.created||''))).slice(0,2);
-  if(!news.length && !duas.length && !crs.length){ el.innerHTML=''; return; }
-  let newsBlk='', duasBlk='', crsBlk='';
+  const tips=(TIPS||[]).slice(0,2);
+  if(!news.length && !duas.length && !crs.length && !tips.length){ el.innerHTML=''; return; }
+  let newsBlk='', duasBlk='', crsBlk='', tipsBlk='';
+  if(tips.length){
+    tipsBlk=`<div class="tk-blk"><div class="tk-h tk-h-tip">💡 Tip Umrah <button class="tk-more" onclick="openTipList()">Lihat semua</button></div>`+
+      tips.map(t=>{ const thumb=t.image_url?`<img class="tk-thumb" src="${esc(t.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`:`<span class="pill" style="background:#fff3d6;color:#8a6d1a">Tip</span>`; return `<div class="tk-item" onclick="openTip('${t.id}')">${thumb}<div class="tk-tx"><b>${esc(t.title)}</b><small>${relTime(t.created_at)}</small></div></div>`; }).join('')+`</div>`;
+  }
   if(news.length){
     newsBlk=`<div class="tk-blk"><div class="tk-h tk-h-news">📰 Berita terkini <button class="tk-more" onclick="jump('news')">Lihat semua</button></div>`+
       news.map(n=>{
@@ -3463,7 +3525,7 @@ function renderTerkini(){
       crs.map(c=>`<div class="tk-item" onclick="jump('kursus')"><span class="pill">${esc(c.negeri||'—')}</span><div class="tk-tx"><b>${esc(c.anjuran||'Kursus Umrah')}</b><small>${esc(c.tarikh||'')}${c.daerah?' · '+esc(c.daerah):''}</small></div></div>`).join('')+`</div>`;
   }
   const head=`<div class="tk-head"><span class="dot"></span> Terkini di Haramaen</div>`;
-  const left=newsBlk+duasBlk, right=crsBlk;
+  const left=tipsBlk+newsBlk+duasBlk, right=crsBlk;
   const body=(left&&right)?`<div class="tk-cols"><div class="tk-col">${left}</div><div class="tk-col">${right}</div></div>`:(left+right);
   el.innerHTML=head+body;
 }
