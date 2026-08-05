@@ -368,6 +368,39 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .topag-meta{font-size:10.5px;color:var(--muted);margin-bottom:7px;min-height:14px}
   .topag-price{font-weight:800;font-size:13px;color:var(--green);letter-spacing:-.2px}
   .topag-price span{font-size:9px;font-weight:600;color:var(--muted)}
+  .topag-card.best{border-color:#1e9f5a;box-shadow:0 6px 16px rgba(30,159,90,.15)}
+  .topag-rib{position:absolute;top:8px;right:-32px;transform:rotate(45deg);background:linear-gradient(90deg,#1e9f5a,#25b567);color:#fff;font-size:8px;font-weight:800;letter-spacing:.3px;padding:2px 34px;z-index:2}
+  .topag-mtag{display:inline-block;background:#f0ecfb;color:var(--green-d);font-size:9px;font-weight:700;border-radius:5px;padding:2px 6px;margin-bottom:6px}
+  .topag-jm{color:#d81b7a;font-weight:800;font-size:9.5px;margin-top:2px}
+  .agx{position:relative;border:1px solid var(--line);border-radius:14px;background:#fff;margin-bottom:12px;overflow:hidden}
+  .agx.best{border:1.5px solid #1e9f5a;box-shadow:0 4px 14px rgba(30,159,90,.12)}
+  .agx.card-premium{border-color:#ffc94d;box-shadow:0 4px 14px rgba(255,180,0,.14)}
+  .agx-ribbon{position:absolute;top:13px;left:-34px;transform:rotate(-45deg);background:linear-gradient(90deg,#1e9f5a,#25b567);color:#fff;font-size:9px;font-weight:800;letter-spacing:.5px;padding:3px 40px;box-shadow:0 1px 4px rgba(0,0,0,.15);z-index:2}
+  .agx-main{display:flex;gap:12px;padding:13px 14px 12px;align-items:flex-start}
+  .agx-logo{width:52px;height:52px;flex:none;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#f4f1fe}
+  .agx-logo .ag-logo,.agx-logo .ag-init{width:52px!important;height:52px!important;min-width:52px;border-radius:12px!important;font-size:21px!important;display:flex!important;align-items:center;justify-content:center;object-fit:cover}
+  .agx-mid{flex:1;min-width:0}
+  .agx-nm{font-weight:800;font-size:14.5px;line-height:1.25;color:var(--ink)}
+  .agx-loc{font-size:12px;color:var(--muted);margin-top:2px}
+  .agx-rate{font-size:12px;color:#8a6d1a;font-weight:700;margin-top:3px}
+  .agx-rate span{color:var(--muted);font-weight:500}
+  .agx-badges{margin-top:6px;display:flex;gap:5px;flex-wrap:wrap}
+  .agx-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+  .agx-tag{background:#f0ecfb;color:var(--green-d);font-size:10.5px;font-weight:700;border-radius:6px;padding:3px 8px}
+  .agx-price{flex:none;text-align:right;min-width:100px;display:flex;flex-direction:column;align-items:flex-end}
+  .agx-from{font-size:10px;color:var(--muted)}
+  .agx-big{font-size:21px;font-weight:800;color:var(--ink);letter-spacing:-.5px;line-height:1.05}
+  .agx-big.good{color:#1e9f5a}
+  .agx-old{font-size:11.5px;color:var(--muted);text-decoration:line-through;margin-top:3px}
+  .agx-jimat{display:inline-block;background:#fdecf3;color:#d81b7a;font-size:10px;font-weight:800;border-radius:5px;padding:2px 6px;margin-top:3px}
+  .agx-unit{font-size:10px;color:var(--muted);margin-top:2px}
+  .agx-nohint{font-size:11.5px;color:var(--muted);text-align:right;line-height:1.3;font-weight:600}
+  .agx-cta{margin-top:9px;background:var(--green);color:#fff;border:none;border-radius:9px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;white-space:nowrap}
+  .agx-cta:hover{background:var(--green-d)}
+  .agx-cta.ghost{background:#fff;color:var(--green);border:1px solid var(--green)}
+  .agx-foot{border-top:1px dashed var(--line);padding:8px 14px;font-size:11.5px;color:#1e8a5a;background:#f4fbf7}
+  .agx-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:2px 14px 12px}
+  .agx-actions .ag-icon-btn{width:30px;height:30px}
   .ag-best{display:inline-block;background:#e6f7ee;color:#1a9f5a;font-size:10px;font-weight:800;border-radius:5px;padding:2px 6px;margin-right:5px;vertical-align:1px}
   .ag-nop{margin-top:7px;font-size:11.5px;color:var(--muted)}
   .ag-sortrow{display:flex;gap:6px;margin:6px 0 2px}
@@ -1553,7 +1586,8 @@ async function loadData(){
   try{ const r=await sb.rpc('list_duas',{p_visitor:vid()}); LATEST_DUAS=(r&&r.data)||[]; }catch(e){ LATEST_DUAS=[]; }
   try{ const r=await sb.from('umrah_tips').select('*').eq('status','published').order('created_at',{ascending:false}).limit(50); TIPS=(r&&r.data)||[]; }catch(e){ TIPS=[]; }
   AGENCIES=(ag.data||[]).map(a=>({id:a.id, name:a.name, rating:Number(a.rating), reviews:Number(a.reviews_count||0),
-    motac:a.motac_licensed, lic:a.motac_license||'—', price:Number(a.price), tier:a.tier, note:a.note||'', logo_url:a.logo_url||'', premium:!!a.is_premium}));
+    motac:a.motac_licensed, lic:a.motac_license||'—', price:Number(a.price), tier:a.tier, note:a.note||'', logo_url:a.logo_url||'', premium:!!a.is_premium,
+    price_old:Number(a.price_old)||0, duration_days:Number(a.duration_days)||0, hotel_star:Number(a.hotel_star)||0, flight_note:a.flight_note||'', package_tier:a.package_tier||''}));
   HOTELS=(ho.data||[]).map(h=>({name:h.name, dist:Number(h.distance_km), price:Number(h.price_per_night),
     stars:Number(h.stars), icon:h.type==='homestay'?'🏠':'🏨', lat:Number(h.lat), lng:Number(h.lng), note:h.note||'', city:h.city||'Makkah'}));
   VOLUNTEERS=(vo.data||[]).map(v=>({name:v.name, loc:v.location, done:Number(v.duas_delivered||0), note:v.note||''}));
@@ -2440,11 +2474,12 @@ function renderAgencyFilters(){
   const R=[0,4,4.5,4.8];
   document.getElementById('agRating').innerHTML=R.map(r=>`
     <button class="chip ${state.agRating===r?'on':''}" onclick="setAgRating(${r})">${r===0?'Semua':'⭐ '+r+'+'}</button>`).join('');
-  const PC=[{v:'',t:'Semua harga'},{v:'lt6',t:'< RM6k'},{v:'6-8',t:'RM6–8k'},{v:'gt8',t:'> RM8k'}];
+  const PC=[{v:'',t:'Semua harga'},{v:'lt6',t:'< RM6k'},{v:'6-8',t:'RM6–8k'},{v:'gt8',t:'> RM8k'},{v:'promo',t:'🏷️ Ada promo'}];
   const ap=document.getElementById('agPrice'); ap.style.display='';
   ap.innerHTML=`<label class="f" style="margin-top:12px;display:block">Susun ikut</label>`+
-    `<div class="ag-sortrow"><button class="chip ${state.agSort!=='price'?'on':''}" onclick="setAgSort('rating')">⭐ Rating</button>`+
-    `<button class="chip ${state.agSort==='price'?'on':''}" onclick="setAgSort('price')">💰 Termurah</button></div>`+
+    `<div class="ag-sortrow"><button class="chip ${state.agSort==='rating'?'on':''}" onclick="setAgSort('rating')">⭐ Rating</button>`+
+    `<button class="chip ${state.agSort==='price'?'on':''}" onclick="setAgSort('price')">💰 Termurah</button>`+
+    `<button class="chip ${state.agSort==='popular'?'on':''}" onclick="setAgSort('popular')">🔥 Popular</button></div>`+
     `<label class="f" style="display:block;margin-top:8px">Julat harga pakej</label>`+
     PC.map(c=>`<button class="chip ${(state.agPrice||'')===c.v?'on':''}" onclick="setAgPrice('${c.v}')">${c.t}</button>`).join('');
   // Negeri dropdown — build unique sorted list, exclude entries with digits (postcodes etc.)
@@ -2475,7 +2510,40 @@ function renderAgencyFilters(){
 function setAgRating(r){state.agRating=r; renderAgencyFilters(); renderAgencies();}
 function setAgPrice(v){state.agPrice=v||null; renderAgencyFilters(); renderAgencies();}
 function setAgSort(s){state.agSort=s; renderAgencyFilters(); renderAgencies();}
-function agPriceMatch(a){ if(!state.agPrice) return true; const p=Number(a.price)||0; if(!p) return false; if(state.agPrice==='lt6') return p<6000; if(state.agPrice==='6-8') return p>=6000&&p<=8000; if(state.agPrice==='gt8') return p>8000; return true; }
+function agPriceMatch(a){ if(!state.agPrice) return true; if(state.agPrice==='promo') return Number(a.price_old)>Number(a.price) && Number(a.price)>0; const p=Number(a.price)||0; if(!p) return false; if(state.agPrice==='lt6') return p<6000; if(state.agPrice==='6-8') return p>=6000&&p<=8000; if(state.agPrice==='gt8') return p>8000; return true; }
+function agPkgEdit(id){
+  const a=(AGENCIES||[]).find(x=>String(x.id)===String(id)); if(!a) return;
+  const m=tipModalEl();
+  const tier=a.package_tier||'';
+  document.getElementById('tipModalBox').innerHTML=`<button class="tip-x" onclick="closeTip()">✕</button>
+    <h3 style="margin:0 24px 4px 0">💰 Edit Pakej</h3>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px">${esc(a.name)}</div>
+    <label class="fl">Harga pakej "dari" (RM)</label><input id="pkPrice" type="number" min="0" step="10" value="${a.price||''}" placeholder="cth: 5990">
+    <label class="fl">Harga asal / sebelum promo (RM) — kosong jika tiada</label><input id="pkOld" type="number" min="0" step="10" value="${a.price_old||''}" placeholder="cth: 7200">
+    <label class="fl">Tempoh (hari)</label><input id="pkDur" type="number" min="0" max="60" step="1" value="${a.duration_days||''}" placeholder="cth: 14">
+    <label class="fl">Taraf hotel (bintang 1–5)</label><input id="pkHotel" type="number" min="0" max="5" step="1" value="${a.hotel_star||''}" placeholder="cth: 4">
+    <label class="fl">Nota penerbangan</label><input id="pkFlight" type="text" value="${esc(a.flight_note||'')}" placeholder="cth: Direct MADINAH">
+    <label class="fl">Kategori pakej</label><select id="pkTier"><option value="">—</option><option ${tier==='Ekonomi'?'selected':''}>Ekonomi</option><option ${tier==='Standard'?'selected':''}>Standard</option><option ${tier==='Premium'?'selected':''}>Premium</option></select>
+    <button class="btn" style="margin-top:16px;width:100%" onclick="agPkgSave('${id}',this)">Simpan Pakej</button>`;
+  m.classList.add('open');
+}
+async function agPkgSave(id,b){
+  b.disabled=true; b.textContent='Menyimpan…';
+  const gv=k=>{const e=document.getElementById(k);return e?e.value:'';};
+  const num=v=>{const n=parseInt(v);return isNaN(n)?null:n;};
+  const payload={price:num(gv('pkPrice')), price_old:num(gv('pkOld')), duration_days:num(gv('pkDur')), hotel_star:num(gv('pkHotel')), flight_note:(gv('pkFlight')||'').trim()||null, package_tier:gv('pkTier')||null};
+  try{
+    let {error}=await sb.from('agencies').update(payload).eq('id',id);
+    if(error){
+      const r2=await sb.from('agencies').update({price:payload.price}).eq('id',id);
+      if(r2.error) throw r2.error;
+      await loadData(); closeTip(); renderAgencyFilters(); renderAgencies(); renderTerkini();
+      toast('Harga disimpan. Jalankan SQL kolum pakej untuk aktifkan tag/promo.'); return;
+    }
+    await loadData(); closeTip(); renderAgencyFilters(); renderAgencies(); renderTerkini();
+    toast('Pakej dikemas kini. ✅');
+  }catch(e){ toast('Gagal simpan — semak kebenaran.'); b.disabled=false; b.textContent='Simpan Pakej'; }
+}
 function agPriceEdit(id,btn){ const cur=((AGENCIES||[]).find(a=>a.id===id)||{}).price||''; const wrap=document.createElement('span'); wrap.style.display='inline-flex'; wrap.style.gap='4px'; wrap.innerHTML=`<input type="number" min="0" step="10" value="${cur}" placeholder="RM" style="width:78px;padding:3px 6px;font-size:11px;border:1px solid var(--line);border-radius:6px"><button class="shr-sm" onclick="agPriceSave('${id}',this)">✔ Simpan</button>`; btn.replaceWith(wrap); const ip=wrap.querySelector('input'); ip.focus(); ip.addEventListener('keydown',e=>{if(e.key==='Enter') wrap.querySelector('button').click();}); }
 async function agPriceSave(id,b){ const val=parseInt(b.previousElementSibling.value)||null; b.disabled=true; b.textContent='…'; try{ const {error}=await sb.from('agencies').update({price:val}).eq('id',id); if(error) throw error; await loadData(); renderAgencies(); toast('Harga dikemas kini. ✅'); }catch(e){ toast('Gagal simpan harga — semak kebenaran.'); b.disabled=false; b.textContent='✔ Simpan'; } }
 function setAgNegeri(n){state.agNegeri=n; state.agDaerah='all'; renderAgencyFilters(); renderAgencies();}
@@ -2500,37 +2568,46 @@ function agencyCardHtml(a, isPrem){
   const isPhone=contact&&!isUrl;
   const shrTxt=esc(a.name+(hq?' — '+hq:''));
   const shrUrl=esc(location.href);
-  const adminBtn=isAdmin()&&a.id?`<button onclick="togglePremium('${a.id}',${isPrem})" style="background:${isPrem?'#fff3cd':'#f0f0f0'};color:${isPrem?'#856404':'#555'};border:1px solid ${isPrem?'#ffc107':'#ccc'};border-radius:6px;padding:2px 8px;font-size:10.5px;font-weight:700;cursor:pointer">${isPrem?'★ Buang Premium':'☆ Set Premium'}</button>`:'';
+  const isCheapest=a.id&&a.id===window.__cheapestAgId;
+  const adminBtn=isAdmin()&&a.id?`<button class="shr-sm" style="border-color:#c9a227;color:#8a6d1a" onclick="togglePremium('${a.id}',${isPrem})">${isPrem?'★ Buang Premium':'☆ Premium'}</button>`:'';
   const mapQ=hq?encodeURIComponent(a.name+(hq?' '+hq:'')):'';
-  const thumbIcons=`<div class="ag-icon-wrap">
-    ${hq?`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Peta lokasi">${ICO_PIN}</a>`:''}
-    ${isUrl?`<a class="ag-icon-btn" href="${contact}" target="_blank" rel="noopener" data-tip="Laman web">${ICO_GLOBE}</a>`:''}
-    ${isPhone?`<a class="ag-icon-btn" href="tel:${contact.replace(/\s/g,'')}" data-tip="Telefon">${ICO_PHONE}</a>`:''}
-  </div>`;
+  const icons=`${hq?`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Peta lokasi">${ICO_PIN}</a>`:''}${isUrl?`<a class="ag-icon-btn" href="${contact}" target="_blank" rel="noopener" data-tip="Laman web">${ICO_GLOBE}</a>`:''}${isPhone?`<a class="ag-icon-btn" href="tel:${contact.replace(/\s/g,'')}" data-tip="Telefon">${ICO_PHONE}</a>`:''}`;
   const rv=a.id&&AG_REVIEW_SUMMARY[a.id];
-  const rvLine=`<button class="rv-trigger" onclick="openReviews('${a.id}','${esc(a.name)}')">${rv?`<span style="color:#f5a623">★</span> ${rv.avg} · <span style="text-decoration:underline">${rv.count} ulasan Haramaen</span>`:'✍️ Ulasan Haramaen'}</button>`;
+  const rvBtn=`<button class="rv-trigger" onclick="openReviews('${a.id}','${esc(a.name)}')">${rv?`<span style="color:#f5a623">★</span> ${rv.avg} · <span style="text-decoration:underline">${rv.count} ulasan</span>`:'✍️ Ulasan Haramaen'}</button>`;
   const shrBtn=`<button class="shr-sm" data-title="${esc(a.name)}" data-text="${shrTxt}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>`;
-  return `<div class="card${isPrem?' card-premium':''}"><div class="list-row" style="align-items:flex-start">
-    <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
-      <div class="thumb" style="margin-bottom:0">${agThumb(a)}</div>
-      ${thumbIcons}
-    </div>
-    <div style="flex:1;min-width:0;padding-left:12px;display:flex;align-items:flex-start;gap:8px">
-      <div style="flex:1;min-width:0">
-        <b style="font-size:13.5px;line-height:1.3;display:block">${a.name}</b>
-        ${a.rating?`<div style="margin:3px 0"><span class="stars">${stars(a.rating)}</span> <span class="tag">${a.rating} · Google</span></div>`:''}
-        ${rvLine}
-        ${a.price>0?`<div class="ag-price">${(a.id&&a.id===window.__cheapestAgId)?'<span class="ag-best">Termurah</span>':''}<span class="ag-from">dari</span> RM${Number(a.price).toLocaleString('en-US')} <span class="ag-unit">/ org</span></div>`:''}
+  const pkgBtn=isAdmin()&&a.id?`<button class="shr-sm" style="border-color:#5E35B1;color:#5E35B1" onclick="agPkgEdit('${a.id}')">💰 Edit pakej</button>`:'';
+  const tags=[];
+  if(a.duration_days>0) tags.push(a.duration_days+' hari');
+  if(a.flight_note) tags.push(esc(a.flight_note));
+  if(a.hotel_star>0) tags.push(a.hotel_star+'★ hotel');
+  if(a.package_tier) tags.push(esc(a.package_tier));
+  const tagsHtml=tags.length?`<div class="agx-tags">${tags.map(t=>`<span class="agx-tag">${t}</span>`).join('')}</div>`:'';
+  const locTxt=(hq&&!/^https?:/i.test(hq))?esc(hq):'';
+  let priceHtml;
+  if(a.price>0){
+    const jimat=a.price_old>a.price?a.price_old-a.price:0;
+    const cta=isUrl?`<a class="agx-cta" href="${contact}" target="_blank" rel="noopener">Lihat Pakej ›</a>`:(isPhone?`<a class="agx-cta" href="tel:${contact.replace(/\s/g,'')}">Hubungi ›</a>`:`<button class="agx-cta" onclick="openReviews('${a.id}','${esc(a.name)}')">Lihat ›</button>`);
+    priceHtml=`<div class="agx-price"><div class="agx-from">dari</div><div class="agx-big${isCheapest?' good':''}">RM${Number(a.price).toLocaleString('en-US')}</div>${jimat>0?`<div class="agx-old">RM${Number(a.price_old).toLocaleString('en-US')}</div><span class="agx-jimat">Jimat RM${Number(jimat).toLocaleString('en-US')}</span>`:'<div class="agx-unit">/ seorang</div>'}${cta}</div>`;
+  } else {
+    const cta=isPhone?`<a class="agx-cta ghost" href="tel:${contact.replace(/\s/g,'')}">Hubungi</a>`:(isUrl?`<a class="agx-cta ghost" href="${contact}" target="_blank" rel="noopener">Laman web</a>`:'');
+    priceHtml=`<div class="agx-price"><div class="agx-nohint">Hubungi<br>untuk harga</div>${cta}</div>`;
+  }
+  const badges=`${isPrem?'<span class="badge-premium">★ Premium</span>':''}${a.motac?'<span class="badge-motac">✓ MOTAC'+(a.lic&&a.lic!=='—'?' '+esc(a.lic):'')+'</span>':''}`;
+  return `<div class="agx${isCheapest?' best':''}${isPrem?' card-premium':''}">${isCheapest?'<span class="agx-ribbon">TERMURAH</span>':''}
+    <div class="agx-main">
+      <div class="agx-logo">${agThumb(a)}</div>
+      <div class="agx-mid">
+        <div class="agx-nm">${esc(a.name)}</div>
+        ${locTxt?`<div class="agx-loc">📍 ${locTxt}</div>`:''}
+        ${a.rating?`<div class="agx-rate">★ ${a.rating} <span>· Google</span></div>`:''}
+        ${badges?`<div class="agx-badges">${badges}</div>`:''}
+        ${tagsHtml}
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-        ${isPrem?'<span class="badge-premium">★ Premium</span>':''}
-        ${a.motac?'<span class="badge-motac">✓ MOTAC'+(a.lic&&a.lic!=='—'?' '+a.lic:'')+'</span>':''}
-        ${adminBtn}
-        ${isAdmin()&&a.id?`<button class="shr-sm" style="border-color:#5E35B1;color:#5E35B1" onclick="agPriceEdit('${a.id}',this)">💰 ${a.price>0?'Ubah':'Set'} harga</button>`:''}
-        ${shrBtn}
-      </div>
+      ${priceHtml}
     </div>
-  </div></div>`;
+    ${isCheapest?'<div class="agx-foot">✈️ Biasanya termasuk penerbangan + hotel + visa</div>':''}
+    <div class="agx-actions">${icons}${rvBtn}${shrBtn}${pkgBtn}${adminBtn}</div>
+  </div>`;
 }
 function renderAgencies(){
   const q=(document.getElementById('agQuery').value||'').toLowerCase();
@@ -2548,6 +2625,7 @@ function renderAgencies(){
     (state.agDaerah==='all' || agDaerah(a.note)===state.agDaerah)
   );
   if(state.agSort==='price'){ filtered.sort((a,b)=>{ const pa=Number(a.price)||Infinity, pb=Number(b.price)||Infinity; return (pa-pb) || ((b.rating||0)-(a.rating||0)); }); }
+  else if(state.agSort==='popular'){ filtered.sort((a,b)=>((b.reviews||0)-(a.reviews||0)) || ((b.rating||0)-(a.rating||0))); }
   else { filtered.sort((a,b)=>(b.rating||0)-(a.rating||0)); }
   window.__cheapestAgId=null; let _mp=Infinity;
   premList.concat(filtered).forEach(a=>{ const p=Number(a.price)||0; if(p>0 && p<_mp){ _mp=p; window.__cheapestAgId=a.id; } });
@@ -3549,7 +3627,10 @@ function topAgHomeHtml(){
   const cards=priced.slice(0,3).map((a,i)=>{
     const logo=a.logo_url?`<img class="topag-logo" src="${esc(a.logo_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`:`<div class="topag-ini">${esc((a.name||'?').trim().charAt(0).toUpperCase())}</div>`;
     const rate=a.rating>0?`⭐ ${Number(a.rating).toFixed(1)}`:'';
-    return `<div class="topag-card r${i+1}" onclick="go('agency')"><div class="topag-rank">${i+1}</div>${logo}<div class="topag-name">${esc(a.name||'')}</div><div class="topag-meta">${rate}</div><div class="topag-price"><span>dari</span> RM${Number(a.price).toLocaleString('en-US')} <span>/org</span></div></div>`;
+    const jimat=a.price_old>a.price?a.price_old-a.price:0;
+    const mtag=a.package_tier?esc(a.package_tier):(a.duration_days>0?a.duration_days+' hari':'');
+    const rib=i===0?'<span class="topag-rib">TERMURAH</span>':'';
+    return `<div class="topag-card r${i+1}${i===0?' best':''}" onclick="go('agency')"><div class="topag-rank">${i+1}</div>${rib}${logo}<div class="topag-name">${esc(a.name||'')}</div><div class="topag-meta">${rate}</div>${mtag?`<div class="topag-mtag">${mtag}</div>`:''}<div class="topag-price"><span>dari</span> RM${Number(a.price).toLocaleString('en-US')} <span>/seorang</span>${jimat>0?`<div class="topag-jm">Jimat RM${jimat.toLocaleString('en-US')}</div>`:''}</div></div>`;
   }).join('');
   return `<div class="topag-wrap"><div class="topag-h">🏷️ Agensi Pakej Termurah <button class="tk-more" onclick="go('agency')">Lihat semua</button></div><div class="topag-row">${cards}</div></div>`;
 }
