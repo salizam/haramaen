@@ -368,6 +368,12 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   #tipModalBox{position:relative;max-height:84vh;overflow:auto}
   .tip-x{position:absolute;top:8px;right:10px;background:none;border:none;font-size:19px;color:var(--muted);cursor:pointer;line-height:1}
   .tip-body{font-size:14px;line-height:1.75;color:var(--ink);white-space:normal}
+  .md-h2{font-weight:800;font-size:16px;margin:15px 0 6px;color:var(--ink)}
+  .md-h3{font-weight:800;font-size:14.5px;margin:12px 0 4px;color:var(--ink)}
+  .md-li{margin:3px 0 3px 4px}
+  .tip-tb{display:flex;gap:6px;margin:2px 0 6px;flex-wrap:wrap}
+  .tip-tbtn{background:#f4f1fe;border:1px solid var(--line);border-radius:7px;padding:5px 12px;font-size:12.5px;font-weight:700;color:var(--green-d);cursor:pointer}
+  .tip-tbtn:hover{background:#e9e3fb}
   .tk-h-tip{}
   .k-lb{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10000;display:none;align-items:center;justify-content:center;cursor:zoom-out;padding:16px}
   .k-lb img{max-width:92vw;max-height:88vh;border-radius:14px;box-shadow:0 8px 48px rgba(0,0,0,.6);object-fit:contain}
@@ -991,6 +997,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
           <label>Tajuk</label>
           <input id="anTitle" placeholder="Tajuk berita…">
           <label>Kandungan</label>
+          <div class="tip-tb"><button type="button" class="tip-tbtn" onclick="fmtText(this,'bold')" title="Tebal"><b>B</b></button><button type="button" class="tip-tbtn" onclick="fmtText(this,'h2')" title="Tajuk">Tajuk</button><button type="button" class="tip-tbtn" onclick="fmtText(this,'h3')" title="Tajuk kecil">Tajuk kecil</button><button type="button" class="tip-tbtn" onclick="fmtText(this,'list')" title="Senarai berbulet">• Senarai</button></div>
           <textarea id="anBody" placeholder="Isi kandungan berita…"></textarea>
           <div class="adm-news-row">
             <div>
@@ -1016,6 +1023,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
           <label>Tajuk Tip</label>
           <input id="atTitle" placeholder="cth: 5 Tip Persediaan Umrah Kali Pertama">
           <label>Kandungan Artikel</label>
+          <div class="tip-tb"><button type="button" class="tip-tbtn" onclick="fmtText(this,'bold')" title="Tebal"><b>B</b></button><button type="button" class="tip-tbtn" onclick="fmtText(this,'h2')" title="Tajuk">Tajuk</button><button type="button" class="tip-tbtn" onclick="fmtText(this,'h3')" title="Tajuk kecil">Tajuk kecil</button><button type="button" class="tip-tbtn" onclick="fmtText(this,'list')" title="Senarai berbulet">• Senarai</button></div>
           <textarea id="atBody" placeholder="Tulis artikel tip umrah di sini…" style="min-height:170px"></textarea>
           <label>Gambar <span style="font-weight:400;color:var(--muted)">(pilihan — JPG/PNG, maks 5MB)</span></label>
           <input type="file" id="atImg" accept="image/jpeg,image/png,image/webp" onchange="previewTipImg(this)">
@@ -1656,7 +1664,38 @@ async function submitTip(){
 }
 function tipModalEl(){ let m=document.getElementById('tipModal'); if(!m){ m=document.createElement('div'); m.id='tipModal'; m.className='modal'; m.innerHTML='<div class="modal-box" id="tipModalBox"></div>'; document.body.appendChild(m); m.addEventListener('click',function(e){ if(e.target===m) closeTip(); }); } return m; }
 function closeTip(){ const m=document.getElementById('tipModal'); if(m) m.classList.remove('open'); }
-function tipBodyHtml(b){ return esc(b||'').replace(/\n/g,'<br>'); }
+function mdRich(b){
+  let s=esc(b||'');
+  s=s.replace(/\*\*([^\n*]+)\*\*/g,'<strong>$1</strong>');
+  const lines=s.split('\n').map(l=>{
+    if(/^###\s+/.test(l)) return '<div class="md-h3">'+l.replace(/^###\s+/,'')+'</div>';
+    if(/^##\s+/.test(l)) return '<div class="md-h2">'+l.replace(/^##\s+/,'')+'</div>';
+    if(/^#\s+/.test(l)) return '<div class="md-h2">'+l.replace(/^#\s+/,'')+'</div>';
+    if(/^[-•]\s+/.test(l)) return '<div class="md-li">• '+l.replace(/^[-•]\s+/,'')+'</div>';
+    return l;
+  });
+  return lines.join('<br>').replace(/<br>(<div class="md-)/g,'$1').replace(/(<\/div>)<br>/g,'$1');
+}
+function tipBodyHtml(b){ return mdRich(b); }
+function fmtText(btn,kind){
+  const ta=btn.closest('.tip-tb') && btn.closest('.tip-tb').nextElementSibling;
+  if(!ta || ta.tagName!=='TEXTAREA') return;
+  const s=ta.selectionStart, e=ta.selectionEnd, val=ta.value, sel=val.slice(s,e);
+  if(kind==='bold'){
+    const inner=sel||'teks';
+    ta.value=val.slice(0,s)+'**'+inner+'**'+val.slice(e);
+    ta.setSelectionRange(s+2, s+2+inner.length);
+  } else {
+    const before=val.slice(0,s); const ls=before.lastIndexOf('\n')+1;
+    const after=val.slice(e); const nl=after.indexOf('\n'); const le=nl<0?val.length:e+nl;
+    const block=val.slice(ls,le);
+    const pre=kind==='h2'?'## ':kind==='h3'?'### ':'- ';
+    const nb=block.split('\n').map(l=>pre+l.replace(/^(#{1,3}\s+|[-•]\s+)/,'')).join('\n');
+    ta.value=val.slice(0,ls)+nb+val.slice(le);
+    ta.setSelectionRange(ls, ls+nb.length);
+  }
+  ta.focus();
+}
 function openTip(id){ const t=(TIPS||[]).find(x=>String(x.id)===String(id)); if(!t) return; const m=tipModalEl(); document.getElementById('tipModalBox').innerHTML=`<button class="tip-x" onclick="closeTip()">✕</button><h3 style="margin:0 24px 6px 0">${esc(t.title)}</h3><div style="font-size:11.5px;color:var(--muted);margin-bottom:12px">💡 Tip Umrah · ${esc(t.author||'Haramaen')} · ${relTime(t.created_at)}</div>${t.image_url?`<img src="${esc(t.image_url)}" style="width:100%;border-radius:10px;margin-bottom:12px" alt="">`:''}<div class="tip-body">${tipBodyHtml(t.body)}</div>`; m.classList.add('open'); }
 function openTipList(){ const m=tipModalEl(); const items=(TIPS||[]).map(t=>`<div class="tk-item" style="cursor:pointer" onclick="openTip('${t.id}')">${t.image_url?`<img class="tk-thumb" src="${esc(t.image_url)}" alt="" loading="lazy">`:`<span class="pill" style="background:#fff3d6;color:#8a6d1a">Tip</span>`}<div class="tk-tx"><b>${esc(t.title)}</b><small>${relTime(t.created_at)}</small></div></div>`).join('')||'<div class="empty">Belum ada tip.</div>'; document.getElementById('tipModalBox').innerHTML=`<button class="tip-x" onclick="closeTip()">✕</button><h3 style="margin:0 0 12px">💡 Semua Tip Umrah</h3>${items}`; m.classList.add('open'); }
 function previewNewsImg(input){
@@ -3391,7 +3430,7 @@ function renderNews(){
             <span>·</span>
             <span>${relTime(n.published_at)}</span>
           </div>
-          <div class="n-body">${fmtBody(n.body)}</div>
+          <div class="n-body">${mdRich(n.body)}</div>
           <div class="n-foot">
             ${src}
             <button class="shr-btn" data-title="${esc(n.title)}" data-text="${esc(n.title)}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
