@@ -350,6 +350,12 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .k-poster-thumb{width:64px;height:80px;object-fit:cover;border-radius:8px;cursor:zoom-in;display:block;box-shadow:0 1px 5px rgba(0,0,0,.2)}
   .k-poster-thumb:hover{opacity:.85}
   #v-agency img,#v-stay img,#v-med img,#v-svc img,#v-shop img:not(.p-car-img),#v-mutawwif img{cursor:zoom-in}
+  .ag-price{margin-top:7px;font-weight:800;font-size:15.5px;color:var(--ink);letter-spacing:-.3px}
+  .ag-price .ag-from{font-size:10.5px;font-weight:600;color:var(--muted)}
+  .ag-price .ag-unit{font-size:10px;font-weight:500;color:var(--muted)}
+  .ag-best{display:inline-block;background:#e6f7ee;color:#1a9f5a;font-size:10px;font-weight:800;border-radius:5px;padding:2px 6px;margin-right:5px;vertical-align:1px}
+  .ag-nop{margin-top:7px;font-size:11.5px;color:var(--muted)}
+  .ag-sortrow{display:flex;gap:6px;margin:6px 0 2px}
   .k-lb{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10000;display:none;align-items:center;justify-content:center;cursor:zoom-out;padding:16px}
   .k-lb img{max-width:92vw;max-height:88vh;border-radius:14px;box-shadow:0 8px 48px rgba(0,0,0,.6);object-fit:contain}
   #posterCarousel{padding:0 0 6px}
@@ -1153,6 +1159,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <input id="arHq" placeholder="cth: Kuala Lumpur">
     <label class="fl">Laman Web / No. Telefon</label>
     <input id="arContact" placeholder="cth: https://agensi.com.my atau 03-1234 5678">
+    <label class="fl">Harga Pakej Dari (RM) <span style="font-weight:400;color:var(--muted)">(pilihan)</span></label>
+    <input id="arPrice" type="number" min="0" step="10" placeholder="cth: 5990">
     <div class="modal-actions">
       <button class="m-cancel" onclick="closeAgReg()">Batal</button>
       <button class="m-save" id="arSave" onclick="submitAgReg()">Hantar Permohonan</button>
@@ -1304,7 +1312,7 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY, {
 
 /* ============ STATE ============ */
 const MASJIDIL_HARAM = {lat:21.4225, lng:39.8262};
-const state = { user:null, myHotel:null, agRating:0, agPrice:null, agNegeri:'all', agDaerah:'all', hoBudget:null, hoCity:'Makkah', duas:[], solCity:'me', medFilter:'all', svcFilter:'all', kTarikh:'all', kNegeri:'all', kDaerah:'all', kSearch:'', kNear:false, userLoc:null, kNearBusy:false, mTarikh:'all', mNegeri:'all', mDaerah:'all', mSearch:'', mNear:false, mNearBusy:false };
+const state = { user:null, myHotel:null, agRating:0, agPrice:null, agSort:'rating', agNegeri:'all', agDaerah:'all', hoBudget:null, hoCity:'Makkah', duas:[], solCity:'me', medFilter:'all', svcFilter:'all', kTarikh:'all', kNegeri:'all', kDaerah:'all', kSearch:'', kNear:false, userLoc:null, kNearBusy:false, mTarikh:'all', mNegeri:'all', mDaerah:'all', mSearch:'', mNear:false, mNearBusy:false };
 
 /* ============ ICONS (inline SVG) ============ */
 const SVG={
@@ -2329,7 +2337,13 @@ function renderAgencyFilters(){
   const R=[0,4,4.5,4.8];
   document.getElementById('agRating').innerHTML=R.map(r=>`
     <button class="chip ${state.agRating===r?'on':''}" onclick="setAgRating(${r})">${r===0?'Semua':'⭐ '+r+'+'}</button>`).join('');
-  document.getElementById('agPrice').innerHTML='';
+  const PC=[{v:'',t:'Semua harga'},{v:'lt6',t:'< RM6k'},{v:'6-8',t:'RM6–8k'},{v:'gt8',t:'> RM8k'}];
+  const ap=document.getElementById('agPrice'); ap.style.display='';
+  ap.innerHTML=`<label class="f" style="margin-top:12px;display:block">Susun ikut</label>`+
+    `<div class="ag-sortrow"><button class="chip ${state.agSort!=='price'?'on':''}" onclick="setAgSort('rating')">⭐ Rating</button>`+
+    `<button class="chip ${state.agSort==='price'?'on':''}" onclick="setAgSort('price')">💰 Termurah</button></div>`+
+    `<label class="f" style="display:block;margin-top:8px">Julat harga pakej</label>`+
+    PC.map(c=>`<button class="chip ${(state.agPrice||'')===c.v?'on':''}" onclick="setAgPrice('${c.v}')">${c.t}</button>`).join('');
   // Negeri dropdown — build unique sorted list, exclude entries with digits (postcodes etc.)
   const negeriSet=new Set();
   (AGENCIES||[]).forEach(a=>{const n=agNegeri(a.note); if(n&&!/\d/.test(n)) negeriSet.add(n);});
@@ -2356,7 +2370,11 @@ function renderAgencyFilters(){
   }
 }
 function setAgRating(r){state.agRating=r; renderAgencyFilters(); renderAgencies();}
-function setAgPrice(v){state.agPrice=(state.agPrice===v?null:v); renderAgencyFilters(); renderAgencies();}
+function setAgPrice(v){state.agPrice=v||null; renderAgencyFilters(); renderAgencies();}
+function setAgSort(s){state.agSort=s; renderAgencyFilters(); renderAgencies();}
+function agPriceMatch(a){ if(!state.agPrice) return true; const p=Number(a.price)||0; if(!p) return false; if(state.agPrice==='lt6') return p<6000; if(state.agPrice==='6-8') return p>=6000&&p<=8000; if(state.agPrice==='gt8') return p>8000; return true; }
+function agPriceEdit(id,btn){ const cur=((AGENCIES||[]).find(a=>a.id===id)||{}).price||''; const wrap=document.createElement('span'); wrap.style.display='inline-flex'; wrap.style.gap='4px'; wrap.innerHTML=`<input type="number" min="0" step="10" value="${cur}" placeholder="RM" style="width:78px;padding:3px 6px;font-size:11px;border:1px solid var(--line);border-radius:6px"><button class="shr-sm" onclick="agPriceSave('${id}',this)">✔ Simpan</button>`; btn.replaceWith(wrap); const ip=wrap.querySelector('input'); ip.focus(); ip.addEventListener('keydown',e=>{if(e.key==='Enter') wrap.querySelector('button').click();}); }
+async function agPriceSave(id,b){ const val=parseInt(b.previousElementSibling.value)||null; b.disabled=true; b.textContent='…'; try{ const {error}=await sb.from('agencies').update({price:val}).eq('id',id); if(error) throw error; await loadData(); renderAgencies(); toast('Harga dikemas kini. ✅'); }catch(e){ toast('Gagal simpan harga — semak kebenaran.'); b.disabled=false; b.textContent='✔ Simpan'; } }
 function setAgNegeri(n){state.agNegeri=n; state.agDaerah='all'; renderAgencyFilters(); renderAgencies();}
 function setAgDaerah(d){state.agDaerah=d; renderAgencyFilters(); renderAgencies();}
 function stars(n){const full=Math.round(n); return '★'.repeat(full)+'☆'.repeat(5-full);}
@@ -2399,11 +2417,13 @@ function agencyCardHtml(a, isPrem){
         <b style="font-size:13.5px;line-height:1.3;display:block">${a.name}</b>
         ${a.rating?`<div style="margin:3px 0"><span class="stars">${stars(a.rating)}</span> <span class="tag">${a.rating} · Google</span></div>`:''}
         ${rvLine}
+        ${a.price>0?`<div class="ag-price">${(a.id&&a.id===window.__cheapestAgId)?'<span class="ag-best">Termurah</span>':''}<span class="ag-from">dari</span> RM${Number(a.price).toLocaleString('en-US')} <span class="ag-unit">/ org</span></div>`:''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
         ${isPrem?'<span class="badge-premium">★ Premium</span>':''}
         ${a.motac?'<span class="badge-motac">✓ MOTAC'+(a.lic&&a.lic!=='—'?' '+a.lic:'')+'</span>':''}
         ${adminBtn}
+        ${isAdmin()&&a.id?`<button class="shr-sm" style="border-color:#5E35B1;color:#5E35B1" onclick="agPriceEdit('${a.id}',this)">💰 ${a.price>0?'Ubah':'Set'} harga</button>`:''}
         ${shrBtn}
       </div>
     </div>
@@ -2415,14 +2435,19 @@ function renderAgencies(){
   // Premium: sentiasa muncul atas — tidak ditapis oleh negeri/daerah/rating
   const premList=AGENCIES.filter(a=>a.premium&&a.name.toLowerCase().includes(q))
     .sort((a,b)=>(b.rating||0)-(a.rating||0));
-  const filtered=AGENCIES.filter(a=>
+  let filtered=AGENCIES.filter(a=>
     !a.premium &&
     a.name.toLowerCase().includes(q) &&
     (a.rating||0)>=state.agRating &&
     (!motac || a.motac) &&
+    agPriceMatch(a) &&
     (state.agNegeri==='all' || agNegeri(a.note)===state.agNegeri) &&
     (state.agDaerah==='all' || agDaerah(a.note)===state.agDaerah)
-  ).sort((a,b)=>(b.rating||0)-(a.rating||0));
+  );
+  if(state.agSort==='price'){ filtered.sort((a,b)=>{ const pa=Number(a.price)||Infinity, pb=Number(b.price)||Infinity; return (pa-pb) || ((b.rating||0)-(a.rating||0)); }); }
+  else { filtered.sort((a,b)=>(b.rating||0)-(a.rating||0)); }
+  window.__cheapestAgId=null; let _mp=Infinity;
+  premList.concat(filtered).forEach(a=>{ const p=Number(a.price)||0; if(p>0 && p<_mp){ _mp=p; window.__cheapestAgId=a.id; } });
   document.getElementById('agCount').textContent=filtered.length;
   const el=document.getElementById('agencyList');
   if(!filtered.length&&!premList.length){el.innerHTML='<div class="empty">Tiada agensi sepadan dengan tapisan anda.</div>';return;}
@@ -2557,12 +2582,13 @@ async function submitAgReg(){
   const rating=parseFloat(document.getElementById('arRating').value)||null;
   const hq=(document.getElementById('arHq').value||'').trim();
   const contact=(document.getElementById('arContact').value||'').trim();
+  const price=parseInt(document.getElementById('arPrice').value)||null;
   const note=[hq,contact].filter(Boolean).join(' • ');
   const btn=document.getElementById('arSave');
   btn.disabled=true; btn.textContent='Menghantar…';
   const {error}=await sb.from('agencies').insert({
     name:nama, motac_license:motac||null, rating:rating,
-    motac_licensed:!!motac, note:note||null, status:'pending'
+    motac_licensed:!!motac, note:note||null, price:price, status:'pending'
   });
   btn.disabled=false; btn.textContent='Hantar Permohonan';
   if(error){toast('Gagal hantar. Cuba lagi.');return;}
