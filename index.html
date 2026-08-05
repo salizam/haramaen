@@ -377,8 +377,9 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .agx.card-premium{border-color:#ffc94d;box-shadow:0 4px 14px rgba(255,180,0,.14)}
   .agx-ribbon{position:absolute;top:13px;left:-34px;transform:rotate(-45deg);background:linear-gradient(90deg,#1e9f5a,#25b567);color:#fff;font-size:9px;font-weight:800;letter-spacing:.5px;padding:3px 40px;box-shadow:0 1px 4px rgba(0,0,0,.15);z-index:2}
   .agx-main{display:flex;gap:12px;padding:13px 14px 12px;align-items:flex-start}
-  .agx-logo{width:52px;height:52px;flex:none;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#f4f1fe}
-  .agx-logo .ag-logo,.agx-logo .ag-init{width:52px!important;height:52px!important;min-width:52px;border-radius:12px!important;font-size:21px!important;display:flex!important;align-items:center;justify-content:center;object-fit:cover}
+  .agx-logo{width:52px;height:52px;flex:none;border-radius:12px;overflow:hidden;background:#fff}
+  .agx-logo .ag-logo{width:52px;height:52px;object-fit:contain;padding:5px;box-sizing:border-box;background:#fff;border-radius:12px}
+  .agx-logo .ag-init{width:52px;height:52px;font-size:21px;border-radius:12px}
   .agx-mid{flex:1;min-width:0}
   .agx-nm{font-weight:800;font-size:14.5px;line-height:1.25;color:var(--ink)}
   .agx-loc{font-size:12px;color:var(--muted);margin-top:2px}
@@ -401,6 +402,28 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .agx-foot{border-top:1px dashed var(--line);padding:8px 14px;font-size:11.5px;color:#1e8a5a;background:#f4fbf7}
   .agx-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:2px 14px 12px}
   .agx-actions .ag-icon-btn{width:30px;height:30px}
+  .art-search{margin-bottom:12px}
+  .art-search input{width:100%}
+  .artl-item{display:flex;align-items:center;gap:11px;padding:11px 4px;border-top:1px solid var(--line);cursor:pointer}
+  .artl-item:first-of-type{border-top:0}
+  .artl-item:hover{background:#faf8ff}
+  .artl-thumb{width:60px;height:60px;flex:none;border-radius:9px;object-fit:cover}
+  .artl-badge{flex:none;align-self:flex-start}
+  .artl-tx{flex:1;min-width:0}
+  .artl-tx b{font-size:14px;line-height:1.3;color:var(--ink);display:block;margin-bottom:2px}
+  .artl-tx small{font-size:11.5px;color:var(--muted)}
+  .artl-arw{color:var(--muted);font-size:20px;flex:none;font-weight:700}
+  .art-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+  .art-all{background:#f0ecfb;color:var(--green-d);border:1px solid var(--line);border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .art-all:hover{background:#e6ddfb}
+  .art-all.wide{width:100%;margin-top:20px;padding:11px}
+  .art-kicker{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px}
+  .art-title{font-size:22px;font-weight:800;line-height:1.28;color:var(--ink);margin:0 0 10px}
+  .art-tags{margin-bottom:12px}
+  .art-img{width:100%;border-radius:12px;margin-bottom:14px;cursor:zoom-in}
+  .art-body{font-size:14.5px;line-height:1.75;color:var(--ink)}
+  .art-foot{display:flex;gap:8px;align-items:center;margin-top:16px;flex-wrap:wrap}
+  .art-admin{display:flex;gap:8px;margin-left:auto}
   .ag-best{display:inline-block;background:#e6f7ee;color:#1a9f5a;font-size:10px;font-weight:800;border-radius:5px;padding:2px 6px;margin-right:5px;vertical-align:1px}
   .ag-nop{margin-top:7px;font-size:11.5px;color:var(--muted)}
   .ag-sortrow{display:flex;gap:6px;margin:6px 0 2px}
@@ -974,7 +997,18 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
       <!-- BERITA UMRAH -->
       <section class="view" id="v-news">
         <div class="section-title">Berita &amp; Info Umrah<span class="u"></span></div>
+        <div class="art-search"><input id="newsSearch" placeholder="🔍 Cari berita…" oninput="state.newsQ=this.value; renderNewsList()"></div>
         <div class="news" id="newsList"></div>
+      </section>
+
+      <section class="view" id="v-tips">
+        <div class="section-title">Tip Umrah<span class="u"></span></div>
+        <div class="art-search"><input id="tipSearch" placeholder="🔍 Cari tip…" oninput="state.tipQ=this.value; renderTipsList()"></div>
+        <div id="tipsListBox"></div>
+      </section>
+
+      <section class="view" id="v-article">
+        <div id="articleBox"></div>
       </section>
 
       <!-- ORANG HILANG -->
@@ -1394,7 +1428,7 @@ const sb = window.supabase.createClient(SB_URL, SB_KEY, {
 
 /* ============ STATE ============ */
 const MASJIDIL_HARAM = {lat:21.4225, lng:39.8262};
-const state = { user:null, myHotel:null, agRating:0, agPrice:null, agSort:'rating', agNegeri:'all', agDaerah:'all', hoBudget:null, hoCity:'Makkah', duas:[], solCity:'me', medFilter:'all', svcFilter:'all', kTarikh:'all', kNegeri:'all', kDaerah:'all', kSearch:'', kNear:false, userLoc:null, kNearBusy:false, mTarikh:'all', mNegeri:'all', mDaerah:'all', mSearch:'', mNear:false, mNearBusy:false };
+const state = { user:null, myHotel:null, agRating:0, agPrice:null, agSort:'rating', agNegeri:'all', agDaerah:'all', hoBudget:null, hoCity:'Makkah', duas:[], solCity:'me', medFilter:'all', svcFilter:'all', kTarikh:'all', kNegeri:'all', kDaerah:'all', kSearch:'', kNear:false, userLoc:null, kNearBusy:false, mTarikh:'all', mNegeri:'all', mDaerah:'all', mSearch:'', mNear:false, mNearBusy:false, newsQ:'', tipQ:'', article:null };
 
 /* ============ ICONS (inline SVG) ============ */
 const SVG={
@@ -1432,6 +1466,7 @@ const NAV=[
   {v:'svc',    t:'Servis',        i:'wheelchair',   c:'#c0620a'},
   {v:'guide',  t:'Panduan Umrah', i:'book',   c:'#1c7d54'},
   {v:'news',   t:'Berita Umrah',  i:'news',   c:'#2d63b8'},
+  {v:'tips',   t:'Tip Umrah',     i:'book',   c:'#8a6d1a'},
   {v:'lost',   t:'Orang Hilang',  i:'pin',    c:'#d32f2f'},
   {v:'solah',  t:'Waktu Solat',   i:'mosque', c:'#2f74c0'},
 ];
@@ -1443,7 +1478,7 @@ const BOTTOM=[
   {v:'assistant',t:'AI',i:'ai',c:'#0ea5e9'},
 ];
 const TITLES={home:"HARAMAEN",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
-  med:"Perubatan",svc:"Servis",shop:"Beli-Belah",guide:"Panduan Umrah",news:"Berita Umrah",lost:"Orang Hilang",solah:"Waktu Solat",kursus:"Kursus Umrah",mutawwif:"Kursus Mutawwif",assistant:"AI Assistant",admin:"Admin Dashboard"};
+  med:"Perubatan",svc:"Servis",shop:"Beli-Belah",guide:"Panduan Umrah",news:"Berita Umrah",tips:"Tip Umrah",article:"Artikel",lost:"Orang Hilang",solah:"Waktu Solat",kursus:"Kursus Umrah",mutawwif:"Kursus Mutawwif",assistant:"AI Assistant",admin:"Admin Dashboard"};
 const ADMIN_EMAILS=['salizam.oasys@gmail.com'];
 function isAdmin(){ return !!(state.user && ADMIN_EMAILS.includes((state.user.email||'').toLowerCase())); }
 function buildNav(){
@@ -1472,6 +1507,9 @@ function go(v, fromHistory){
   if(v==='assistant') renderAssistant();
   if(v==='shop') renderShop();
   if(v==='lost') loadLost();
+  if(v==='news') renderNews();
+  if(v==='tips') renderTipsList();
+  if(v==='article') renderArticle();
   if(v==='admin') renderAdmin(); else if(admTimer){ clearInterval(admTimer); admTimer=null; }
   // Simpan view dalam sejarah pelayar supaya butang 'back' telefon kembali ke page sebelumnya
   try{
@@ -1737,8 +1775,8 @@ function rteCmd(btn,cmd){ const rte=btn.closest('.rte-tb') && btn.closest('.rte-
 function rteVal(id){ const el=document.getElementById(id); if(!el) return ''; if((el.textContent||'').trim()==='' && !/<img|<br/i.test(el.innerHTML)) return ''; return sanitizeHtml(el.innerHTML); }
 function sanitizeHtml(html){ const d=document.createElement('div'); d.innerHTML=html||''; const ALLOW={B:1,STRONG:1,I:1,EM:1,U:1,H3:1,H4:1,H5:1,UL:1,OL:1,LI:1,BR:1,P:1,DIV:1,SPAN:1,A:1}; let changed=true; while(changed){ changed=false; const all=d.querySelectorAll('*'); for(const c of all){ if(!ALLOW[c.tagName]){ while(c.firstChild) c.parentNode.insertBefore(c.firstChild,c); c.parentNode.removeChild(c); changed=true; break; } } } d.querySelectorAll('*').forEach(c=>{ [...c.attributes].forEach(a=>{ const n=a.name.toLowerCase(); if(c.tagName==='A'&&n==='href'){ if(/^\s*javascript:/i.test(a.value)) c.removeAttribute(a.name); } else c.removeAttribute(a.name); }); }); return d.innerHTML; }
 function articleHtml(b){ b=b||''; if(/<[a-z][\s\S]*>/i.test(b)) return sanitizeHtml(b); return mdRich(b); }
-function openTip(id){ const t=(TIPS||[]).find(x=>String(x.id)===String(id)); if(!t) return; const m=tipModalEl(); document.getElementById('tipModalBox').innerHTML=`<button class="tip-x" onclick="closeTip()">✕</button><h3 style="margin:0 24px 6px 0">${esc(t.title)}</h3><div style="font-size:11.5px;color:var(--muted);margin-bottom:12px">💡 Tip Umrah · ${esc(t.author||'Haramaen')} · ${relTime(t.created_at)}</div>${t.image_url?`<img src="${esc(t.image_url)}" style="width:100%;border-radius:10px;margin-bottom:12px" alt="">`:''}<div class="tip-body">${tipBodyHtml(t.body)}</div>`; m.classList.add('open'); }
-function openTipList(){ const m=tipModalEl(); const items=(TIPS||[]).map(t=>`<div class="tk-item" style="cursor:pointer" onclick="openTip('${t.id}')">${t.image_url?`<img class="tk-thumb" src="${esc(t.image_url)}" alt="" loading="lazy">`:`<span class="pill" style="background:#fff3d6;color:#8a6d1a">Tip</span>`}<div class="tk-tx"><b>${esc(t.title)}</b><small>${relTime(t.created_at)}</small></div></div>`).join('')||'<div class="empty">Belum ada tip.</div>'; document.getElementById('tipModalBox').innerHTML=`<button class="tip-x" onclick="closeTip()">✕</button><h3 style="margin:0 0 12px">💡 Semua Tip Umrah</h3>${items}`; m.classList.add('open'); }
+function openTip(id){ openArticle('tip',id); }
+function openTipList(){ go('tips'); }
 function previewNewsImg(input){
   const prev=document.getElementById('anImgPreview');
   if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; }
@@ -3490,41 +3528,56 @@ function newsTagCls(t){ t=(t||'').toLowerCase();
   if(t==='kesihatan') return 'blue';
   if(t==='tips') return 'gold';
   return ''; }
-function renderNews(){
+function renderNews(){ const s=document.getElementById('newsSearch'); if(s&&s.value!==(state.newsQ||'')) s.value=state.newsQ||''; renderNewsList(); }
+function renderNewsList(){
   const el=document.getElementById('newsList'); if(!el) return;
-  const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:12px">Berita &amp; pengumuman terkini berkaitan umrah — peraturan Saudi, visa, kesihatan, penerbangan &amp; amaran penting. Dikemas kini dari semasa ke semasa. 📰</div>`;
-  if(!NEWS.length){ el.innerHTML=intro+`<div class="empty">Belum ada berita buat masa ini. Nantikan kemas kini terkini. 🤍</div>`; return; }
-  el.innerHTML=intro+NEWS.map(n=>{
-    const src='';
-    const adminBtns=isAdmin()?`<span class="n-admin-grp"><button class="n-edit" onclick="openEditNews(${n.id})">✏️ Edit</button><button class="n-del" onclick="delNews(${n.id},this)">🗑️ Padam</button></span>`:'';
-    const shrUrl=esc(location.href);
-    const imgHtml=n.image_url?`<img class="n-thumb" src="${esc(n.image_url)}" alt="${esc(n.title)}" loading="lazy" onerror="this.style.display='none'">`:'';
-    return `<div class="card" data-news="${n.id}">
-      <div class="n-card-top">
-        ${imgHtml}
-        <div class="n-card-right">
-          <div class="n-hd">
-            <span class="pill ${newsTagCls(n.tag)}">${esc(n.tag||'Info')}</span>
-            <span style="font-size:11px;color:var(--muted);margin-left:auto">${esc(n.category||'Umrah')}</span>
-          </div>
-          <div class="n-title">${esc(n.title)}</div>
-          <div class="n-meta">
-            <span>✍️ ${esc(n.author||'Haramaen')}</span>
-            <span>·</span>
-            <span>📅 ${fmtDate(n.published_at)}</span>
-            <span>·</span>
-            <span>${relTime(n.published_at)}</span>
-          </div>
-          <div class="n-body">${articleHtml(n.body)}</div>
-          <div class="n-foot">
-            ${src}
-            <button class="shr-btn" data-title="${esc(n.title)}" data-text="${esc(n.title)}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
-            ${adminBtns}
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+  const q=(state.newsQ||'').toLowerCase();
+  const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:12px">Berita &amp; pengumuman terkini berkaitan umrah — peraturan Saudi, visa, kesihatan, penerbangan &amp; amaran penting. 📰</div>`;
+  if(!(NEWS||[]).length){ el.innerHTML=intro+`<div class="empty">Belum ada berita buat masa ini. Nantikan kemas kini terkini. 🤍</div>`; return; }
+  const items=(NEWS||[]).filter(n=>!q||(n.title||'').toLowerCase().includes(q)||(n.tag||'').toLowerCase().includes(q)||(n.body||'').toLowerCase().includes(q));
+  el.innerHTML=intro+(items.length?items.map(n=>artListItem('news',n)).join(''):'<div class="empty">Tiada berita sepadan dengan carian.</div>');
+}
+function renderTipsList(){
+  const el=document.getElementById('tipsListBox'); if(!el) return;
+  const s=document.getElementById('tipSearch'); if(s&&s.value!==(state.tipQ||'')) s.value=state.tipQ||'';
+  const q=(state.tipQ||'').toLowerCase();
+  const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:12px">Artikel tip &amp; panduan umrah yang disediakan oleh Haramaen. 💡</div>`;
+  if(!(TIPS||[]).length){ el.innerHTML=intro+`<div class="empty">Belum ada tip umrah buat masa ini. 🤍</div>`; return; }
+  const items=(TIPS||[]).filter(t=>!q||(t.title||'').toLowerCase().includes(q)||(t.body||'').toLowerCase().includes(q));
+  el.innerHTML=intro+(items.length?items.map(t=>artListItem('tip',t)).join(''):'<div class="empty">Tiada tip sepadan dengan carian.</div>');
+}
+function artListItem(kind,it){
+  const date=kind==='tip'?relTime(it.created_at):relTime(it.published_at);
+  const tag=kind==='tip'?(it.category||'Tip'):(it.tag||'Info');
+  const tcls=kind==='tip'?'':newsTagCls(it.tag);
+  const thumb=it.image_url?`<img class="artl-thumb" src="${esc(it.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`:`<span class="artl-badge pill ${tcls}" style="${kind==='tip'?'background:#fff3d6;color:#8a6d1a':''}">${esc(tag)}</span>`;
+  return `<div class="artl-item" onclick="openArticle('${kind}','${it.id}')">${thumb}<div class="artl-tx"><b>${esc(it.title)}</b><small>${esc(tag)} · ${date}</small></div><span class="artl-arw">›</span></div>`;
+}
+function openArticle(kind,id){ state.article={kind:kind,id:id}; go('article'); }
+function renderArticle(){
+  const el=document.getElementById('articleBox'); if(!el) return;
+  const a=state.article||{}; const kind=a.kind;
+  let item; if(kind==='tip') item=(TIPS||[]).find(x=>String(x.id)===String(a.id)); else item=(NEWS||[]).find(x=>String(x.id)===String(a.id));
+  const listV=kind==='tip'?'tips':'news';
+  const topBar=`<div class="art-top"><button class="backbtn" onclick="history.back()">← Kembali</button><button class="art-all" onclick="go('${listV}')">📋 Semua artikel</button></div>`;
+  if(!item){ el.innerHTML=topBar+'<div class="empty">Artikel tidak dijumpai.</div>'; return; }
+  const kicker=kind==='tip'?'💡 Tip Umrah':'📰 Berita';
+  const date=kind==='tip'?relTime(item.created_at):fmtDate(item.published_at);
+  const author=item.author||'Haramaen';
+  const tagPill=kind==='tip'?(item.category?`<span class="pill" style="background:#fff3d6;color:#8a6d1a">${esc(item.category)}</span>`:''):`<span class="pill ${newsTagCls(item.tag)}">${esc(item.tag||'Info')}</span>`;
+  const img=item.image_url?`<img class="art-img" src="${esc(item.image_url)}" alt="${esc(item.title)}" onerror="this.style.display='none'">`:'';
+  const adminBtns=(kind==='news'&&isAdmin())?`<div class="art-admin"><button class="n-edit" onclick="openEditNews(${item.id})">✏️ Edit</button><button class="n-del" onclick="delNews(${item.id},this)">🗑️ Padam</button></div>`:'';
+  const shrUrl=esc(location.href);
+  const shr=`<button class="shr-sm" data-title="${esc(item.title)}" data-text="${esc(item.title)}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>`;
+  el.innerHTML=topBar+
+    `<div class="art-kicker">${kicker} · ${esc(author)} · ${date}</div>`+
+    `<h1 class="art-title">${esc(item.title)}</h1>`+
+    `<div class="art-tags">${tagPill}</div>`+
+    img+
+    `<div class="art-body n-body">${articleHtml(item.body)}</div>`+
+    `<div class="art-foot">${shr}${adminBtns}</div>`+
+    `<button class="art-all wide" onclick="go('${listV}')">📋 Lihat semua artikel</button>`;
+  const m=document.getElementById('main'); if(m) m.scrollTop=0; window.scrollTo(0,0);
 }
 async function delNews(id,btn){
   if(!confirm('Adakah anda pasti untuk padam artikel ini?')) return;
@@ -3532,7 +3585,7 @@ async function delNews(id,btn){
   const {error}=await sb.rpc('admin_delete_news',{p_id:id});
   if(error){ toast('Gagal padam berita.'); if(btn){btn.disabled=false;btn.textContent='🗑️ Padam';} return; }
   NEWS=NEWS.filter(n=>n.id!==id);
-  renderNews(); renderTerkini();
+  renderTerkini(); go('news');
   toast('Berita dipadam.');
 }
 
@@ -3645,14 +3698,14 @@ function renderTerkini(){
   if(!news.length && !duas.length && !crs.length && !tips.length){ el.innerHTML=''; return; }
   let newsBlk='', duasBlk='', crsBlk='', tipsBlk='';
   if(tips.length){
-    tipsBlk=`<div class="tk-blk"><div class="tk-h tk-h-tip">💡 Tip Umrah <button class="tk-more" onclick="openTipList()">Lihat semua</button></div>`+
-      tips.map(t=>{ const thumb=t.image_url?`<img class="tk-thumb" src="${esc(t.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`:`<span class="pill" style="background:#fff3d6;color:#8a6d1a">Tip</span>`; return `<div class="tk-item" onclick="openTip('${t.id}')">${thumb}<div class="tk-tx"><b>${esc(t.title)}</b><small>${relTime(t.created_at)}</small></div></div>`; }).join('')+`</div>`;
+    tipsBlk=`<div class="tk-blk"><div class="tk-h tk-h-tip">💡 Tip Umrah <button class="tk-more" onclick="go('tips')">Lihat semua</button></div>`+
+      tips.map(t=>{ const thumb=t.image_url?`<img class="tk-thumb" src="${esc(t.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`:`<span class="pill" style="background:#fff3d6;color:#8a6d1a">Tip</span>`; return `<div class="tk-item" onclick="openArticle('tip','${t.id}')">${thumb}<div class="tk-tx"><b>${esc(t.title)}</b><small>${relTime(t.created_at)}</small></div></div>`; }).join('')+`</div>`;
   }
   if(news.length){
     newsBlk=`<div class="tk-blk"><div class="tk-h tk-h-news">📰 Berita terkini <button class="tk-more" onclick="jump('news')">Lihat semua</button></div>`+
       news.map(n=>{
         const thumb=n.image_url?`<img class="tk-thumb" src="${esc(n.image_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`:`<span class="pill ${newsTagCls(n.tag)}">${esc(n.tag||'Info')}</span>`;
-        return `<div class="tk-item" onclick="jump('news')">${thumb}<div class="tk-tx"><b>${esc(n.title)}</b><small>${relTime(n.published_at)}</small></div></div>`;
+        return `<div class="tk-item" onclick="openArticle('news','${n.id}')">${thumb}<div class="tk-tx"><b>${esc(n.title)}</b><small>${relTime(n.published_at)}</small></div></div>`;
       }).join('')+`</div>`;
   }
   if(duas.length){
