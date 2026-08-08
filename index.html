@@ -1007,11 +1007,6 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
       <section class="view" id="v-guide">
         <div class="section-title">Panduan Umrah<span class="u"></span></div>
         <div id="ebookBox"></div>
-        <div class="card" style="background:linear-gradient(120deg,#0c5340,#0a3b2d);color:#fff;border:0">
-          <b style="font-size:15px">Rukun Umrah</b>
-          <p class="muted" style="color:rgba(255,255,255,.85);margin:6px 0 0;font-size:13px">4 rukun yang wajib disempurnakan mengikut tertib. Jika ditinggalkan, umrah tidak sah.</p>
-        </div>
-        <div id="guideSteps"></div>
         <div class="section-title" style="font-size:15px;margin-top:18px">Senarai Semak Persediaan</div>
         <div class="card" id="guideCheck"></div>
       </section>
@@ -3608,14 +3603,6 @@ function checkList(arr){return arr.map(c=>`
     <label style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13.5px">
       <input type="checkbox" style="width:auto;margin-top:2px"> <span>${c}</span></label>`).join('');}
 function renderGuide(){
-  const doaHTML=d=>`<div class="g-doa"><div class="gl">🤲 ${d.l}</div>${d.a?`<div class="g-ar">${d.a}</div>`:''}${d.r?`<div class="g-rumi">${d.r}</div>`:''}<div class="g-mean">${d.m}</div></div>`;
-  document.getElementById('guideSteps').innerHTML=GUIDE.map((g,i)=>{
-    const steps=(g.steps||[]).map(x=>`<li>${x}</li>`).join('');
-    const doa=(g.doa||[]).map(doaHTML).join('');
-    return `<div class="step"><div class="n">${i+1}</div><div class="sc"><b>${g.t}</b><p>${g.d}</p>${steps?`<ul class="g-steps">${steps}</ul>`:''}${doa}</div></div>`;
-  }).join('')
-  + `<div class="card g-larangan"><b style="font-size:14px;color:var(--danger)">⛔ Larangan Ketika Ihram</b>`+LARANGAN.map(x=>`<div class="ll">${x.h}</div><div class="ld">${x.d}</div>`).join('')+`</div>`
-  + `<div class="tag" style="text-align:center;margin-top:12px;opacity:.85">Sumber: eBook Panduan Ibadah Umrah — Oasys Umrah</div>`;
   document.getElementById('guideCheck').innerHTML=
     `<b style="font-size:13.5px;color:var(--green)">👳 Kelengkapan Lelaki</b>${checkList(KIT_L)}`+
     `<b style="font-size:13.5px;color:var(--green);display:block;margin-top:14px">🧕 Kelengkapan Wanita</b>${checkList(KIT_W)}`+
@@ -3674,7 +3661,7 @@ async function loadPdfEbook(url){
     },{root:null,rootMargin:'400px 0px'});
     wrap.querySelectorAll('.pdf-page').forEach(el=>io.observe(el));
   }catch(e){
-    if(document.getElementById('pdfWrap')) wrap.innerHTML='<div class="pdf-loading" style="color:var(--danger)">Gagal memuatkan eBook. Sila cuba butang “Muat turun”.</div>';
+    if(document.getElementById('pdfWrap')) wrap.innerHTML='<div class="pdf-loading" style="color:var(--danger)">Gagal memuatkan eBook. Sila semak sambungan internet dan muat semula halaman.</div>';
   }
 }
 function renderEbook(){
@@ -3693,9 +3680,8 @@ function renderEbook(){
   }
   box.innerHTML=`<div class="section-title" style="font-size:15px;margin-top:18px">📖 eBook Panduan Umrah</div>
     <div class="card" style="padding:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <div style="margin-bottom:8px">
         <b style="font-size:14px">${esc(eb.title||'eBook Panduan Umrah')}</b>
-        <a href="${esc(eb.url)}" target="_blank" rel="noopener" class="shr-sm" style="text-decoration:none">⬇️ Muat turun</a>
       </div>
       <div id="pdfWrap" class="pdf-wrap"><div class="pdf-loading">Memuatkan eBook… ⏳</div></div>
       ${adminBar}
