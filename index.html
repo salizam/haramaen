@@ -83,6 +83,14 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .tb-ava{width:42px;height:42px;border-radius:50%;background:var(--green);color:#fff;border:0;cursor:pointer;
     display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;font-family:inherit;overflow:hidden;padding:0;box-sizing:border-box}
   .tb-ava img{width:42px;height:42px;object-fit:cover;display:block;flex:none}
+  #tbLogin{display:none;background:var(--gold);color:#fff;border:0;border-radius:22px;padding:9px 18px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;font-family:inherit;align-items:center;gap:5px}
+  #tbLogin:hover{filter:brightness(1.06)}
+  body.pub #tbLogin{display:inline-flex}
+  body.pub .tb-notif,body.pub .tb-user{display:none}
+  body.pub #sbFootLogout{display:none}
+  body.pub #sbFootLogin{display:flex}
+  #pubBack{display:none;margin-top:18px;color:var(--muted);font-size:13px;text-decoration:underline;cursor:pointer}
+  body.pub #pubBack{display:inline-block}
   .dua-ava{width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;flex:none;line-height:1}
   .dua-ava img{width:22px;height:22px;object-fit:cover;display:block}
   .dua-name{display:flex;align-items:center;gap:8px;min-width:0}
@@ -459,6 +467,11 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .p-carousel::-webkit-scrollbar{display:none}
   .p-car-img{width:184px;height:230px;object-fit:cover;border-radius:12px;flex:none;scroll-snap-align:start;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.13);transition:opacity .15s}
   .p-car-img:hover,.p-car-img:active{opacity:.82}
+  .p-marquee{overflow:hidden;padding:4px 0 8px}
+  .p-mq-track{display:flex;gap:10px;width:max-content;animation-name:pmarq;animation-timing-function:linear;animation-iteration-count:infinite;will-change:transform}
+  .p-marquee:hover .p-mq-track{animation-play-state:paused}
+  @keyframes pmarq{from{transform:translateX(0)}to{transform:translateX(calc(-50% - 5px))}}
+  @media(prefers-reduced-motion:reduce){.p-mq-track{animation:none}}
   .n-src:hover{text-decoration:underline}
   .n-admin-grp{display:flex; gap:6px; margin-left:auto}
   .n-del{background:#fdece9; color:var(--danger); border:0; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer}
@@ -760,6 +773,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <span id="authToggleText">Belum ada akaun?</span>
     <a href="#" onclick="toggleAuthMode();return false;" id="authToggleLink">Daftar di sini</a>
   </div>
+  <a href="#" id="pubBack" onclick="backToPublic();return false;">← Lihat laman utama tanpa log masuk</a>
 </div>
 
 <div class="app" id="app" style="display:none">
@@ -771,7 +785,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     </div>
     <nav class="sb-nav" id="sbNav"></nav>
     <div class="sb-foot">
-      <button class="sb-link" onclick="logout()"><span class="ico" data-i="logout" style="background:#c0392b"></span> Log keluar</button>
+      <button class="sb-link" id="sbFootLogout" onclick="logout()"><span class="ico" data-i="logout" style="background:#c0392b"></span> Log keluar</button>
+      <button class="sb-link" id="sbFootLogin" onclick="showLogin()" style="display:none"><span class="ico" data-i="user" style="background:var(--gold)"></span> Log Masuk</button>
     </div>
     <div class="sb-mosque"><svg viewBox="0 0 300 90" preserveAspectRatio="xMidYMax meet"><path fill="#fff" d="M0 90V60h12V44a10 10 0 0 1 20 0v16h10V50a8 8 0 0 1 16 0v10h18V40c0-8 6-12 10-18 4 6 10 10 10 18v20h18V50a8 8 0 0 1 16 0v10h16V38c0-10 8-16 12-24 4 8 12 14 12 24v22h16V50a8 8 0 0 1 16 0v10h18V40c0-8 6-12 10-18 4 6 10 10 10 18v20h10V44a10 10 0 0 1 20 0v16h12v30z"/></svg></div>
   </aside>
@@ -781,6 +796,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <header class="topbar">
       <div class="greet" id="greet">Assalamualaikum 👋</div>
       <div class="tb-right">
+        <button id="tbLogin" onclick="showLogin()">🔑 Log Masuk</button>
         <div class="tb-notif">
           <button class="tb-bell" title="Notifikasi" onclick="toggleNotif(event)"><span class="ico" data-i="bell"></span><span class="notif-badge" id="notifBadge" style="display:none">0</span></button>
           <div class="tb-menu notif-panel" id="notifPanel">
@@ -1522,6 +1538,7 @@ function buildNav(){
 }
 const VALID_VIEWS=['home','agency','dua','stay','med','svc','shop','guide','news','lost','solah','kursus','mutawwif','assistant','admin'];
 function go(v, fromHistory){
+  if(!state.user && v!=='home'){ showLogin(); return; }
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   const el=document.getElementById('v-'+v); if(el) el.classList.add('active');
   document.querySelectorAll('[data-v]').forEach(t=>t.classList.toggle('active', t.getAttribute('data-v')===v));
@@ -1712,23 +1729,34 @@ function isReturningFromOAuth(){
   return /access_token=|[?&]code=|error=/.test(location.hash + location.search);
 }
 async function showApp(user){
-  state.user=user;
+  state.user=user||null;
   document.documentElement.classList.remove('auth-pending');
+  document.body.classList.toggle('pub', !user);
   // Clean OAuth tokens/code from the URL after a successful login
   if(isReturningFromOAuth()){ try{ history.replaceState(null,'',location.origin+location.pathname); }catch(e){} }
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='';
-  const md=user.user_metadata||{};
-  const nm=md.full_name||md.name||user.email||'Sahabat Haramaen';
-  document.getElementById('greet').textContent = 'Assalamualaikum, '+nm+' 👋';
-  setAvatarUI(md.avatar_url || md.picture || null, nm);
-  document.getElementById('tbMenuName').textContent = nm;
+  if(user){
+    const md=user.user_metadata||{};
+    const nm=md.full_name||md.name||user.email||'Sahabat Haramaen';
+    document.getElementById('greet').textContent = 'Assalamualaikum, '+nm+' 👋';
+    setAvatarUI(md.avatar_url || md.picture || null, nm);
+    document.getElementById('tbMenuName').textContent = nm;
+  } else {
+    document.getElementById('greet').textContent = 'Selamat datang ke HARAMAEN 👋';
+  }
   if(!appReady){
     try{ await loadData(); }catch(e){ toast('Gagal muat data — semak sambungan.'); }
     boot(); appReady=true;
+  } else {
+    buildNav(); go('home');
   }
-  startNotif();
-  initPush();
+  if(user){ startNotif(); initPush(); }
+}
+function backToPublic(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='';
+  go('home');
 }
 /* ---- Avatar helpers ---- */
 function setAvatarUI(url, nm){
@@ -1869,10 +1897,10 @@ async function initAuth(){
   try{
     const {data:{session}} = await sb.auth.getSession();
     if(session) showApp(session.user);
-    else if(!hasToken && !hasError) showLogin();
+    else if(!hasToken && !hasError) showApp(null);
     sb.auth.onAuthStateChange((event,sess)=>{
       if(sess && sess.user) showApp(sess.user);
-      else if(event==='SIGNED_OUT'){ appReady=false; state.user=null; showLogin(); }
+      else if(event==='SIGNED_OUT'){ state.user=null; showApp(null); }
     });
     if(hasToken && !hasError){ setTimeout(async()=>{ const {data:{session:s}}=await sb.auth.getSession(); if(!s){ showLogin(); setMsg('Log masuk tak selesai. Sila cuba lagi.'); } }, 5000); }
   }catch(e){ showLogin(); setMsg('Tak dapat sambung ke pelayan.'); }
@@ -2687,7 +2715,7 @@ function agencyCardHtml(a, isPrem){
   const isPhone=contact&&!isUrl;
   const shrTxt=esc(a.name+(hq?' — '+hq:''));
   const shrUrl=esc(location.href);
-  const isCheapest=a.id&&a.id===window.__cheapestAgId;
+  const isCheapest=Number(a.price)>0 && Number(a.price)===Number(window.__minAgPrice);
   const adminBtn=isAdmin()&&a.id?`<button class="shr-sm" style="border-color:#c9a227;color:#8a6d1a" onclick="togglePremium('${a.id}',${isPrem})">${isPrem?'★ Buang Premium':'☆ Premium'}</button>`:'';
   const mapQ=hq?encodeURIComponent(a.name+(hq?' '+hq:'')):'';
   const icons=`${hq?`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Peta lokasi">${ICO_PIN}</a>`:''}${isUrl?`<a class="ag-icon-btn" href="${contact}" target="_blank" rel="noopener" data-tip="Laman web">${ICO_GLOBE}</a>`:''}${isPhone?`<a class="ag-icon-btn" href="tel:${contact.replace(/\s/g,'')}" data-tip="Telefon">${ICO_PHONE}</a>`:''}`;
@@ -2749,6 +2777,7 @@ function renderAgencies(){
   else { filtered.sort((a,b)=>(b.rating||0)-(a.rating||0)); }
   window.__cheapestAgId=null; let _mp=Infinity;
   premList.concat(filtered).forEach(a=>{ const p=Number(a.price)||0; if(p>0 && p<_mp){ _mp=p; window.__cheapestAgId=a.id; } });
+  window.__minAgPrice=isFinite(_mp)?_mp:0;
   document.getElementById('agCount').textContent=filtered.length;
   const el=document.getElementById('agencyList');
   if(!filtered.length&&!premList.length){el.innerHTML='<div class="empty">Tiada agensi sepadan dengan tapisan anda.</div>';return;}
@@ -3375,8 +3404,11 @@ function bizPosters(where){
     (BIZ||[]).forEach(b=>{ if(b.poster) items.push({url:b.poster, name:b.name, view:'shop', ts:b.created||''}); });
     (COURSES||[]).forEach(c=>{ if(c.poster_url) items.push({url:c.poster_url, name:'Kursus', view:'kursus', ts:c.created||''}); });
     if(!items.length) return '';
-    items.sort((a,b)=>String(a.ts).localeCompare(String(b.ts)));
-    return `<div class="p-carousel" style="margin-top:16px">${items.map(it=>`<img class="p-car-img" src="${esc(it.url)}" alt="Poster ${esc(it.name)}" loading="lazy" onclick="go('${it.view}')">`).join('')}</div>`;
+    items.sort((a,b)=>String(b.ts).localeCompare(String(a.ts)));
+    const imgs=items.map(it=>`<img class="p-car-img" src="${esc(it.url)}" alt="Poster ${esc(it.name)}" loading="lazy" onclick="go('${it.view}')">`).join('');
+    if(items.length<2) return `<div class="p-carousel" style="margin-top:16px">${imgs}</div>`;
+    const dur=Math.max(28, items.length*7);
+    return `<div class="p-marquee" style="margin-top:16px"><div class="p-mq-track" style="animation-duration:${dur}s">${imgs}${imgs}</div></div>`;
   }
   const posters=(BIZ||[]).filter(b=>b.poster);
   if(!posters.length) return '';
@@ -3813,13 +3845,15 @@ function topAgHomeHtml(){
   const priced=(AGENCIES||[]).filter(a=>Number(a.price)>0);
   if(priced.length<3) return '';
   priced.sort((a,b)=>{ const pa=Number(a.price)||Infinity, pb=Number(b.price)||Infinity; return (pa-pb) || ((b.rating||0)-(a.rating||0)); });
+  const minP=Number(priced[0].price)||0;
   const cards=priced.slice(0,3).map((a,i)=>{
     const logo=a.logo_url?`<img class="topag-logo" src="${esc(a.logo_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`:`<div class="topag-ini">${esc((a.name||'?').trim().charAt(0).toUpperCase())}</div>`;
     const rate=a.rating>0?`⭐ ${Number(a.rating).toFixed(1)}`:'';
     const jimat=a.price_old>a.price?a.price_old-a.price:0;
     const mtag=a.package_tier?esc(a.package_tier):(a.duration_days>0?a.duration_days+' hari':'');
-    const rib=i===0?'<span class="topag-rib">TERMURAH</span>':'';
-    return `<div class="topag-card r${i+1}${i===0?' best':''}" onclick="go('agency')"><div class="topag-rank">${i+1}</div>${rib}${logo}<div class="topag-name">${esc(a.name||'')}</div><div class="topag-meta">${rate}</div>${mtag?`<div class="topag-mtag">${mtag}</div>`:''}<div class="topag-price"><span>dari</span> RM${Number(a.price).toLocaleString('en-US')} <span>/seorang</span>${jimat>0?`<div class="topag-jm">Jimat RM${jimat.toLocaleString('en-US')}</div>`:''}</div></div>`;
+    const isMin=Number(a.price)===minP;
+    const rib=isMin?'<span class="topag-rib">TERMURAH</span>':'';
+    return `<div class="topag-card r${i+1}${isMin?' best':''}" onclick="go('agency')"><div class="topag-rank">${i+1}</div>${rib}${logo}<div class="topag-name">${esc(a.name||'')}</div><div class="topag-meta">${rate}</div>${mtag?`<div class="topag-mtag">${mtag}</div>`:''}<div class="topag-price"><span>dari</span> RM${Number(a.price).toLocaleString('en-US')} <span>/seorang</span>${jimat>0?`<div class="topag-jm">Jimat RM${jimat.toLocaleString('en-US')}</div>`:''}</div></div>`;
   }).join('');
   return `<div class="topag-wrap"><div class="topag-h">🏷️ Agensi Pakej Termurah <button class="tk-more" onclick="go('agency')">Lihat semua</button></div><div class="topag-row">${cards}</div></div>`;
 }
