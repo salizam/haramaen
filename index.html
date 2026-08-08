@@ -3326,7 +3326,7 @@ function renderSvc(){
   cats.forEach(c=>{
     if(sel!=='all'&&sel!==c.id) return;
     const legacy=SERVICES.filter(s=>c.key.includes(s.tag)).map(s=>({name:s.name,icon:s.icon,desc:s.desc,pill:s.price,contact:'',photo:''}));
-    const subs=(SVCSUB||[]).filter(x=>matchCat(c,x.category)).map(x=>{used.add(x.id);return {name:x.name,icon:c.icon||'🛎️',desc:x.desc,pill:[x.category,x.location].filter(Boolean).join(' · '),contact:x.contact,photo:x.photo};});
+    const subs=(SVCSUB||[]).filter(x=>matchCat(c,x.category)).map(x=>{used.add(x.id);return {name:x.name,icon:c.icon||'🛎️',desc:x.desc,pill:'',contact:x.contact,photo:x.photo};});
     const items=subs.concat(legacy);
     if(!items.length && !c.always) return;
     anySection=true;
@@ -3341,7 +3341,7 @@ function renderSvc(){
   if(sel==='all' && rest.length){
     anySection=true;
     html+=`<div class="section-title" style="font-size:15px;margin-top:6px">🛎️ Servis Lain</div>`;
-    html+=rest.map(x=>svcCard({name:x.name,icon:'🛎️',desc:x.desc,pill:[x.category,x.location].filter(Boolean).join(' · '),contact:x.contact,photo:x.photo})).join('');
+    html+=rest.map(x=>svcCard({name:x.name,icon:'🛎️',desc:x.desc,pill:'',contact:x.contact,photo:x.photo})).join('');
   }
   if(!anySection) html+=`<div class="empty">Tiada rekod untuk kategori ini.</div>`;
   document.getElementById('dir-svc').innerHTML=html;
