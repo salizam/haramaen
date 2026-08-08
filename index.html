@@ -298,6 +298,11 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   @media(max-width:430px){ .wx-grid{gap:6px} .wx-card{padding:12px 5px} .wx-card .wx-city{font-size:11px;white-space:nowrap} .wx-card .wx-temp{font-size:17px} .wx-card .wx-emoji{font-size:26px} }
 
   /* ---------- Guide / News / Lost ---------- */
+  .pdf-wrap{margin-top:4px}
+  .pdf-page{position:relative; min-height:60vh; margin:0 auto 10px; background:#f4f1fb; border:1px solid var(--line); border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center}
+  .pdf-page canvas{display:block; width:100%; height:auto}
+  .pdf-page .pdf-ph{font-size:12px; color:var(--muted)}
+  .pdf-loading{padding:24px 12px; text-align:center; font-size:13px; color:var(--muted)}
   .step{display:flex; gap:14px; margin-bottom:14px}
   .step .n{width:34px;height:34px;border-radius:10px;background:var(--green);color:#fff;flex:none;
     display:grid;place-items:center;font-weight:800}
@@ -1001,6 +1006,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
       <!-- PANDUAN UMRAH -->
       <section class="view" id="v-guide">
         <div class="section-title">Panduan Umrah<span class="u"></span></div>
+        <div id="ebookBox"></div>
         <div class="card" style="background:linear-gradient(120deg,#0c5340,#0a3b2d);color:#fff;border:0">
           <b style="font-size:15px">Rukun Umrah</b>
           <p class="muted" style="color:rgba(255,255,255,.85);margin:6px 0 0;font-size:13px">4 rukun yang wajib disempurnakan mengikut tertib. Jika ditinggalkan, umrah tidak sah.</p>
@@ -1653,7 +1659,7 @@ document.addEventListener('click', function(e){ const m=document.getElementById(
 /* ============ LIVE DATA (Supabase) ============ */
 let AGENCIES=[], HOTELS=[], VOLUNTEERS=[], HOSPITALS=[], SERVICES=[], COURSES=[], BIZ=[], SVCSUB=[], SAR_RATE=1.27;
 let MUTAWWIF=[];
-let NEWS=[], LATEST_DUAS=[], TIPS=[], AG_REVIEW_SUMMARY={};
+let NEWS=[], LATEST_DUAS=[], TIPS=[], AG_REVIEW_SUMMARY={}, EBOOKS=[];
 let admTimer=null;
 const MED_MAP={hospital:{t:'Hospital',i:'🏥'}, pharmacy:{t:'Farmasi',i:'💊'}, insurance:{t:'Insurans',i:'🛡️'}};
 function _todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -1686,6 +1692,7 @@ async function loadData(){
       .sort((a,b)=> (a.date||'').localeCompare(b.date||'')); }catch(e){ MUTAWWIF=[]; }
   try{ const r=await sb.rpc('list_duas',{p_visitor:vid()}); LATEST_DUAS=(r&&r.data)||[]; }catch(e){ LATEST_DUAS=[]; }
   try{ const r=await sb.from('umrah_tips').select('*').eq('status','published').order('created_at',{ascending:false}).limit(50); TIPS=(r&&r.data)||[]; }catch(e){ TIPS=[]; }
+  try{ const eb=await sb.from('ebooks').select('*').eq('active',true).order('created_at',{ascending:false}); EBOOKS=(eb.data||[]).map(x=>({id:x.id, title:x.title||'', url:x.pdf_url||'', cover:x.cover_url||'', created:x.created_at||''})); }catch(e){ EBOOKS=[]; }
   AGENCIES=(ag.data||[]).map(a=>({id:a.id, name:a.name, rating:Number(a.rating), reviews:Number(a.reviews_count||0),
     motac:a.motac_licensed, lic:a.motac_license||'—', price:Number(a.price), tier:a.tier, note:a.note||'', logo_url:a.logo_url||'', premium:!!a.is_premium,
     price_old:Number(a.price_old)||0, duration_days:Number(a.duration_days)||0, hotel_star:Number(a.hotel_star)||0, flight_note:a.flight_note||'', package_tier:a.package_tier||''}));
@@ -3614,6 +3621,142 @@ function renderGuide(){
     `<b style="font-size:13.5px;color:var(--green);display:block;margin-top:14px">🧕 Kelengkapan Wanita</b>${checkList(KIT_W)}`+
     `<b style="font-size:13.5px;color:var(--green);display:block;margin-top:14px">💊 Ubat & Lain-lain</b>`+
     `<div class="tag" style="margin:4px 0 2px">Nota: ubat di Saudi agak mahal — bawa bekalan secukupnya.</div>${checkList(KIT_UBAT)}`;
+  renderEbook();
+}
+
+/* ============ eBOOK PDF (PDF.js) ============ */
+let _pdfjsP=null;
+function ensurePdfJs(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(_pdfjsP) return _pdfjsP;
+  _pdfjsP=new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload=()=>{ try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; res(window.pdfjsLib); }catch(e){ rej(e); } };
+    s.onerror=()=>rej(new Error('pdfjs gagal dimuat'));
+    document.head.appendChild(s);
+  });
+  return _pdfjsP;
+}
+let _pdfTok=0;
+async function loadPdfEbook(url){
+  const wrap=document.getElementById('pdfWrap'); if(!wrap) return;
+  const tok=++_pdfTok;
+  try{
+    const pdfjsLib=await ensurePdfJs();
+    const pdf=await pdfjsLib.getDocument({url}).promise;
+    if(tok!==_pdfTok || !document.getElementById('pdfWrap')) return;
+    wrap.innerHTML='';
+    for(let n=1;n<=pdf.numPages;n++){
+      const holder=document.createElement('div');
+      holder.className='pdf-page'; holder.dataset.page=String(n);
+      holder.innerHTML='<span class="pdf-ph">'+n+' / '+pdf.numPages+'</span>';
+      wrap.appendChild(holder);
+    }
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    const io=new IntersectionObserver((ents)=>{
+      ents.forEach(async (ent)=>{
+        if(!ent.isIntersecting) return;
+        const el=ent.target; io.unobserve(el);
+        if(el.dataset.done) return; el.dataset.done='1';
+        try{
+          const pg=await pdf.getPage(Number(el.dataset.page));
+          const cw=el.clientWidth||wrap.clientWidth||360;
+          const base=pg.getViewport({scale:1});
+          const vp=pg.getViewport({scale:(cw/base.width)*dpr});
+          const canvas=document.createElement('canvas');
+          canvas.width=Math.floor(vp.width); canvas.height=Math.floor(vp.height);
+          await pg.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+          if(tok!==_pdfTok) return;
+          el.innerHTML=''; el.style.minHeight='0'; el.appendChild(canvas);
+        }catch(e){ el.innerHTML='<span class="pdf-ph">Gagal papar muka surat '+el.dataset.page+'</span>'; }
+      });
+    },{root:null,rootMargin:'400px 0px'});
+    wrap.querySelectorAll('.pdf-page').forEach(el=>io.observe(el));
+  }catch(e){
+    if(document.getElementById('pdfWrap')) wrap.innerHTML='<div class="pdf-loading" style="color:var(--danger)">Gagal memuatkan eBook. Sila cuba butang “Muat turun”.</div>';
+  }
+}
+function renderEbook(){
+  const box=document.getElementById('ebookBox'); if(!box) return;
+  const eb=(EBOOKS||[])[0];
+  const admin=isAdmin();
+  if(!eb && !admin){ box.innerHTML=''; return; }
+  const adminBar=admin?`<div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">
+      <button class="shr-sm" style="border-color:#5E35B1;color:#5E35B1" onclick="ebookEdit()">${eb?'✏️ Tukar eBook':'➕ Tambah eBook'}</button>
+      ${eb?`<button class="shr-sm" style="border-color:#e0b4b4;color:#c0392b" onclick="ebookDelete('${eb.id}',this)">🗑️ Buang</button>`:''}
+    </div>`:'';
+  if(!eb){
+    box.innerHTML=`<div class="section-title" style="font-size:15px;margin-top:18px">📖 eBook Panduan Umrah</div>
+      <div class="card"><div class="tag">Belum ada eBook dimuat naik.</div>${adminBar}</div>`;
+    return;
+  }
+  box.innerHTML=`<div class="section-title" style="font-size:15px;margin-top:18px">📖 eBook Panduan Umrah</div>
+    <div class="card" style="padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <b style="font-size:14px">${esc(eb.title||'eBook Panduan Umrah')}</b>
+        <a href="${esc(eb.url)}" target="_blank" rel="noopener" class="shr-sm" style="text-decoration:none">⬇️ Muat turun</a>
+      </div>
+      <div id="pdfWrap" class="pdf-wrap"><div class="pdf-loading">Memuatkan eBook… ⏳</div></div>
+      ${adminBar}
+    </div>`;
+  loadPdfEbook(eb.url);
+}
+function ebookEdit(){
+  if(!isAdmin()) return;
+  const eb=(EBOOKS||[])[0];
+  const m=tipModalEl();
+  document.getElementById('tipModalBox').innerHTML=`<button class="tip-x" onclick="closeTip()">✕</button>
+    <h3 style="margin:0 24px 4px 0">📖 Urus eBook Panduan</h3>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px">Fail PDF akan dipapar dalam page Panduan Umrah.</div>
+    <label class="fl">Tajuk eBook</label>
+    <input id="ebTitle" class="f" placeholder="eBook Panduan Ibadah Umrah" value="${eb?esc(eb.title||''):''}">
+    <label class="fl" style="margin-top:10px">Muat naik fail PDF (maks 50MB)</label>
+    <input type="file" id="ebFile" accept="application/pdf" class="f" style="font-size:12px;padding:5px">
+    <label class="fl" style="margin-top:10px">atau tampal URL PDF awam</label>
+    <input id="ebUrl" class="f" placeholder="https://…/ebook.pdf" value="${eb?esc(eb.url||''):''}">
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn" id="ebSaveBtn" style="flex:1" onclick="ebookSave(this)">💾 Simpan eBook</button>
+    </div>`;
+  m.classList.add('open');
+}
+async function ebookSave(btn){
+  btn.disabled=true; btn.textContent='Menyimpan…';
+  const reset=()=>{ btn.disabled=false; btn.textContent='💾 Simpan eBook'; };
+  try{
+    const title=(document.getElementById('ebTitle').value||'').trim()||'eBook Panduan Umrah';
+    let url=(document.getElementById('ebUrl').value||'').trim();
+    const file=document.getElementById('ebFile').files[0];
+    if(file){
+      if(file.type!=='application/pdf'){ toast('Fail mesti dalam format PDF.'); return reset(); }
+      if(file.size>50*1024*1024){ toast('Fail terlalu besar — maks 50MB.'); return reset(); }
+      const path='ebook-'+Date.now()+'.pdf';
+      const {error:upErr}=await sb.storage.from('ebooks').upload(path,file,{contentType:'application/pdf',upsert:true});
+      if(upErr) throw upErr;
+      url=sb.storage.from('ebooks').getPublicUrl(path).data.publicUrl;
+    }
+    if(!url){ toast('Pilih fail PDF atau tampal URL dulu.'); return reset(); }
+    const existing=(EBOOKS||[])[0];
+    let resp;
+    if(existing&&existing.id){ resp=await sb.from('ebooks').update({title:title, pdf_url:url, active:true}).eq('id',existing.id).select(); }
+    else { resp=await sb.from('ebooks').insert({title:title, pdf_url:url, active:true}).select(); }
+    if(resp.error) throw resp.error;
+    if(!resp.data||!resp.data.length){ toast('Gagal — kebenaran RLS tidak mengizinkan.'); return reset(); }
+    await loadData(); closeTip(); renderGuide();
+    toast('eBook dikemas kini. ✅');
+  }catch(e){ toast('Gagal simpan eBook — '+((e&&e.message)||'cuba lagi.')); reset(); }
+}
+async function ebookDelete(id,btn){
+  if(!isAdmin()) return;
+  if(!confirm('Buang eBook ini dari page Panduan Umrah?')) return;
+  btn.disabled=true; btn.textContent='…';
+  try{
+    const {data,error}=await sb.from('ebooks').delete().eq('id',id).select();
+    if(error) throw error;
+    if(!data||!data.length){ toast('Gagal buang — kebenaran RLS.'); btn.disabled=false; btn.textContent='🗑️ Buang'; return; }
+    await loadData(); renderGuide();
+    toast('eBook dibuang.');
+  }catch(e){ toast('Gagal buang eBook.'); btn.disabled=false; btn.textContent='🗑️ Buang'; }
 }
 
 /* ============ SHARE ============ */
