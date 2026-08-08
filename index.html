@@ -1344,7 +1344,26 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <div class="modal-row">
       <div>
         <label class="fl">Jenis Servis</label>
-        <input id="svcJenis" value="Tolak Kerusi Roda">
+        <select id="svcJenis" class="f">
+          <option>Tolak Kerusi Roda</option>
+          <option>Mutawwif / Mutawwifah</option>
+          <option>Dobi</option>
+          <option>Pengangkutan &amp; Teksi</option>
+          <option>Penghantaran &amp; Kurier</option>
+          <option>Ziarah &amp; Lawatan</option>
+          <option>Jurugambar &amp; Video</option>
+          <option>Barber &amp; Cukur</option>
+          <option>Katering &amp; Makanan</option>
+          <option>SIM &amp; Internet</option>
+          <option>Tukaran Wang</option>
+          <option>Insurans Perjalanan</option>
+          <option>Porter &amp; Bagasi</option>
+          <option>Badal Umrah</option>
+          <option>Ihram &amp; Telekung</option>
+          <option>Visa &amp; Permit</option>
+          <option>Terjemahan</option>
+          <option>Lain-lain</option>
+        </select>
       </div>
       <div>
         <label class="fl">Lokasi / Kawasan</label>
@@ -3264,10 +3283,23 @@ function renderMed(){
 }
 function renderSvc(){
   const cats=[
-    {id:'kerusi', key:['Kerusi Roda','Tolak Kerusi Roda'], title:'♿ Tolak Kerusi Roda', label:'Tolak Kerusi Roda', always:true},
-    {id:'mutawwif', key:['Mutawwif','Mutawwifah'], title:'🧕 Mutawwif / Mutawwifah', label:'Mutawwif / Mutawwifah'},
-    {id:'dobi', key:['Dobi'], title:'🧺 Dobi (Laundry)', label:'Dobi'},
-    {id:'transport', key:['Teksi','Pengangkutan','e-Hailing'], title:'🚕 Pengangkutan & Teksi', label:'Pengangkutan & Teksi'},
+    {id:'kerusi', icon:'♿', key:['Kerusi Roda','Tolak Kerusi Roda'], title:'♿ Tolak Kerusi Roda', label:'Tolak Kerusi Roda', always:true},
+    {id:'mutawwif', icon:'🧕', key:['Mutawwif','Mutawwifah'], title:'🧕 Mutawwif / Mutawwifah', label:'Mutawwif / Mutawwifah'},
+    {id:'dobi', icon:'🧺', key:['Dobi','Laundry'], title:'🧺 Dobi (Laundry)', label:'Dobi'},
+    {id:'transport', icon:'🚕', key:['Teksi','Pengangkutan','e-Hailing','Sewa kereta','Transport'], title:'🚕 Pengangkutan & Teksi', label:'Pengangkutan & Teksi'},
+    {id:'kurier', icon:'📦', key:['Penghantaran','Kurier','Kargo','Cargo','Courier','Pos barang'], title:'📦 Penghantaran & Kurier', label:'Penghantaran & Kurier'},
+    {id:'ziarah', icon:'🗺️', key:['Ziarah','Lawatan','Tour','Sightseeing'], title:'🗺️ Ziarah & Lawatan', label:'Ziarah & Lawatan'},
+    {id:'foto', icon:'📸', key:['Jurugambar','Fotografi','Photography','Videografi','Video','Foto'], title:'📸 Jurugambar & Video', label:'Jurugambar & Video'},
+    {id:'barber', icon:'✂️', key:['Barber','Cukur','Gunting','Tahallul','Salun','Salon'], title:'✂️ Barber & Cukur', label:'Barber & Cukur'},
+    {id:'makan', icon:'🍚', key:['Katering','Makanan','Restoran','Catering','Food','Nasi'], title:'🍚 Katering & Makanan', label:'Katering & Makanan'},
+    {id:'sim', icon:'📶', key:['SIM','eSIM','Internet','Data','Wifi','Roaming'], title:'📶 SIM & Internet', label:'SIM & Internet'},
+    {id:'tukaran', icon:'💱', key:['Money Changer','Tukaran wang','Pertukaran wang','Currency'], title:'💱 Tukaran Wang', label:'Tukaran Wang'},
+    {id:'insurans', icon:'🛡️', key:['Insurans','Insurance','Takaful'], title:'🛡️ Insurans Perjalanan', label:'Insurans Perjalanan'},
+    {id:'porter', icon:'🧳', key:['Porter','Bagasi','Angkat beg','Luggage'], title:'🧳 Porter & Bagasi', label:'Porter & Bagasi'},
+    {id:'badal', icon:'🕋', key:['Badal'], title:'🕋 Badal Umrah', label:'Badal Umrah'},
+    {id:'ihram', icon:'👕', key:['Ihram','Telekung'], title:'👕 Bekalan Ihram & Telekung', label:'Ihram & Telekung'},
+    {id:'visa', icon:'🛂', key:['Visa','Permit','Nusuk','Tasreeh'], title:'🛂 Visa & Permit', label:'Visa & Permit'},
+    {id:'terjemah', icon:'🌐', key:['Terjemah','Juru bahasa','Translation','Translator'], title:'🌐 Terjemahan', label:'Terjemahan'},
   ];
   const sel=state.svcFilter||'all';
   const opts=`<option value="all"${sel==='all'?' selected':''}>Semua kategori</option>`+cats.map(c=>`<option value="${c.id}"${sel===c.id?' selected':''}>${c.label}</option>`).join('');
@@ -3294,7 +3326,7 @@ function renderSvc(){
   cats.forEach(c=>{
     if(sel!=='all'&&sel!==c.id) return;
     const legacy=SERVICES.filter(s=>c.key.includes(s.tag)).map(s=>({name:s.name,icon:s.icon,desc:s.desc,pill:s.price,contact:'',photo:''}));
-    const subs=(SVCSUB||[]).filter(x=>matchCat(c,x.category)).map(x=>{used.add(x.id);return {name:x.name,icon:'♿',desc:x.desc,pill:[x.category,x.location].filter(Boolean).join(' · '),contact:x.contact,photo:x.photo};});
+    const subs=(SVCSUB||[]).filter(x=>matchCat(c,x.category)).map(x=>{used.add(x.id);return {name:x.name,icon:c.icon||'🛎️',desc:x.desc,pill:[x.category,x.location].filter(Boolean).join(' · '),contact:x.contact,photo:x.photo};});
     const items=subs.concat(legacy);
     if(!items.length && !c.always) return;
     anySection=true;
