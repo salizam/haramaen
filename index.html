@@ -437,6 +437,14 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .art-body{font-size:14.5px;line-height:1.75;color:var(--ink)}
   .art-foot{display:flex;gap:8px;align-items:center;margin-top:16px;flex-wrap:wrap}
   .art-admin{display:flex;gap:8px;margin-left:auto}
+  .art-body ul,.art-body ol{margin:8px 0 8px 22px} .art-body li{margin:3px 0}
+  .art-fab{position:fixed;right:16px;bottom:calc(82px + env(safe-area-inset-bottom));z-index:55;display:flex;flex-direction:column;gap:10px}
+  .art-fab-btn{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--green-d);box-shadow:0 5px 16px rgba(49,27,146,.22);cursor:pointer;display:grid;place-items:center;font-size:19px;line-height:1;padding:0;transition:transform .12s}
+  .art-fab-btn:hover{background:#f4f1fe;transform:translateY(-1px)}
+  .art-fab-btn:active{transform:scale(.94)}
+  .art-fab-btn.up{background:var(--green);color:#fff;border-color:var(--green)}
+  .art-fab-btn.del{color:var(--danger)}
+  @media(min-width:821px){ .art-fab{right:24px;bottom:24px} }
   .ag-best{display:inline-block;background:#e6f7ee;color:#1a9f5a;font-size:10px;font-weight:800;border-radius:5px;padding:2px 6px;margin-right:5px;vertical-align:1px}
   .ag-nop{margin-top:7px;font-size:11.5px;color:var(--muted)}
   .ag-sortrow{display:flex;gap:6px;margin:6px 0 2px}
@@ -458,7 +466,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .rte-tb{display:flex;gap:6px;margin:2px 0 6px;flex-wrap:wrap}
   .rte-tb button{background:#f4f1fe;border:1px solid var(--line);border-radius:7px;padding:5px 12px;font-size:13.5px;font-weight:700;color:var(--green-d);cursor:pointer;min-width:34px;line-height:1}
   .rte-tb button:hover{background:#e9e3fb}
-  .rte{border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-height:120px;font-size:14px;line-height:1.6;background:#fff;outline:none;color:var(--ink)}
+  .rte{border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-height:120px;max-height:300px;overflow-y:auto;font-size:14px;line-height:1.6;background:#fff;outline:none;color:var(--ink)}
   .rte:focus{border-color:var(--green-l)}
   .rte:empty:before{content:attr(data-ph);color:var(--muted)}
   .rte h4{font-weight:800;font-size:15.5px;margin:10px 0 5px}
@@ -910,7 +918,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
 
       <!-- AGENCY -->
       <section class="view" id="v-agency">
-        <div class="section-title">Cari Agensi Umrah<span class="u"></span></div>
+        <div class="ktitle-row"><div class="section-title">Cari Agensi Umrah<span class="u"></span></div><button class="kbtn kbtn-daftar" onclick="showAgReg()">Daftar agensi anda</button></div>
         <div class="card">
           <input id="agQuery" placeholder="🔍 Cari nama agensi…" oninput="renderAgencies()">
           <label class="f">Rating Google minimum</label>
@@ -1103,7 +1111,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
           <label>Tajuk</label>
           <input id="anTitle" placeholder="Tajuk berita…">
           <label>Kandungan</label>
-          <div class="rte-tb"><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'bold')" title="Tebal"><b>B</b></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'italic')" title="Italik"><i>I</i></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'underline')" title="Garis bawah"><u>U</u></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'h4')" title="Tajuk">Tajuk</button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'ul')" title="Senarai">• Senarai</button></div>
+          <div class="rte-tb"></div>
           <div id="anBody" class="rte" contenteditable="true" data-ph="Isi kandungan berita…"></div>
           <div class="adm-news-row">
             <div>
@@ -1129,7 +1137,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
           <label>Tajuk Tip</label>
           <input id="atTitle" placeholder="cth: 5 Tip Persediaan Umrah Kali Pertama">
           <label>Kandungan Artikel</label>
-          <div class="rte-tb"><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'bold')" title="Tebal"><b>B</b></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'italic')" title="Italik"><i>I</i></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'underline')" title="Garis bawah"><u>U</u></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'h4')" title="Tajuk">Tajuk</button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'ul')" title="Senarai">• Senarai</button></div>
+          <div class="rte-tb"></div>
           <div id="atBody" class="rte" contenteditable="true" data-ph="Tulis artikel tip umrah di sini…" style="min-height:170px"></div>
           <label>Gambar <span style="font-weight:400;color:var(--muted)">(pilihan — JPG/PNG, maks 5MB)</span></label>
           <input type="file" id="atImg" accept="image/jpeg,image/png,image/webp" onchange="previewTipImg(this)">
@@ -1414,7 +1422,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <label class="fl">Tajuk</label>
     <input id="enTitle" class="f" placeholder="Tajuk artikel…">
     <label class="fl">Kandungan</label>
-    <div class="rte-tb"><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'bold')" title="Tebal"><b>B</b></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'italic')" title="Italik"><i>I</i></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'underline')" title="Garis bawah"><u>U</u></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'h4')" title="Tajuk">Tajuk</button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'ul')" title="Senarai">• Senarai</button></div>
+    <div class="rte-tb"></div>
     <div id="enBody" class="rte" contenteditable="true" data-ph="Isi kandungan…" style="min-height:150px"></div>
     <div style="display:flex;gap:8px">
       <div style="flex:1">
@@ -1452,7 +1460,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <label class="fl">Tajuk</label>
     <input id="etTitle" class="f" placeholder="Tajuk tip…">
     <label class="fl">Kandungan</label>
-    <div class="rte-tb"><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'bold')" title="Tebal"><b>B</b></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'italic')" title="Italik"><i>I</i></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'underline')" title="Garis bawah"><u>U</u></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'h4')" title="Tajuk">Tajuk</button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'ul')" title="Senarai">• Senarai</button></div>
+    <div class="rte-tb"></div>
     <div id="etBody" class="rte" contenteditable="true" data-ph="Isi kandungan tip…" style="min-height:150px"></div>
     <label class="fl">Gambar Tip</label>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
@@ -1698,7 +1706,7 @@ async function loadData(){
     return {name:m.name, type:k.t, icon:k.i, dist:m.distance_km===null?null:Number(m.distance_km), tel:m.phone, tag:m.tag||'', apply_url:m.apply_url||''};});
   SERVICES=(sv.data||[]).map(s=>({name:s.name, icon:SVC_ICON[s.icon]||'🕋', desc:s.description||'', price:s.price_label||'', tag:s.tag||''}));
   try{ const bz=await sb.from('business_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); BIZ=(bz.data||[]).map(b=>({id:b.id, name:b.name||'', category:b.category||'', location:b.location||'', contact:b.contact||'', website:b.website||'', desc:b.description||'', signboard:b.signboard_url||'', poster:b.poster_url||'', created:b.created_at||''})); }catch(e){ BIZ=[]; }
-  try{ const ss=await sb.from('service_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); SVCSUB=(ss.data||[]).map(x=>({id:x.id, name:x.name||'', category:x.category||'', location:x.location||'', contact:x.contact||'', desc:x.description||'', photo:x.photo_url||''})); }catch(e){ SVCSUB=[]; }
+  try{ const ss=await sb.from('service_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); SVCSUB=(ss.data||[]).map(x=>({id:x.id, name:x.name||'', category:x.category||'', location:x.location||'', contact:x.contact||'', desc:x.description||'', photo:x.photo_url||'', created:x.created_at||''})); }catch(e){ SVCSUB=[]; }
   if(cr.data && cr.data[0]) SAR_RATE=Number(cr.data[0].rate);
   checkContentNotifs();
 }
@@ -1847,9 +1855,11 @@ function mdRich(b){
   return lines.join('<br>').replace(/<br>(<div class="md-)/g,'$1').replace(/(<\/div>)<br>/g,'$1');
 }
 function tipBodyHtml(b){ return articleHtml(b); }
-function rteCmd(btn,cmd){ const rte=btn.closest('.rte-tb') && btn.closest('.rte-tb').nextElementSibling; if(!rte) return; rte.focus(); try{ document.execCommand('styleWithCSS',false,false); }catch(e){} if(cmd==='h4') document.execCommand('formatBlock',false,'h4'); else if(cmd==='ul') document.execCommand('insertUnorderedList',false,null); else document.execCommand(cmd,false,null); }
+const RTE_TB_HTML=`<button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'bold')" title="Tebal"><b>B</b></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'italic')" title="Italik"><i>I</i></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'underline')" title="Garis bawah"><u>U</u></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'justifyLeft')" title="Rata kiri"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="13" y2="12"/><line x1="4" y1="18" x2="17" y2="18"/></svg></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'justifyCenter')" title="Rata tengah"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="5" y1="18" x2="19" y2="18"/></svg></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'justifyRight')" title="Rata kanan"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="11" y1="12" x2="20" y2="12"/><line x1="7" y1="18" x2="20" y2="18"/></svg></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'ol')" title="Senarai bernombor"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><text x="1.5" y="8.5" font-size="7.5" fill="currentColor" stroke="none" font-weight="700">1</text><text x="1.5" y="14.5" font-size="7.5" fill="currentColor" stroke="none" font-weight="700">2</text><text x="1.5" y="20.5" font-size="7.5" fill="currentColor" stroke="none" font-weight="700">3</text></svg></button><button type="button" onmousedown="event.preventDefault()" onclick="rteCmd(this,'ul')" title="Senarai bulet"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4.5" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.3" fill="currentColor" stroke="none"/></svg></button>`;
+function injectRteToolbars(){ document.querySelectorAll('.rte-tb').forEach(t=>{ if(!t.dataset.filled){ t.innerHTML=RTE_TB_HTML; t.dataset.filled='1'; } }); }
+function rteCmd(btn,cmd){ const rte=btn.closest('.rte-tb') && btn.closest('.rte-tb').nextElementSibling; if(!rte) return; rte.focus(); try{ document.execCommand('styleWithCSS',false,/^justify/.test(cmd)); }catch(e){} if(cmd==='ul') document.execCommand('insertUnorderedList',false,null); else if(cmd==='ol') document.execCommand('insertOrderedList',false,null); else document.execCommand(cmd,false,null); }
 function rteVal(id){ const el=document.getElementById(id); if(!el) return ''; if((el.textContent||'').trim()==='' && !/<img|<br/i.test(el.innerHTML)) return ''; return sanitizeHtml(el.innerHTML); }
-function sanitizeHtml(html){ const d=document.createElement('div'); d.innerHTML=html||''; const ALLOW={B:1,STRONG:1,I:1,EM:1,U:1,H3:1,H4:1,H5:1,UL:1,OL:1,LI:1,BR:1,P:1,DIV:1,SPAN:1,A:1}; let changed=true; while(changed){ changed=false; const all=d.querySelectorAll('*'); for(const c of all){ if(!ALLOW[c.tagName]){ while(c.firstChild) c.parentNode.insertBefore(c.firstChild,c); c.parentNode.removeChild(c); changed=true; break; } } } d.querySelectorAll('*').forEach(c=>{ [...c.attributes].forEach(a=>{ const n=a.name.toLowerCase(); if(c.tagName==='A'&&n==='href'){ if(/^\s*javascript:/i.test(a.value)) c.removeAttribute(a.name); } else c.removeAttribute(a.name); }); }); return d.innerHTML; }
+function sanitizeHtml(html){ const d=document.createElement('div'); d.innerHTML=html||''; const ALLOW={B:1,STRONG:1,I:1,EM:1,U:1,H3:1,H4:1,H5:1,UL:1,OL:1,LI:1,BR:1,P:1,DIV:1,SPAN:1,A:1}; let changed=true; while(changed){ changed=false; const all=d.querySelectorAll('*'); for(const c of all){ if(!ALLOW[c.tagName]){ while(c.firstChild) c.parentNode.insertBefore(c.firstChild,c); c.parentNode.removeChild(c); changed=true; break; } } } d.querySelectorAll('*').forEach(c=>{ [...c.attributes].forEach(a=>{ const n=a.name.toLowerCase(); if(c.tagName==='A'&&n==='href'){ if(/^\s*javascript:/i.test(a.value)) c.removeAttribute(a.name); } else if(n==='style'){ const m=(a.value||'').match(/text-align\s*:\s*(left|right|center|justify)/i); if(m) c.setAttribute('style','text-align:'+m[1].toLowerCase()); else c.removeAttribute(a.name); } else c.removeAttribute(a.name); }); }); return d.innerHTML; }
 function articleHtml(b){ b=b||''; if(/<[a-z][\s\S]*>/i.test(b)) return sanitizeHtml(b); return mdRich(b); }
 function openTip(id){ openArticle('tip',id); }
 function openTipList(){ go('tips'); }
@@ -3436,7 +3446,9 @@ function bizPosters(where){
   if(where==='home'){
     const items=[];
     (BIZ||[]).forEach(b=>{ if(b.poster) items.push({url:b.poster, name:b.name, view:'shop', ts:b.created||''}); });
-    (COURSES||[]).forEach(c=>{ if(c.poster_url) items.push({url:c.poster_url, name:'Kursus', view:'kursus', ts:c.created||''}); });
+    (COURSES||[]).forEach(c=>{ if(c.poster_url) items.push({url:c.poster_url, name:'Kursus Umrah', view:'kursus', ts:c.created||''}); });
+    (MUTAWWIF||[]).forEach(c=>{ if(c.poster_url) items.push({url:c.poster_url, name:'Kursus Mutawwif', view:'mutawwif', ts:c.created||''}); });
+    (SVCSUB||[]).forEach(x=>{ if(x.photo) items.push({url:x.photo, name:x.name||'Servis', view:'svc', ts:x.created||''}); });
     if(!items.length) return '';
     items.sort((a,b)=>String(b.ts).localeCompare(String(a.ts)));
     const imgs=items.map(it=>`<img class="p-car-img" src="${esc(it.url)}" alt="Poster ${esc(it.name)}" loading="lazy" onclick="go('${it.view}')">`).join('');
@@ -3841,19 +3853,24 @@ function renderArticle(){
   const author=item.author||'Haramaen';
   const tagPill=kind==='tip'?(item.category?`<span class="pill" style="background:#fff3d6;color:#8a6d1a">${esc(item.category)}</span>`:''):`<span class="pill ${newsTagCls(item.tag)}">${esc(item.tag||'Info')}</span>`;
   const img=item.image_url?`<img class="art-img" src="${esc(item.image_url)}" alt="${esc(item.title)}" onerror="this.style.display='none'">`:'';
-  const adminBtns=!isAdmin()?'':(kind==='news'?`<div class="art-admin"><button class="n-edit" onclick="openEditNews(${item.id})">✏️ Edit</button><button class="n-del" onclick="delNews(${item.id},this)">🗑️ Padam</button></div>`:`<div class="art-admin"><button class="n-edit" onclick="openEditTip('${item.id}')">✏️ Edit</button><button class="n-del" onclick="delTip('${item.id}',this)">🗑️ Padam</button></div>`);
   const shrUrl=esc(location.href);
-  const shr=`<button class="shr-sm" data-title="${esc(item.title)}" data-text="${esc(item.title)}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>`;
+  const upSvg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="6"/><polyline points="6 12 12 6 18 12"/></svg>';
+  const shareSvg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>';
+  const fabAdmin=!isAdmin()?'':(kind==='news'
+    ?`<button class="art-fab-btn" title="Edit artikel" onclick="openEditNews(${item.id})">✏️</button><button class="art-fab-btn del" title="Padam artikel" onclick="delNews(${item.id},this)">🗑️</button>`
+    :`<button class="art-fab-btn" title="Edit artikel" onclick="openEditTip('${item.id}')">✏️</button><button class="art-fab-btn del" title="Padam artikel" onclick="delTip('${item.id}',this)">🗑️</button>`);
+  const fab=`<div class="art-fab"><button class="art-fab-btn up" title="Ke atas artikel" onclick="scrollArtTop()">${upSvg}</button><button class="art-fab-btn" title="Kongsi artikel" data-title="${esc(item.title)}" data-text="${esc(item.title)}" data-url="${shrUrl}" onclick="shareItem(this)">${shareSvg}</button>${fabAdmin}</div>`;
   el.innerHTML=topBar+
     `<div class="art-kicker">${kicker} · ${esc(author)} · ${date}</div>`+
     `<h1 class="art-title">${esc(item.title)}</h1>`+
     `<div class="art-tags">${tagPill}</div>`+
     img+
     `<div class="art-body n-body">${articleHtml(item.body)}</div>`+
-    `<div class="art-foot">${shr}${adminBtns}</div>`+
-    `<button class="art-all wide" onclick="go('${listV}')">📋 Lihat semua artikel</button>`;
+    `<button class="art-all wide" onclick="go('${listV}')">📋 Lihat semua artikel</button>`+
+    fab;
   const m=document.getElementById('main'); if(m) m.scrollTop=0; window.scrollTo(0,0);
 }
+function scrollArtTop(){ const m=document.getElementById('main'); try{ if(m) m.scrollTo({top:0,behavior:'smooth'}); }catch(e){ if(m) m.scrollTop=0; } try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); } }
 async function delNews(id,btn){
   if(!confirm('Adakah anda pasti untuk padam artikel ini?')) return;
   if(btn){ btn.disabled=true; btn.textContent='Memadam…'; }
@@ -4333,6 +4350,7 @@ function toast(msg,ms=2800){
 /* ============ BOOT ============ */
 function boot(){
   buildNav();
+  injectRteToolbars();
   renderHome();
   renderAgencyFilters(); renderAgencies();
   renderHotelFilters(); renderHotels();
