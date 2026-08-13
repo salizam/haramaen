@@ -348,8 +348,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .n-title{margin:12px 16px 0; padding:0; font-size:16.5px; font-weight:800; line-height:1.35; color:var(--ink)}
   .n-meta{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--muted); flex-wrap:wrap; padding:8px 16px 12px; border-bottom:1px dashed var(--line)}
   .n-body{padding:13px 16px 4px; font-size:13.5px; color:#2c3a33; line-height:1.68; border-top:none; margin-top:0}
-  .n-body p{margin:0 0 10px; text-align:justify; text-indent:1.5em}
-  .n-body p:first-child{text-indent:0}
+  .n-body p{margin:0 0 10px}
   .n-body p:last-child{margin-bottom:0}
   .n-foot{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 16px 14px; border-top:1px dashed var(--line); margin-top:10px}
   .n-src{font-size:12px; color:var(--green); font-weight:700; text-decoration:none}
@@ -1181,7 +1180,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Servis menunggu kelulusan</span><span class="acc-badge" id="bSvc"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingSvc"><div class="empty">Memuatkan…</div></div></div></div></div>
         <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Agensi menunggu kelulusan</span><span class="acc-badge" id="bAgency"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingAgency"><div class="empty">Memuatkan…</div></div></div></div></div>
         <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Kursus Mutawwif menunggu kelulusan</span><span class="acc-badge" id="bMutawwif"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingMutawwif"><div class="empty">Memuatkan…</div></div></div></div></div>
-        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Maklum Balas Pengguna</span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div class="fb-filter" id="fbFilter"><button class="on" onclick="filterFb('all',this)">Semua</button><button onclick="filterFb('5',this)">★★★★★</button><button onclick="filterFb('4',this)">★★★★</button><button onclick="filterFb('3',this)">★★★</button><button onclick="filterFb('unrated',this)">Tanpa rating</button></div>
+        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Maklum Balas Pengguna</span><span class="acc-badge" id="fbCount"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div class="fb-filter" id="fbFilter"><button class="on" onclick="filterFb('all',this)">Semua</button><button onclick="filterFb('5',this)">★★★★★</button><button onclick="filterFb('4',this)">★★★★</button><button onclick="filterFb('3',this)">★★★</button><button onclick="filterFb('unrated',this)">Tanpa rating</button></div>
         <div id="admFeedback"><div class="empty">Memuatkan…</div></div></div></div></div>
       </section>
 
@@ -2548,7 +2547,7 @@ async function loadFeedback(){
     const {data,error}=await sb.from('feedback').select('*').order('created_at',{ascending:false}).limit(200);
     if(error) throw error;
     _fbAll=data||[];
-    document.getElementById('fbCount').textContent=`${_fbAll.length} mesej`;
+    const _c=document.getElementById('fbCount'); if(_c) _c.textContent=_fbAll.length;
     renderFbList(_fbAll);
   }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat maklum balas.</div>'; }
 }
@@ -3964,6 +3963,7 @@ function openEditNews(id){
   if(prev){ if(n.image_url){prev.src=n.image_url;prev.style.display='block';}else{prev.src='';prev.style.display='none';} }
   const imgInput=document.getElementById('enImg'); if(imgInput) imgInput.value='';
   const clr=document.getElementById('enClearImg'); if(clr) clr.checked=false;
+  const sv=document.getElementById('enSave'); if(sv){ sv.disabled=false; sv.textContent='💾 Simpan Perubahan'; }
   document.getElementById('enModal').classList.add('open');
 }
 function closeEditNews(){
@@ -3987,37 +3987,41 @@ function openEditTip(id){
   const prev=document.getElementById('etImgPreview'); if(prev){ if(t.image_url){prev.src=t.image_url;prev.style.display='block';}else{prev.src='';prev.style.display='none';} }
   const imgInput=document.getElementById('etImg'); if(imgInput) imgInput.value='';
   const clr=document.getElementById('etClearImg'); if(clr) clr.checked=false;
+  const sv=document.getElementById('etSave'); if(sv){ sv.disabled=false; sv.textContent='💾 Simpan Perubahan'; }
   document.getElementById('etModal').classList.add('open');
 }
 function closeEditTip(){ const m=document.getElementById('etModal'); if(m) m.classList.remove('open'); _etId=null; }
+function withTimeout(p, ms){ return Promise.race([ Promise.resolve(p), new Promise(function(_,rej){ setTimeout(function(){ rej(new Error('TIMEOUT')); }, ms||25000); }) ]); }
 async function submitEditTip(){
   if(!_etId) return;
   const title=(document.getElementById('etTitle').value||'').trim();
   const body=rteVal('etBody');
+  const btn=document.getElementById('etSave');
   if(!title||!body){ toast('Tajuk dan kandungan wajib diisi.'); return; }
-  const btn=document.getElementById('etSave'); btn.disabled=true; btn.textContent='Menyimpan…';
+  btn.disabled=true; btn.textContent='Menyimpan…';
   try{
     let imgUrl=null; const clearImg=document.getElementById('etClearImg').checked;
     const imgFile=document.getElementById('etImg').files[0];
     if(imgFile&&!clearImg){
-      if(imgFile.size>5*1024*1024){ toast('Gambar terlalu besar — maks 5MB.'); btn.disabled=false; btn.textContent='💾 Simpan Perubahan'; return; }
+      if(imgFile.size>5*1024*1024){ toast('Gambar terlalu besar — maks 5MB.'); return; }
       const ext=imgFile.name.split('.').pop()||'jpg'; const path='tip-edit-'+_etId+'-'+Date.now()+'.'+ext;
-      const {error:upErr}=await sb.storage.from('news-images').upload(path,imgFile,{contentType:imgFile.type,upsert:true});
+      const {error:upErr}=await withTimeout(sb.storage.from('news-images').upload(path,imgFile,{contentType:imgFile.type,upsert:true}));
       if(upErr) throw upErr; const {data:{publicUrl}}=sb.storage.from('news-images').getPublicUrl(path); imgUrl=publicUrl;
     }
     const patch={title:title, body:body};
     if(clearImg) patch.image_url=null; else if(imgUrl) patch.image_url=imgUrl;
-    const {data,error}=await sb.from('umrah_tips').update(patch).eq('id',_etId).select();
+    const {data,error}=await withTimeout(sb.from('umrah_tips').update(patch).eq('id',_etId).select());
     if(error) throw error;
-    if(!data||!data.length){ toast('Gagal simpan — kebenaran RLS tidak mengizinkan.'); btn.disabled=false; btn.textContent='💾 Simpan Perubahan'; return; }
+    if(!data||!data.length){ toast('Gagal simpan — kebenaran RLS tidak mengizinkan.'); return; }
     const idx=(TIPS||[]).findIndex(x=>String(x.id)===String(_etId));
     if(idx>=0) TIPS[idx]={...TIPS[idx],title,body,image_url:clearImg?null:(imgUrl||TIPS[idx].image_url)};
     const wasArticle=(state.article&&state.article.kind==='tip'&&String(state.article.id)===String(_etId));
     renderTerkini(); if(document.getElementById('tipsListBox')) renderTipsList();
     closeEditTip();
-    if(wasArticle) renderArticle();
+    if(wasArticle){ try{ renderArticle(); }catch(_e){} }
     toast('Tip dikemas kini. ✅');
-  }catch(e){ toast('Gagal simpan tip — semak kebenaran.'); btn.disabled=false; btn.textContent='💾 Simpan Perubahan'; }
+  }catch(e){ toast('Gagal simpan tip — '+((e&&e.message==='TIMEOUT')?'sambungan lambat, cuba lagi.':'semak sambungan/kebenaran.')); }
+  finally{ if(btn){ btn.disabled=false; btn.textContent='💾 Simpan Perubahan'; } }
 }
 async function delTip(id,btn){
   if(!confirm('Adakah anda pasti untuk padam tip ini?')) return;
@@ -4047,7 +4051,7 @@ async function submitEditNews(){
       const {data:{publicUrl}}=sb.storage.from('news-images').getPublicUrl(path);
       imgUrl=publicUrl;
     }
-    const {error}=await sb.rpc('admin_update_news',{
+    const {error}=await withTimeout(sb.rpc('admin_update_news',{
       p_id:_enId,
       p_title:title,
       p_body:body,
@@ -4058,7 +4062,7 @@ async function submitEditNews(){
       p_source_url:document.getElementById('enSrcUrl').value.trim()||null,
       p_image_url:imgUrl,
       p_clear_image:clearImg
-    });
+    }));
     if(error) throw error;
     // Update local cache
     const idx=NEWS.findIndex(x=>x.id===_enId);
