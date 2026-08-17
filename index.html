@@ -477,6 +477,10 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .acc.open .acc-body{max-height:6000px}
   .acc-inner{padding:6px 13px 14px}
   .acc-badge{display:none;background:var(--danger);color:#fff;font-size:11px;font-weight:800;min-width:19px;height:19px;border-radius:10px;align-items:center;justify-content:center;padding:0 5px}
+  .nav-badge{display:none;background:var(--danger);color:#fff;font-size:10.5px;font-weight:800;min-width:18px;height:18px;border-radius:9px;align-items:center;justify-content:center;padding:0 5px;margin-left:6px}
+  .sb-link .nav-badge{margin-left:auto}
+  .tb-menu-item .nav-badge{margin-left:auto}
+  .tb-dot{position:absolute;top:-3px;right:-3px;min-width:17px;height:17px;background:var(--danger);color:#fff;border-radius:9px;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);pointer-events:none;z-index:2}
   #tipModalBox{position:relative;max-height:84vh;overflow:auto}
   .tip-x{position:absolute;top:8px;right:10px;background:none;border:none;font-size:19px;color:var(--muted);cursor:pointer;line-height:1}
   .tip-body{font-size:14px;line-height:1.75;color:var(--ink);white-space:normal}
@@ -839,11 +843,12 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         </div>
         <div class="tb-user">
           <button class="tb-ava" id="tbAva" title="Akaun" onclick="toggleUserMenu(event)">S</button>
+          <span class="tb-dot" id="tbNotifDot"></span>
           <div class="tb-menu" id="tbMenu">
             <div class="tb-menu-name" id="tbMenuName">Sahabat Haramaen</div>
             <button class="tb-menu-item menu-green" onclick="document.getElementById('tbMenu').classList.remove('open');document.getElementById('avatarInput').click()"><span class="ico" data-i="pic"></span> Tukar Foto Profil</button>
             <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="changeAvatar(this)">
-            <button class="tb-menu-item" id="tbStatItem" style="display:none" onclick="document.getElementById('tbMenu').classList.remove('open');go('admin')"><span class="ico" data-i="book"></span> Admin Dashboard</button>
+            <button class="tb-menu-item" id="tbStatItem" style="display:none" onclick="document.getElementById('tbMenu').classList.remove('open');go('admin')"><span class="ico" data-i="book"></span> Admin Dashboard<span class="nav-badge" id="tbAdminBadge"></span></button>
             <button class="tb-menu-item" id="pushToggleBtn" onclick="togglePush()" style="display:none"><span class="ico" data-i="bell"></span> <span id="pushToggleLbl">Notifikasi Push</span></button>
             <button class="tb-menu-item" onclick="document.getElementById('tbMenu').classList.remove('open');openFeedback()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="vertical-align:-3px;margin-right:2px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Maklum Balas</button>
             <button class="tb-menu-item" onclick="logout()"><span class="ico" data-i="logout"></span> Log keluar</button>
@@ -1180,7 +1185,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Servis menunggu kelulusan</span><span class="acc-badge" id="bSvc"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingSvc"><div class="empty">Memuatkan…</div></div></div></div></div>
         <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Agensi menunggu kelulusan</span><span class="acc-badge" id="bAgency"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingAgency"><div class="empty">Memuatkan…</div></div></div></div></div>
         <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Kursus Mutawwif menunggu kelulusan</span><span class="acc-badge" id="bMutawwif"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingMutawwif"><div class="empty">Memuatkan…</div></div></div></div></div>
-        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Maklum Balas Pengguna</span><span class="acc-badge" id="fbCount"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div class="fb-filter" id="fbFilter"><button class="on" onclick="filterFb('all',this)">Semua</button><button onclick="filterFb('5',this)">★★★★★</button><button onclick="filterFb('4',this)">★★★★</button><button onclick="filterFb('3',this)">★★★</button><button onclick="filterFb('unrated',this)">Tanpa rating</button></div>
+        <div class="acc"><button class="acc-h" onclick="toggleFbAcc(this)"><span>Maklum Balas Pengguna</span><span class="acc-badge" id="fbCount"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div class="fb-filter" id="fbFilter"><button class="on" onclick="filterFb('all',this)">Semua</button><button onclick="filterFb('5',this)">★★★★★</button><button onclick="filterFb('4',this)">★★★★</button><button onclick="filterFb('3',this)">★★★</button><button onclick="filterFb('unrated',this)">Tanpa rating</button></div>
         <div id="admFeedback"><div class="empty">Memuatkan…</div></div></div></div></div>
       </section>
 
@@ -1592,7 +1597,7 @@ function buildNav(){
   const navList = NAV.concat(isAdmin()?[{v:'admin',t:'📊 Admin Dashboard',i:'book'}]:[]);
   const si=document.getElementById('tbStatItem'); if(si) si.style.display=isAdmin()?'flex':'none';
   document.getElementById('sbNav').innerHTML=navList.map(n=>
-    `<button class="sb-link" data-v="${n.v}" onclick="go('${n.v}')"><span class="ico" data-i="${n.i}" style="background:${n.c||'rgba(255,255,255,.15)'}"></span> ${n.t}</button>`).join('');
+    `<button class="sb-link" data-v="${n.v}" onclick="go('${n.v}')"><span class="ico" data-i="${n.i}" style="background:${n.c||'rgba(255,255,255,.15)'}"></span> ${n.t}${n.v==='admin'?'<span class="nav-badge" id="navAdminBadge"></span>':''}</button>`).join('');
   document.getElementById('bottomNav').innerHTML=BOTTOM.map(n=>
     n.center
       ? `<button class="bn bn-center" data-v="__more" onclick="openMore(event)" aria-label="Menu lain"><span class="bn-center-ic">${GRID_SVG}</span><span>${n.t}</span></button>`
@@ -1631,7 +1636,7 @@ const GRID_SVG='<svg viewBox="0 0 44 44" width="30" height="30" xmlns="http://ww
 const BOTTOM_MAIN=['home','dua','agency','assistant'];
 function moreList(){ const h=MENU.slice(); if(isAdmin()) h.push({v:'admin',t:'Admin Dashboard',i:'book',c:'#555'}); return h; }
 function renderMoreSheet(){ const g=document.getElementById('moreGrid'); if(!g) return;
-  g.innerHTML=moreList().map(function(m){ const ic=ICONS[m.i]?`<img class="fimg" src="${ICONS[m.i]}" alt="" draggable="false">`:svg(m.i); const badge=m.soon?`<span class="soon-badge">Akan datang</span>`:''; const click=m.soon?`toast('${m.t} akan datang, nantikan!')`:`pickMore('${m.v}')`; return `<button class="more-item${m.soon?' soon':''}" data-v="${m.v}" onclick="${click}"><span class="fi" style="background:${m.c}">${ic}</span><span>${m.t}${badge}</span></button>`; }).join('');
+  g.innerHTML=moreList().map(function(m){ const ic=ICONS[m.i]?`<img class="fimg" src="${ICONS[m.i]}" alt="" draggable="false">`:svg(m.i); const badge=m.soon?`<span class="soon-badge">Akan datang</span>`:''; const click=m.soon?`toast('${m.t} akan datang, nantikan!')`:`pickMore('${m.v}')`; return `<button class="more-item${m.soon?' soon':''}" data-v="${m.v}" onclick="${click}"><span class="fi" style="background:${m.c}">${ic}</span><span>${m.t}${badge}${m.v==='admin'?'<span class="nav-badge" id="moreAdminBadge"></span>':''}</span></button>`; }).join('');
   paintIcons(); }
 function openMore(e){ if(e) e.stopPropagation(); const s=document.getElementById('moreSheet'); if(s) s.classList.add('open'); initMoreDrag(); }
 function closeMore(){ const s=document.getElementById('moreSheet'); if(s) s.classList.remove('open'); const p=document.querySelector('.more-panel'); if(p){ p.style.transition=''; p.style.transform=''; } }
@@ -2341,12 +2346,21 @@ function startTracking(){
 /* ---- Admin: statistik pelawat + kelulusan kursus ---- */
 async function accToggle(btn){ const a=btn.closest('.acc'); if(a) a.classList.toggle('open'); }
 function setBadge(id,n){ const el=document.getElementById(id); if(!el) return; if(n>0){ el.textContent=n; el.style.display='inline-flex'; } else { el.textContent=''; el.style.display='none'; } }
+function fbSeen(){ try{ return localStorage.getItem('hrm_fb_seen')||''; }catch(e){ return ''; } }
+function fbNewCount(list){ const s=Date.parse(fbSeen())||0; return (list||[]).filter(function(f){ const t=Date.parse(f.created_at||''); return t && t>s; }).length; }
+function markFbSeen(){ try{ localStorage.setItem('hrm_fb_seen', new Date().toISOString()); }catch(e){} setBadge('fbCount',0); refreshAdminBadges(); }
+function toggleFbAcc(btn){ accToggle(btn); const a=btn.closest('.acc'); if(a&&a.classList.contains('open')) markFbSeen(); }
 async function refreshAdminBadges(){
   if(!isAdmin()) return;
   const q=(t)=>sb.from(t).select('id',{count:'exact',head:true}).eq('status','pending');
   try{
-    const [c,b,sv,ag,mu]=await Promise.all([sb.rpc('admin_list_pending_courses'),q('business_submissions'),q('service_submissions'),q('agencies'),q('mutawwif_courses')]);
-    setBadge('bKursus',(c.data&&c.data.length)||0); setBadge('bBiz',b.count||0); setBadge('bSvc',sv.count||0); setBadge('bAgency',ag.count||0); setBadge('bMutawwif',mu.count||0);
+    const [c,b,sv,ag,mu,fb]=await Promise.all([sb.rpc('admin_list_pending_courses'),q('business_submissions'),q('service_submissions'),q('agencies'),q('mutawwif_courses'),sb.from('feedback').select('created_at')]);
+    const cK=(c.data&&c.data.length)||0, cB=b.count||0, cS=sv.count||0, cA=ag.count||0, cM=mu.count||0;
+    setBadge('bKursus',cK); setBadge('bBiz',cB); setBadge('bSvc',cS); setBadge('bAgency',cA); setBadge('bMutawwif',cM);
+    const fbNew=fbNewCount((fb&&fb.data)||[]);
+    setBadge('fbCount',fbNew);
+    const total=cK+cB+cS+cA+cM+fbNew;
+    setBadge('navAdminBadge',total); setBadge('moreAdminBadge',total); setBadge('tbAdminBadge',total); setBadge('tbNotifDot',total);
   }catch(e){}
 }
 function renderAdmin(){
@@ -2547,7 +2561,7 @@ async function loadFeedback(){
     const {data,error}=await sb.from('feedback').select('*').order('created_at',{ascending:false}).limit(200);
     if(error) throw error;
     _fbAll=data||[];
-    const _c=document.getElementById('fbCount'); if(_c) _c.textContent=_fbAll.length;
+    setBadge('fbCount', fbNewCount(_fbAll));
     renderFbList(_fbAll);
   }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat maklum balas.</div>'; }
 }
@@ -4429,6 +4443,7 @@ function boot(){
   loadPrayerTimes();
   loadHeroWx();
   paintIcons();
+  if(isAdmin()){ refreshAdminBadges(); if(!window.__admBadgeTimer){ window.__admBadgeTimer=setInterval(()=>{ if(isAdmin()) refreshAdminBadges(); }, 90000); } }
   // Restore view dari URL hash selepas semua data dimuatkan
   const savedView=(location.hash||'').replace('#','');
   if(savedView && VALID_VIEWS.includes(savedView) && (savedView!=='admin'||isAdmin())){
