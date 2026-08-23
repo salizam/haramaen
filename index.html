@@ -1798,6 +1798,7 @@ function isReturningFromOAuth(){
   return /access_token=|[?&]code=|error=/.test(location.hash + location.search);
 }
 async function showApp(user){
+  var _prevUid = state.user ? state.user.id : null;
   state.user=user||null;
   document.documentElement.classList.remove('auth-pending');
   document.body.classList.toggle('pub', !user);
@@ -1818,7 +1819,14 @@ async function showApp(user){
     try{ await loadData(); }catch(e){ toast('Gagal muat data — semak sambungan.'); }
     boot(); appReady=true;
   } else {
-    buildNav(); go('home');
+    buildNav();
+    var _curUid = user ? user.id : null;
+    if(!user){ go('home'); }
+    else if(_prevUid !== _curUid){
+      var _sv=(location.hash||'').replace('#','');
+      if(_sv && VALID_VIEWS.includes(_sv) && (_sv!=='admin'||isAdmin())) go(_sv, true);
+      else go('home');
+    }
   }
   if(user){ startNotif(); initPush(); }
 }
