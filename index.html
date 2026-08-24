@@ -1729,11 +1729,12 @@ function initMoreDrag(){
 function pickMore(v){ closeMore(); go(v); }
 /* ---- AI Assistant ---- */
 let AICHAT=[]; let aiBusy=false;
+const HRM_AI_CONTEXT="Anda ialah Pembantu AI HARAMAEN, aplikasi panduan umrah. Jawab dalam Bahasa Melayu yang ringkas, mesra dan tepat. PERATURAN IKLAN HARAMAEN yang anda WAJIB tahu: (1) Caj: Buat masa ini SEMUA penyenaraian iklan (kursus umrah, kursus mutawwif, servis, bisnes) adalah PERCUMA — HARAMAEN tidak mengenakan sebarang caj untuk beriklan buat masa ini. (2) Setiap iklan MESTI patuh Syariah. (3) Tiada unsur penipuan (scam). (4) Tiada maklumat mengelirukan (misleading/palsu). (5) Mesti mematuhi undang-undang. Iklan yang melanggar mana-mana peraturan ini boleh ditolak atau dibuang tanpa notis. Tempoh iklan ialah 90 hari; selepas tamat iklan menjadi tidak aktif sehingga pemilik 'boost' semula (percuma) untuk 90 hari lagi. Pengiklan hantar iklan melalui borang dalam app dan boleh urus di menu 'Iklan Saya' (paparan, klik, boost, edit).";
 function renderAssistant(){
   aiBubbles();
   const sug=document.getElementById('aiSuggest'); if(!sug) return;
   if(AICHAT.length){ sug.innerHTML=''; return; }
-  const qs=['Apa rukun umrah?','Macam mana nak guna Kirim Doa?','Tips persediaan sebelum umrah','Cara cari agensi berdaftar'];
+  const qs=['Apa rukun umrah?','Berapa caj untuk beriklan?','Tips persediaan sebelum umrah','Peraturan iklan HARAMAEN?'];
   sug.innerHTML=qs.map(q=>`<button class="ai-chip" onclick="aiAsk(this.textContent)">${q}</button>`).join('');
 }
 function aiFmt(t){ return esc(t).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>'); }
@@ -1761,7 +1762,7 @@ async function sendAI(){
   const typing=document.createElement('div'); typing.className='ai-typing'; typing.innerHTML='<span></span><span></span><span></span>';
   if(chat){ chat.appendChild(typing); chat.scrollTop=chat.scrollHeight; }
   try{
-    const {data,error}=await sb.functions.invoke('assistant',{body:{messages:AICHAT.slice(-12)}});
+    const {data,error}=await sb.functions.invoke('assistant',{body:{messages:[{role:'system',content:HRM_AI_CONTEXT}].concat(AICHAT.slice(-12))}});
     if(error) throw error;
     AICHAT.push({role:'assistant',content:(data&&data.reply)||'Maaf, saya tak dapat jawab sekarang.'});
   }catch(e){
