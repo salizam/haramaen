@@ -1729,7 +1729,7 @@ function initMoreDrag(){
 function pickMore(v){ closeMore(); go(v); }
 /* ---- AI Assistant ---- */
 let AICHAT=[]; let aiBusy=false;
-const HRM_AI_CONTEXT="Anda ialah Pembantu AI HARAMAEN, aplikasi panduan umrah. Jawab dalam Bahasa Melayu yang ringkas, mesra dan tepat. PERATURAN IKLAN HARAMAEN yang anda WAJIB tahu: (1) Caj: Buat masa ini SEMUA penyenaraian iklan (kursus umrah, kursus mutawwif, servis, bisnes) adalah PERCUMA — HARAMAEN tidak mengenakan sebarang caj untuk beriklan buat masa ini. (2) Setiap iklan MESTI patuh Syariah. (3) Tiada unsur penipuan (scam). (4) Tiada maklumat mengelirukan (misleading/palsu). (5) Mesti mematuhi undang-undang. Iklan yang melanggar mana-mana peraturan ini boleh ditolak atau dibuang tanpa notis. Tempoh iklan ialah 90 hari; selepas tamat iklan menjadi tidak aktif sehingga pemilik 'boost' semula (percuma) untuk 90 hari lagi. Pengiklan hantar iklan melalui borang dalam app dan boleh urus di menu 'Iklan Saya' (paparan, klik, boost, edit).";
+const HRM_AI_CONTEXT="Anda ialah Pembantu AI HARAMAEN, aplikasi panduan umrah. Jawab dalam Bahasa Melayu yang ringkas, mesra dan tepat. PERATURAN IKLAN HARAMAEN yang anda WAJIB tahu: (1) Caj: Buat masa ini SEMUA penyenaraian iklan (kursus umrah, kursus mutawwif, servis, bisnes) adalah PERCUMA — HARAMAEN tidak mengenakan sebarang caj untuk beriklan buat masa ini. (2) Setiap iklan MESTI patuh Syariah. (3) Tiada unsur penipuan (scam). (4) Tiada maklumat mengelirukan (misleading/palsu). (5) Mesti mematuhi undang-undang. (6) Setiap iklan WAJIB disemak & diluluskan admin dahulu sebelum dipaparkan kepada umum. Iklan yang melanggar mana-mana peraturan ini boleh ditolak atau dibuang tanpa notis. Tempoh iklan ialah 90 hari; selepas tamat iklan menjadi tidak aktif sehingga pemilik 'boost' semula (percuma) untuk 90 hari lagi. Pengiklan hantar iklan melalui borang dalam app dan boleh urus di menu 'Iklan Saya' (paparan, klik, boost, edit).";
 function renderAssistant(){
   aiBubbles();
   const sug=document.getElementById('aiSuggest'); if(!sug) return;
@@ -2174,7 +2174,7 @@ function courseRow(k,dist){
     :`<td class="k-poster-td"></td>`;
   const mapQ=encodeURIComponent([k.lokasi,loc2].filter(Boolean).join(', '));
   const mapLink=mapQ?`<br><a href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" class="k-map-link">🗺️ Peta</a>`:'';
-  return `<tr>${posterTd}<td>${esc(k.tarikh)}</td><td>${esc(k.masa)}</td><td>${esc(k.lokasi)}${loc2?`<br><small style="color:var(--muted)">${esc(loc2)}</small>`:''}${mapLink}${dtxt}</td><td data-l="Hubungi" style="vertical-align:top">${k.hubungi?`<a href="${waLink(k.hubungi)}" target="_blank" rel="noopener" class="wa-link" onclick="trackAd('${k.atype||'courses'}','${k.id}','click')">${WA_ICON}${esc(k.hubungi)}</a>`:''}<div style="margin-top:4px"><button class="shr-sm" data-title="${shrT}" data-text="${shrX}" data-url="${shrU}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div></td></tr>`;
+  return `<tr>${posterTd}<td>${esc(k.tarikh)}</td><td>${esc(k.masa)}</td><td>${esc(k.lokasi)}${loc2?`<br><small style="color:var(--muted)">${esc(loc2)}</small>`:''}${mapLink}${dtxt}</td><td data-l="Hubungi" style="vertical-align:top">${k.hubungi?`<a href="${waLink(k.hubungi)}" target="_blank" rel="noopener" class="wa-link" onclick="trackAd('${k.atype||'courses'}','${k.id}','click')">${WA_ICON}${esc(k.hubungi)}</a>`:''}<div style="margin-top:4px"><button class="shr-sm" data-title="${shrT}" data-text="${shrX}" data-url="${shrU}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>${isAdmin()?`<button class="shr-sm" style="border-color:#e0b4b4;color:#c0392b;margin-left:4px" onclick="deleteAd('${k.atype||'courses'}','${k.id}',this)">🗑️ Padam</button>`:''}</div></td></tr>`;
 }
 function renderKursus(){
   const b=document.getElementById('kursusBody'); if(!b) return;
@@ -2343,7 +2343,7 @@ function openMutawwifForm(){ cfMode='mutawwif'; openCourseForm(true); }
 function openCourseForm(_keep){
   if(!_keep) cfMode='course';
   const _t=document.getElementById('cfTitle'); if(_t) _t.textContent=(cfMode==='mutawwif'?'Daftar Kursus Mutawwif':'Daftar Kursus Umrah');
-  const _sub=document.getElementById('cfSub'); if(_sub) _sub.textContent=(cfMode==='mutawwif'?'Isi maklumat kursus mutawwif. Kursus akan terus dipaparkan dalam senarai.':'Isi maklumat kursus. Kursus akan disemak admin dahulu sebelum dipaparkan dalam senarai.');
+  const _sub=document.getElementById('cfSub'); if(_sub) _sub.textContent=(cfMode==='mutawwif'?'Isi maklumat kursus mutawwif. Kursus akan disemak admin dahulu sebelum dipaparkan dalam senarai.':'Isi maklumat kursus. Kursus akan disemak admin dahulu sebelum dipaparkan dalam senarai.');
   const sel=document.getElementById('cfNegeri');
   if(sel && !sel.dataset.filled){ sel.innerHTML='<option value="">— Pilih negeri —</option>'+MY_NEGERI.map(n=>`<option>${n}</option>`).join(''); sel.dataset.filled=1; }
   fillMasa();
@@ -2428,7 +2428,7 @@ async function submitCourse(){
     if(cfMode==='mutawwif'){ try{ const mc=await sb.from('mutawwif_courses').select('*').eq('status','approved');
       MUTAWWIF=(mc.data||[]).map(c=>({tarikh:c.tarikh_label, date:c.tarikh_date||'', masa:c.masa||'', lokasi:c.lokasi||'', daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||'', created:c.created_at||'', poster_url:c.poster_url||''})).sort((a,b)=>(a.date||'').localeCompare(b.date||'')); renderMutawwifAll(); }catch(e){} }
     closeCourseForm();
-    toast(cfMode==='mutawwif'?'Terima kasih! Kursus mutawwif telah dipaparkan.':'Terima kasih! Kursus dihantar untuk semakan admin.');
+    toast('Terima kasih! Kursus dihantar untuk semakan admin. 🙏');
   }catch(e){ toast('Gagal menghantar — cuba lagi.'); }
   btn.disabled=false; btn.textContent='Hantar';
 }
@@ -2520,6 +2520,7 @@ async function loadPendingCourses(){
         <div class="pend-act">
           <button class="b-approve" onclick="setCourse(${c.id},'approved',this)">✓ Lulus</button>
           <button class="b-reject" onclick="setCourse(${c.id},'rejected',this)">✕ Tolak</button>
+          <button class="b-reject" onclick="deleteAd('courses',${c.id},this)">🗑️ Padam</button>
         </div>
       </div>`).join('') : '<div class="empty">Tiada kursus menunggu kelulusan.</div>';
   }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat senarai.</div>'; }
@@ -2555,6 +2556,7 @@ async function loadPendingBusiness(){
         <div class="pend-act">
           <button class="b-approve" onclick="setBusiness('${esc(String(b.id))}','approved',this)">✓ Lulus</button>
           <button class="b-reject" onclick="setBusiness('${esc(String(b.id))}','rejected',this)">✕ Tolak</button>
+          <button class="b-reject" onclick="deleteAd('business_submissions','${esc(String(b.id))}',this)">🗑️ Padam</button>
         </div>
       </div>`).join('') : '<div class="empty">Tiada bisnes menunggu kelulusan.</div>';
   }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat senarai (pastikan login sebagai admin).</div>'; }
@@ -2586,6 +2588,7 @@ async function loadPendingService(){
         <div class="pend-act">
           <button class="b-approve" onclick="setService('${esc(String(x.id))}','approved',this)">✓ Lulus</button>
           <button class="b-reject" onclick="setService('${esc(String(x.id))}','rejected',this)">✕ Tolak</button>
+          <button class="b-reject" onclick="deleteAd('service_submissions','${esc(String(x.id))}',this)">🗑️ Padam</button>
         </div>
       </div>`).join('') : '<div class="empty">Tiada servis menunggu kelulusan.</div>';
   }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat senarai (pastikan login sebagai admin).</div>'; }
@@ -2647,6 +2650,7 @@ async function loadPendingMutawwif(){
         <div class="pend-act">
           <button class="b-approve" onclick="setMutawwif('${esc(String(c.id))}','approved',this)">✓ Lulus</button>
           <button class="b-reject" onclick="setMutawwif('${esc(String(c.id))}','rejected',this)">✕ Tolak</button>
+          <button class="b-reject" onclick="deleteAd('mutawwif_courses','${esc(String(c.id))}',this)">🗑️ Padam</button>
         </div>
       </div>`).join('') : '<div class="empty">Tiada kursus mutawwif menunggu kelulusan.</div>';
   }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat senarai (pastikan login sebagai admin).</div>'; }
@@ -3503,6 +3507,7 @@ function renderSvc(){
       <div class="row-between"><b>${esc(o.name)}</b>${o.pill?`<span class="pill gold">${esc(o.pill)}</span>`:''}</div>
       ${o.desc?`<div class="tag">${esc(o.desc)}</div>`:''}
       ${wa}
+      ${isAdmin()?`<div style="margin-top:6px"><button class="shr-sm" style="border-color:#e0b4b4;color:#c0392b" onclick="deleteAd('service_submissions','${o.id}',this)">🗑️ Padam</button></div>`:''}
       <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(o.name)}" data-text="${esc(o.name+(o.desc?' — '+o.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
       </div></div></div>`;
   }
@@ -4822,6 +4827,23 @@ function openCourseEdit(type,row){
   const t=document.getElementById('cfTitle'); if(t) t.textContent=(cfMode==='mutawwif'?'Edit Kursus Mutawwif':'Edit Kursus Umrah');
   const sv=document.getElementById('cfSave'); if(sv) sv.textContent='Simpan';
   showExtend('cfExtendBox',type,row.id,row);
+}
+async function deleteAd(type,id,btn){
+  if(!isAdmin()) return;
+  if(btn && btn.getAttribute('data-armed')!=='1'){ btn.setAttribute('data-armed','1'); btn.dataset.olbl=btn.textContent; btn.textContent='Pasti? Padam'; setTimeout(function(){ if(btn&&btn.getAttribute('data-armed')==='1'){ btn.removeAttribute('data-armed'); btn.textContent=btn.dataset.olbl||'🗑️ Padam'; } },3500); return; }
+  if(btn){ btn.disabled=true; btn.textContent='Memadam…'; }
+  try{
+    const {error}=await sb.from(type).delete().eq('id',id);
+    if(error) throw error;
+    try{ await loadData(); }catch(e){}
+    try{ if(typeof renderKursusAll==='function') renderKursusAll(); }catch(e){}
+    try{ if(typeof renderMutawwifAll==='function') renderMutawwifAll(); }catch(e){}
+    try{ if(typeof renderSvc==='function') renderSvc(); }catch(e){}
+    try{ if(typeof renderShop==='function') renderShop(); }catch(e){}
+    try{ if(typeof renderAdmin==='function') renderAdmin(); }catch(e){}
+    if(document.getElementById('myAdsBox')&&typeof renderMyAds==='function') renderMyAds();
+    toast('Iklan dipadam. 🗑️');
+  }catch(e){ toast('Gagal padam — semak kebenaran admin (RLS).'); if(btn){ btn.disabled=false; btn.textContent=(btn.dataset.olbl||'🗑️ Padam'); btn.removeAttribute('data-armed'); } }
 }
 function trackAd(type,id,kind){
   try{
