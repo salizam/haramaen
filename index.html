@@ -491,6 +491,17 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .usr-tbl td.usr-em{color:var(--green-d);word-break:break-all}
   .usr-tbl td.usr-dt{white-space:nowrap;color:var(--muted)}
   .usr-tbl td.usr-i{color:var(--muted);width:26px}
+  .usr-tbl td.usr-act{white-space:nowrap}
+  .usr-btn{border:0;border-radius:8px;padding:5px 9px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+  .usr-btn.e{background:#efe9fb;color:var(--green-d);margin-right:5px}
+  .usr-btn.e:hover{background:#e2d8f7}
+  .usr-btn.d{background:#fdece9;color:var(--danger)}
+  .usr-btn.d:hover{background:#f9dbd6}
+  .ue-field{margin-bottom:12px}
+  .ue-field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px}
+  .ue-field input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:11px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink)}
+  .ue-field input:focus{outline:none;border-color:var(--gold)}
+  .ue-warn{font-size:11.5px;color:#b45309;background:#fef3c7;border:1px solid #fde68a;border-radius:9px;padding:8px 11px;margin:2px 0 4px;line-height:1.45}
   .sb-link .nav-badge{margin-left:auto}
   .tb-menu-item .nav-badge{margin-left:auto}
   .tb-dot{position:absolute;top:-3px;right:-3px;min-width:17px;height:17px;background:var(--danger);color:#fff;border-radius:9px;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);pointer-events:none;z-index:2}
@@ -1285,6 +1296,18 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   </div>
 </div>
 
+<!-- MODAL: Edit Pengguna -->
+<div class="modal" id="userEditModal">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-head"><b>Edit Pengguna</b><button class="modal-close" onclick="closeUserEdit()" title="Tutup"><svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="12.5" y2="12.5"/><line x1="12.5" y1="1.5" x2="1.5" y2="12.5"/></svg></button></div>
+    <div style="padding:16px">
+      <div class="ue-field"><label>Nama</label><input id="ueName" type="text" placeholder="Nama pengguna" autocomplete="off"></div>
+      <div class="ue-field"><label>Email</label><input id="ueEmail" type="email" placeholder="email@contoh.com" autocomplete="off"></div>
+      <div class="ue-warn">⚠️ Menukar email akan menukar email log masuk pengguna. Untuk akaun Google, ini mungkin menjejaskan log masuk mereka.</div>
+      <button class="kbtn" id="ueSave" onclick="userEditSave()" style="width:100%;margin-top:12px">💾 Simpan</button>
+    </div>
+  </div>
+</div>
 <!-- MODAL: Agency Reviews -->
 <div class="modal" id="reviewModal">
   <div class="modal-box" style="max-width:480px">
@@ -2468,26 +2491,73 @@ function startTracking(){
 /* ---- Admin: statistik pelawat + kelulusan kursus ---- */
 async function accToggle(btn){ const a=btn.closest('.acc'); if(!a) return; const willOpen=!a.classList.contains('open'); if(willOpen&&a.parentElement){ Array.prototype.forEach.call(a.parentElement.children,function(s){ if(s!==a&&s.classList&&s.classList.contains('acc')) s.classList.remove('open'); }); } a.classList.toggle('open'); }
 function setBadge(id,n){ const el=document.getElementById(id); if(!el) return; if(n>0){ el.textContent=n; el.style.display='inline-flex'; } else { el.textContent=''; el.style.display='none'; } }
-let USERS_LOADED=false;
+let USERS_LOADED=false, USERS_DATA=null;
 function fmtUserDate(s){ if(!s) return '—'; const d=new Date(s); if(isNaN(d.getTime())) return esc(String(s)); try{ return d.toLocaleDateString('ms-MY',{day:'numeric',month:'short',year:'numeric'}); }catch(_){ return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}); } }
+async function fetchUsers(force){
+  if(USERS_LOADED && !force && USERS_DATA) return USERS_DATA;
+  const {data,error}=await sb.rpc('admin_list_users');
+  if(error) throw error;
+  let rows=data; if(typeof rows==='string'){ try{ rows=JSON.parse(rows); }catch(_){ rows=[]; } }
+  if(!Array.isArray(rows)) rows=[];
+  USERS_DATA=rows; USERS_LOADED=true;
+  return rows;
+}
+function updateUserStat(){ const el=document.getElementById('statUsers'); if(el) el.textContent=(USERS_DATA?USERS_DATA.length:'…'); }
+async function loadUserCount(){
+  try{ await fetchUsers(); updateUserStat(); }
+  catch(e){ const el=document.getElementById('statUsers'); if(el) el.textContent='—'; }
+}
 async function loadUsersList(force){
   const box=document.getElementById('admUsers'); if(!box) return;
-  if(USERS_LOADED && !force) return;
+  if(USERS_LOADED && !force && USERS_DATA){ renderUsersList(USERS_DATA); updateUserStat(); return; }
   box.innerHTML='<div class="empty">Memuatkan…</div>';
   try{
-    const {data,error}=await sb.rpc('admin_list_users');
-    if(error) throw error;
-    let rows=data; if(typeof rows==='string'){ try{ rows=JSON.parse(rows); }catch(_){ rows=[]; } }
-    if(!Array.isArray(rows)) rows=[];
-    USERS_LOADED=true;
+    const rows=await fetchUsers(force);
     renderUsersList(rows);
+    updateUserStat();
   }catch(e){ USERS_LOADED=false; box.innerHTML='<div class="empty">Gagal memuatkan senarai pengguna — '+esc(e&&e.message||'cuba lagi')+'</div>'; }
 }
 function renderUsersList(rows){
   const box=document.getElementById('admUsers'); if(!box) return;
   if(!rows.length){ box.innerHTML='<div class="empty">Tiada pengguna berdaftar lagi.</div>'; return; }
-  const body=rows.map((u,i)=>`<tr><td class="usr-i">${i+1}</td><td class="usr-nm">${esc(u.name||'—')}</td><td class="usr-em">${esc(u.email||'—')}</td><td class="usr-dt">${fmtUserDate(u.created_at)}</td></tr>`).join('');
-  box.innerHTML='<div class="usr-sum">Jumlah pengguna berdaftar: <b>'+rows.length+'</b></div><div class="usr-wrap"><table class="usr-tbl"><thead><tr><th class="usr-i">#</th><th>Nama</th><th>Email</th><th>Berdaftar</th></tr></thead><tbody>'+body+'</tbody></table></div>';
+  const body=rows.map((u,i)=>`<tr><td class="usr-i">${i+1}</td><td class="usr-nm">${esc(u.name||'—')}</td><td class="usr-em">${esc(u.email||'—')}</td><td class="usr-dt">${fmtUserDate(u.created_at)}</td><td class="usr-act">${u.id?`<button class="usr-btn e" onclick="userEdit('${esc(String(u.id))}')">✏️ Edit</button><button class="usr-btn d" onclick="userDelete('${esc(String(u.id))}',this)">🗑️ Padam</button>`:'<span style="color:var(--muted);font-size:11px">—</span>'}</td></tr>`).join('');
+  box.innerHTML='<div class="usr-sum">Jumlah pengguna berdaftar: <b>'+rows.length+'</b></div><div class="usr-wrap"><table class="usr-tbl"><thead><tr><th class="usr-i">#</th><th>Nama</th><th>Email</th><th>Berdaftar</th><th>Tindakan</th></tr></thead><tbody>'+body+'</tbody></table></div>';
+}
+function userEdit(id){
+  const u=(USERS_DATA||[]).find(x=>String(x.id)===String(id)); if(!u) return;
+  window.__ueId=id;
+  const n=document.getElementById('ueName'); if(n) n.value=u.name||'';
+  const e=document.getElementById('ueEmail'); if(e) e.value=u.email||'';
+  const m=document.getElementById('userEditModal'); if(m) m.classList.add('open');
+}
+function closeUserEdit(){ const m=document.getElementById('userEditModal'); if(m) m.classList.remove('open'); window.__ueId=null; }
+async function userEditSave(){
+  const id=window.__ueId; if(!id) return;
+  const name=(document.getElementById('ueName').value||'').trim();
+  const email=(document.getElementById('ueEmail').value||'').trim().toLowerCase();
+  if(!name){ toast('Sila isi nama.'); return; }
+  if(!email || email.indexOf('@')<1 || email.indexOf('.')<0){ toast('Sila isi email yang sah.'); return; }
+  const btn=document.getElementById('ueSave'); if(btn){ btn.disabled=true; btn.textContent='Menyimpan…'; }
+  try{
+    const {error}=await sb.rpc('admin_update_user',{p_id:id,p_name:name,p_email:email});
+    if(error) throw error;
+    const u=(USERS_DATA||[]).find(x=>String(x.id)===String(id)); if(u){ u.name=name; u.email=email; }
+    renderUsersList(USERS_DATA||[]); updateUserStat();
+    toast('Maklumat pengguna dikemas kini. ✅');
+    closeUserEdit();
+  }catch(e){ toast('Gagal kemas kini — '+(e&&e.message||'cuba lagi.')); }
+  if(btn){ btn.disabled=false; btn.textContent='💾 Simpan'; }
+}
+async function userDelete(id,btn){
+  if(btn && btn.getAttribute('data-armed')!=='1'){ btn.setAttribute('data-armed','1'); btn.dataset.olbl=btn.textContent; btn.textContent='Pasti? Padam'; setTimeout(function(){ if(btn&&btn.getAttribute('data-armed')==='1'){ btn.removeAttribute('data-armed'); btn.textContent=btn.dataset.olbl||'🗑️ Padam'; } },3500); return; }
+  if(btn){ btn.disabled=true; btn.textContent='Memadam…'; }
+  try{
+    const {error}=await sb.rpc('admin_delete_user',{p_id:id});
+    if(error) throw error;
+    USERS_DATA=(USERS_DATA||[]).filter(x=>String(x.id)!==String(id));
+    renderUsersList(USERS_DATA); updateUserStat();
+    toast('Akaun pengguna & kandungannya dipadam. 🗑️');
+  }catch(e){ toast('Gagal padam — '+(e&&e.message||'semak kebenaran admin.')); if(btn){ btn.disabled=false; btn.textContent=(btn.dataset.olbl||'🗑️ Padam'); btn.removeAttribute('data-armed'); } }
 }
 function fbSeen(){ try{ return localStorage.getItem('hrm_fb_seen')||''; }catch(e){ return ''; } }
 function fbNewCount(list){ const s=Date.parse(fbSeen())||0; return (list||[]).filter(function(f){ const t=Date.parse(f.created_at||''); return t && t>s; }).length; }
@@ -2509,6 +2579,7 @@ async function refreshAdminBadges(){
 function renderAdmin(){
   if(!isAdmin()){ document.getElementById('admStats').innerHTML='<div class="empty">Akses admin sahaja.</div>'; return; }
   loadAdminStats();
+  loadUserCount();
   refreshAdminBadges();
   if(admTimer) clearInterval(admTimer);
   admTimer=setInterval(()=>{ const a=document.getElementById('v-admin'); if(a&&a.classList.contains('active')) loadAdminStats(true); else { clearInterval(admTimer); admTimer=null; } }, 30000);
@@ -2529,7 +2600,8 @@ async function loadAdminStats(quiet){
       <div class="adm-stat"><div class="n">${s.today_unique||0}</div><div class="l">Pelawat unik hari ini</div></div>
       <div class="adm-stat"><div class="n">${s.today_visits||0}</div><div class="l">Kunjungan hari ini</div></div>
       <div class="adm-stat"><div class="n">${s.total_unique||0}</div><div class="l">Jumlah pelawat unik</div></div>
-      <div class="adm-stat"><div class="n">${s.total_visits||0}</div><div class="l">Jumlah kunjungan</div></div>`;
+      <div class="adm-stat"><div class="n">${s.total_visits||0}</div><div class="l">Jumlah kunjungan</div></div>
+      <div class="adm-stat"><div class="n" id="statUsers">${USERS_DATA?USERS_DATA.length:'…'}</div><div class="l">Jumlah pengguna berdaftar</div></div>`;
     const daily=s.daily||[];
     const max=Math.max(1,...daily.map(d=>d.uniq||0));
     document.getElementById('admBars').innerHTML = daily.length ? daily.map(d=>{
