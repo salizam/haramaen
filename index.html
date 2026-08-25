@@ -392,6 +392,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .topag-h{display:flex;align-items:center;font-weight:800;font-size:14px;color:var(--green);margin-bottom:9px;gap:6px}
   .topag-h .tk-more{margin-left:auto}
   .topag-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .topag-row .topag-card:nth-child(n+4){display:none}
+  @media(min-width:980px){ .topag-row{grid-template-columns:repeat(5,1fr)} .topag-row .topag-card:nth-child(n+4){display:block} }
   .topag-card{position:relative;background:linear-gradient(160deg,#faf7ff,#f1ecfb);border:1px solid var(--line);border-radius:13px;padding:13px 9px 11px;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden}
   .topag-card:hover{transform:translateY(-2px);box-shadow:0 7px 16px rgba(94,53,177,.16)}
   .topag-rank{position:absolute;top:0;left:0;background:var(--green-l);color:#fff;font-size:10.5px;font-weight:800;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:0 0 9px 0;padding:0 3px}
@@ -479,6 +481,16 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .acc-inner{padding:6px 13px 14px}
   .acc-badge{display:none;background:var(--danger);color:#fff;font-size:11px;font-weight:800;min-width:19px;height:19px;border-radius:10px;align-items:center;justify-content:center;padding:0 5px}
   .nav-badge{display:none;background:var(--danger);color:#fff;font-size:10.5px;font-weight:800;min-width:18px;height:18px;border-radius:9px;align-items:center;justify-content:center;padding:0 5px;margin-left:6px}
+  .usr-sum{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+  .usr-sum b{color:var(--green-d);font-size:16px}
+  .usr-wrap{overflow-x:auto}
+  .usr-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+  .usr-tbl th,.usr-tbl td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+  .usr-tbl th{font-size:10.5px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+  .usr-tbl td.usr-nm{font-weight:700;color:var(--ink)}
+  .usr-tbl td.usr-em{color:var(--green-d);word-break:break-all}
+  .usr-tbl td.usr-dt{white-space:nowrap;color:var(--muted)}
+  .usr-tbl td.usr-i{color:var(--muted);width:26px}
   .sb-link .nav-badge{margin-left:auto}
   .tb-menu-item .nav-badge{margin-left:auto}
   .tb-dot{position:absolute;top:-3px;right:-3px;min-width:17px;height:17px;background:var(--danger);color:#fff;border-radius:9px;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);pointer-events:none;z-index:2}
@@ -592,6 +604,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .tk-blk{margin-top:12px}
   .tk-cols{display:block}
   @media(min-width:640px){ .tk-cols{display:grid; grid-template-columns:1fr 1fr; gap:0 22px; align-items:start} }
+  @media(min-width:980px){ .tk-cols{grid-template-columns:1fr 1fr 1fr; gap:0 20px} }
   .tk-h{display:flex; align-items:center; font-size:12.5px; font-weight:700; margin-bottom:6px; padding:6px 10px; border-radius:10px; gap:4px}
   .tk-h-news{background:var(--green-d); color:#fff}
   .tk-h-dua{background:var(--green-d); color:#fff}
@@ -1255,6 +1268,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Kursus Mutawwif menunggu kelulusan</span><span class="acc-badge" id="bMutawwif"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingMutawwif"><div class="empty">Memuatkan…</div></div></div></div></div>
         <div class="acc"><button class="acc-h" onclick="toggleFbAcc(this)"><span>Maklum Balas Pengguna</span><span class="acc-badge" id="fbCount"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div class="fb-filter" id="fbFilter"><button class="on" onclick="filterFb('all',this)">Semua</button><button onclick="filterFb('5',this)">★★★★★</button><button onclick="filterFb('4',this)">★★★★</button><button onclick="filterFb('3',this)">★★★</button><button onclick="filterFb('unrated',this)">Tanpa rating</button></div>
         <div id="admFeedback"><div class="empty">Memuatkan…</div></div></div></div></div>
+        <div class="acc"><button class="acc-h" onclick="accToggle(this);loadUsersList()"><span>👥 Jumlah Pengguna</span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admUsers"><div class="empty">Memuatkan…</div></div></div></div></div>
       </section>
 
     </main>
@@ -2452,8 +2466,29 @@ function startTracking(){
 }
 
 /* ---- Admin: statistik pelawat + kelulusan kursus ---- */
-async function accToggle(btn){ const a=btn.closest('.acc'); if(a) a.classList.toggle('open'); }
+async function accToggle(btn){ const a=btn.closest('.acc'); if(!a) return; const willOpen=!a.classList.contains('open'); if(willOpen&&a.parentElement){ Array.prototype.forEach.call(a.parentElement.children,function(s){ if(s!==a&&s.classList&&s.classList.contains('acc')) s.classList.remove('open'); }); } a.classList.toggle('open'); }
 function setBadge(id,n){ const el=document.getElementById(id); if(!el) return; if(n>0){ el.textContent=n; el.style.display='inline-flex'; } else { el.textContent=''; el.style.display='none'; } }
+let USERS_LOADED=false;
+function fmtUserDate(s){ if(!s) return '—'; const d=new Date(s); if(isNaN(d.getTime())) return esc(String(s)); try{ return d.toLocaleDateString('ms-MY',{day:'numeric',month:'short',year:'numeric'}); }catch(_){ return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}); } }
+async function loadUsersList(force){
+  const box=document.getElementById('admUsers'); if(!box) return;
+  if(USERS_LOADED && !force) return;
+  box.innerHTML='<div class="empty">Memuatkan…</div>';
+  try{
+    const {data,error}=await sb.rpc('admin_list_users');
+    if(error) throw error;
+    let rows=data; if(typeof rows==='string'){ try{ rows=JSON.parse(rows); }catch(_){ rows=[]; } }
+    if(!Array.isArray(rows)) rows=[];
+    USERS_LOADED=true;
+    renderUsersList(rows);
+  }catch(e){ USERS_LOADED=false; box.innerHTML='<div class="empty">Gagal memuatkan senarai pengguna — '+esc(e&&e.message||'cuba lagi')+'</div>'; }
+}
+function renderUsersList(rows){
+  const box=document.getElementById('admUsers'); if(!box) return;
+  if(!rows.length){ box.innerHTML='<div class="empty">Tiada pengguna berdaftar lagi.</div>'; return; }
+  const body=rows.map((u,i)=>`<tr><td class="usr-i">${i+1}</td><td class="usr-nm">${esc(u.name||'—')}</td><td class="usr-em">${esc(u.email||'—')}</td><td class="usr-dt">${fmtUserDate(u.created_at)}</td></tr>`).join('');
+  box.innerHTML='<div class="usr-sum">Jumlah pengguna berdaftar: <b>'+rows.length+'</b></div><div class="usr-wrap"><table class="usr-tbl"><thead><tr><th class="usr-i">#</th><th>Nama</th><th>Email</th><th>Berdaftar</th></tr></thead><tbody>'+body+'</tbody></table></div>';
+}
 function fbSeen(){ try{ return localStorage.getItem('hrm_fb_seen')||''; }catch(e){ return ''; } }
 function fbNewCount(list){ const s=Date.parse(fbSeen())||0; return (list||[]).filter(function(f){ const t=Date.parse(f.created_at||''); return t && t>s; }).length; }
 function markFbSeen(){ try{ localStorage.setItem('hrm_fb_seen', new Date().toISOString()); }catch(e){} setBadge('fbCount',0); refreshAdminBadges(); }
@@ -3263,6 +3298,7 @@ async function submitDeliver(id,btn){
 let notifTimer=null, contentNotifs=[];
 function notifText(n){
   const who=`<span class="who">${esc(n.actor_name||'Hamba Allah')}</span>`;
+  if(n.type==='newuser') return `${who} telah mendaftar sebagai pengguna baharu HARAMAEN. 🎉`;
   if(n.type==='deliver') return `${who} telah membacakan kiriman doa anda di ${esc(n.location||'tempat mustajab')}.`;
   return `${who} telah mengaminkan doa anda.`;
 }
@@ -3374,7 +3410,7 @@ async function loadNotif(){
       }).join('');
       const pHtml=items.map(n=>`
         <div class="notif-item${n.is_read?'':' unread'}">
-          <div class="notif-ic">${n.type==='deliver'?'🕋':'🤲'}</div>
+          <div class="notif-ic">${n.type==='newuser'?'👤':(n.type==='deliver'?'🕋':'🤲')}</div>
           <div><div class="notif-tx">${notifText(n)}</div><div class="notif-tm">${relTime(n.created_at)}</div></div>
         </div>`).join('');
       list.innerHTML = (cHtml||pHtml) ? (cHtml+pHtml) : '<div class="notif-empty">Tiada notifikasi lagi.</div>';
@@ -4266,7 +4302,7 @@ function topAgHomeHtml(){
   if(priced.length<3) return '';
   priced.sort((a,b)=>{ const pa=Number(a.price)||Infinity, pb=Number(b.price)||Infinity; return (pa-pb) || ((b.rating||0)-(a.rating||0)); });
   const minP=Number(priced[0].price)||0;
-  const cards=priced.slice(0,3).map((a,i)=>{
+  const cards=priced.slice(0,5).map((a,i)=>{
     const logo=a.logo_url?`<img class="topag-logo" src="${esc(a.logo_url)}" alt="" loading="lazy" onerror="this.style.display='none'">`:`<div class="topag-ini">${esc((a.name||'?').trim().charAt(0).toUpperCase())}</div>`;
     const rate=a.rating>0?`⭐ ${Number(a.rating).toFixed(1)}`:'';
     const jimat=a.price_old>a.price?a.price_old-a.price:0;
@@ -4307,8 +4343,9 @@ function renderTerkini(){
       crs.map(c=>`<div class="tk-item" onclick="jump('kursus')"><span class="pill">${esc(c.negeri||'—')}</span><div class="tk-tx"><b>${esc(c.anjuran||'Kursus Umrah')}</b><small>${esc(c.tarikh||'')}${c.daerah?' · '+esc(c.daerah):''}</small></div></div>`).join('')+`</div>`;
   }
   const head=`<div class="tk-head"><span class="dot"></span> Terkini di Haramaen</div>`;
-  const left=tipsBlk+newsBlk+duasBlk, right=crsBlk;
-  const body=(left&&right)?`<div class="tk-cols"><div class="tk-col">${left}</div><div class="tk-col">${right}</div></div>`:(left+right);
+  const c1=tipsBlk+newsBlk, c2=duasBlk, c3=crsBlk;
+  const cols=[c1,c2,c3].filter(Boolean);
+  const body = cols.length>1 ? `<div class="tk-cols">${cols.map(c=>`<div class="tk-col">${c}</div>`).join('')}</div>` : cols.join('');
   el.innerHTML=head+body;
 }
 
