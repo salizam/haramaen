@@ -1904,7 +1904,7 @@ async function loadData(){
     stars:Number(h.stars), icon:h.type==='homestay'?'🏠':'🏨', lat:Number(h.lat), lng:Number(h.lng), note:h.note||'', city:h.city||'Makkah'}));
   VOLUNTEERS=(vo.data||[]).map(v=>({name:v.name, loc:v.location, done:Number(v.duas_delivered||0), note:v.note||''}));
   HOSPITALS=(me.data||[]).map(m=>{const k=MED_MAP[m.type]||{t:m.type,i:'🏥'};
-    return {name:m.name, type:k.t, icon:k.i, dist:m.distance_km===null?null:Number(m.distance_km), tel:m.phone, tag:m.tag||'', apply_url:m.apply_url||''};});
+    return {name:m.name, type:k.t, icon:k.i, dist:m.distance_km===null?null:Number(m.distance_km), tel:m.phone, tag:m.tag||'', apply_url:m.apply_url||'', location:m.location||''};});
   SERVICES=(sv.data||[]).map(s=>({name:s.name, icon:SVC_ICON[s.icon]||'🕋', desc:s.description||'', price:s.price_label||'', tag:s.tag||''}));
   try{ const bz=await sb.from('business_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); BIZ=(bz.data||[]).map(b=>({id:b.id, name:b.name||'', category:b.category||'', location:b.location||'', contact:b.contact||'', website:b.website||'', desc:b.description||'', signboard:b.signboard_url||'', poster:b.poster_url||'', images:b.images||[], created:b.created_at||'', exp:b.expires_at||'', boosted:b.boosted_at||''})).filter(b=>_pubActive(b.exp)).sort(_pubSortNew); }catch(e){ BIZ=[]; }
   try{ const ss=await sb.from('service_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); SVCSUB=(ss.data||[]).map(x=>({id:x.id, name:x.name||'', category:x.category||'', location:x.location||'', contact:x.contact||'', website:x.website||'', desc:x.description||'', photo:x.photo_url||'', images:x.images||[], created:x.created_at||'', exp:x.expires_at||'', boosted:x.boosted_at||''})).filter(x=>_pubActive(x.exp)).sort(_pubSortNew); }catch(e){ SVCSUB=[]; }
@@ -3623,9 +3623,10 @@ function renderMed(){
     `<div class="dir-filter"><label>Jenis</label><select onchange="state.medFilter=this.value;renderMed()">${opts}</select></div>`+
     `<div class="muted" style="font-size:12.5px;margin-bottom:10px">Sumber perubatan & kecemasan — berguna untuk jemaah DIY Umrah. 🚑</div>`+
     (list.map(h=>{
-      const mapQ=encodeURIComponent(h.name+' Makkah');
+      const loc=(h.location||'').trim();
+      const mapVal=(loc==='-'||loc.toLowerCase()==='none')?'':(loc||(h.name+' Makkah'));
       const _ico=[];
-      _ico.push(`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Peta lokasi">${ICO_PIN}</a>`);
+      if(mapVal) _ico.push(`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapVal)}" target="_blank" rel="noopener" data-tip="Peta lokasi">${ICO_PIN}</a>`);
       if(h.apply_url) _ico.push(`<a class="ag-icon-btn" href="${esc(h.apply_url)}" target="_blank" rel="noopener" data-tip="Web / Mohon">${ICO_GLOBE}</a>`);
       if(h.tel) _ico.push(`<a class="ag-icon-btn" href="tel:${esc(String(h.tel).replace(/\s/g,''))}" data-tip="Telefon">${ICO_PHONE}</a>`);
       return `<div class="card"><div class="list-row" style="align-items:flex-start">
