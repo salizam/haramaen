@@ -502,6 +502,20 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .ue-field input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:11px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink)}
   .ue-field input:focus{outline:none;border-color:var(--gold)}
   .ue-warn{font-size:11.5px;color:#b45309;background:#fef3c7;border:1px solid #fde68a;border-radius:9px;padding:8px 11px;margin:2px 0 4px;line-height:1.45}
+  /* Galeri iklan (multi-image upload) */
+  .mig-grid{display:flex;flex-wrap:wrap;gap:9px;margin:4px 0 5px}
+  .mig-t{position:relative;width:84px;height:84px;border-radius:11px;overflow:hidden;border:1px solid var(--line);flex:none}
+  .mig-t img{width:100%;height:100%;object-fit:cover;display:block}
+  .mig-x{position:absolute;top:3px;right:3px;width:21px;height:21px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:14px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
+  .mig-star{position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;border:0;background:rgba(0,0,0,.42);font-size:11px;line-height:1;cursor:pointer;padding:0}
+  .mig-main{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(49,27,146,.85));color:#fff;font-size:8.5px;font-weight:800;text-align:center;padding:9px 2px 3px;letter-spacing:.3px;z-index:1}
+  .mig-add{width:84px;height:84px;border-radius:11px;border:2px dashed #cdbdf0;background:#faf7ff;color:var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;flex:none}
+  .mig-plus{font-size:23px;line-height:1;font-weight:300}
+  .mig-add small{font-size:10px;font-weight:700}
+  .mig-cnt{font-size:11px;color:var(--muted);font-weight:700}
+  .gal-strip{display:flex;gap:7px;overflow-x:auto;margin-top:8px;padding-bottom:4px;scrollbar-width:none}
+  .gal-strip::-webkit-scrollbar{display:none}
+  .gal-thumb{width:70px;height:70px;object-fit:cover;border-radius:9px;flex:none;cursor:zoom-in;box-shadow:0 1px 5px rgba(0,0,0,.12)}
   .sb-link .nav-badge{margin-left:auto}
   .tb-menu-item .nav-badge{margin-left:auto}
   .tb-dot{position:absolute;top:-3px;right:-3px;min-width:17px;height:17px;background:var(--danger);color:#fff;border-radius:9px;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);pointer-events:none;z-index:2}
@@ -1408,9 +1422,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     </div>
     <label class="fl">No. telefon / Hubungi</label>
     <input id="cfHubungi" placeholder="cth: 012-345 6789">
-    <label class="fl">Poster / Iklan Kursus <span style="font-weight:400;color:var(--muted)">(pilihan — JPG/PNG, maks 5MB)</span></label>
-    <input type="file" id="cfPoster" accept="image/jpeg,image/png,image/webp" onchange="previewPoster(this)">
-    <img id="cfPosterPreview" class="up-preview" alt="Preview poster">
+    <label class="fl">Gambar Kursus <span style="font-weight:400;color:var(--muted)">(sehingga 10 — JPG/PNG/WEBP, maks 5MB setiap satu)</span></label>
+    <div class="mig" id="migCf"></div>
     <div id="cfExtendBox" class="mya-ext" style="display:none"></div>
     <div class="modal-actions">
       <button class="m-cancel" onclick="closeCourseForm()">Batal</button>
@@ -1481,9 +1494,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <label class="fl">Gambar Signboard / Logo Bisnes <span style="font-weight:400;color:var(--muted)">(jika ada)</span></label>
     <input type="file" id="bizImg" accept="image/jpeg,image/png,image/webp" onchange="previewBizImg(this)">
     <img id="bizImgPreview" class="up-preview" alt="Preview gambar">
-    <label class="fl">Poster Iklan (potret) <span style="font-weight:400;color:var(--muted)">(pilihan — 4:5, JPG/PNG maks 5MB)</span></label>
-    <input type="file" id="bizPoster" accept="image/jpeg,image/png,image/webp" onchange="previewBizPoster(this)">
-    <img id="bizPosterPreview" class="up-preview" alt="Preview poster">
+    <label class="fl">Gambar / Poster Iklan <span style="font-weight:400;color:var(--muted)">(sehingga 10 — JPG/PNG/WEBP, maks 5MB setiap satu)</span></label>
+    <div class="mig" id="migBiz"></div>
     <div id="bizExtendBox" class="mya-ext" style="display:none"></div>
     <div class="modal-actions">
       <button class="m-cancel" onclick="closeBizForm()">Batal</button>
@@ -1531,9 +1543,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <input id="svcContact" placeholder="cth: +9665XXXXXXXX atau 01X-XXXXXXX">
     <label class="fl">Keterangan Ringkas</label>
     <textarea id="svcDesc" placeholder="Ceritakan tentang servis anda, kadar harga, waktu tersedia…"></textarea>
-    <label class="fl">Gambar <span style="font-weight:400;color:var(--muted)">(jika ada)</span></label>
-    <input type="file" id="svcImg" accept="image/jpeg,image/png,image/webp" onchange="previewSvcImg(this)">
-    <img id="svcImgPreview" class="up-preview" alt="Preview gambar">
+    <label class="fl">Gambar Servis <span style="font-weight:400;color:var(--muted)">(sehingga 10 — JPG/PNG/WEBP, maks 5MB setiap satu)</span></label>
+    <div class="mig" id="migSvc"></div>
     <div id="svcExtendBox" class="mya-ext" style="display:none"></div>
     <div class="modal-actions">
       <button class="m-cancel" onclick="closeSvcForm()">Batal</button>
@@ -1869,8 +1880,8 @@ async function loadData(){
   HOSPITALS=(me.data||[]).map(m=>{const k=MED_MAP[m.type]||{t:m.type,i:'🏥'};
     return {name:m.name, type:k.t, icon:k.i, dist:m.distance_km===null?null:Number(m.distance_km), tel:m.phone, tag:m.tag||'', apply_url:m.apply_url||''};});
   SERVICES=(sv.data||[]).map(s=>({name:s.name, icon:SVC_ICON[s.icon]||'🕋', desc:s.description||'', price:s.price_label||'', tag:s.tag||''}));
-  try{ const bz=await sb.from('business_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); BIZ=(bz.data||[]).map(b=>({id:b.id, name:b.name||'', category:b.category||'', location:b.location||'', contact:b.contact||'', website:b.website||'', desc:b.description||'', signboard:b.signboard_url||'', poster:b.poster_url||'', created:b.created_at||'', exp:b.expires_at||'', boosted:b.boosted_at||''})).filter(b=>_pubActive(b.exp)).sort(_pubSortNew); }catch(e){ BIZ=[]; }
-  try{ const ss=await sb.from('service_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); SVCSUB=(ss.data||[]).map(x=>({id:x.id, name:x.name||'', category:x.category||'', location:x.location||'', contact:x.contact||'', desc:x.description||'', photo:x.photo_url||'', created:x.created_at||'', exp:x.expires_at||'', boosted:x.boosted_at||''})).filter(x=>_pubActive(x.exp)).sort(_pubSortNew); }catch(e){ SVCSUB=[]; }
+  try{ const bz=await sb.from('business_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); BIZ=(bz.data||[]).map(b=>({id:b.id, name:b.name||'', category:b.category||'', location:b.location||'', contact:b.contact||'', website:b.website||'', desc:b.description||'', signboard:b.signboard_url||'', poster:b.poster_url||'', images:b.images||[], created:b.created_at||'', exp:b.expires_at||'', boosted:b.boosted_at||''})).filter(b=>_pubActive(b.exp)).sort(_pubSortNew); }catch(e){ BIZ=[]; }
+  try{ const ss=await sb.from('service_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); SVCSUB=(ss.data||[]).map(x=>({id:x.id, name:x.name||'', category:x.category||'', location:x.location||'', contact:x.contact||'', desc:x.description||'', photo:x.photo_url||'', images:x.images||[], created:x.created_at||'', exp:x.expires_at||'', boosted:x.boosted_at||''})).filter(x=>_pubActive(x.exp)).sort(_pubSortNew); }catch(e){ SVCSUB=[]; }
   if(cr.data && cr.data[0]) SAR_RATE=Number(cr.data[0].rate);
   checkContentNotifs();
 }
@@ -2388,6 +2399,7 @@ function openCourseForm(_keep){
   ['cfJenis','cfJamA','cfMinitA','cfAmpmA','cfJamB','cfMinitB','cfAmpmB'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   if(sel) sel.value='';
   const dd=document.getElementById('cfDaerah'); if(dd) dd.innerHTML='<option value="">— Pilih negeri dahulu —</option>';
+  if(!_keep){ try{ migInit('Cf',[]); }catch(_e){} }
   document.getElementById('courseModal').classList.add('open');
 }
 function buildMasa(){
@@ -2407,8 +2419,7 @@ function onCfNegeri(){
 }
 function closeCourseForm(){
   document.getElementById('courseModal').classList.remove('open');
-  const pi=document.getElementById('cfPoster'); if(pi) pi.value='';
-  const pp=document.getElementById('cfPosterPreview'); if(pp){pp.src='';pp.style.display='none';}
+  try{ migInit('Cf',[]); }catch(_e){}
   cfEditId=null; cfEditTable=null; if(typeof hideExtend==='function') hideExtend('cfExtendBox');
   const _sv=document.getElementById('cfSave'); if(_sv) _sv.textContent='Hantar';
 }
@@ -2432,22 +2443,13 @@ async function submitCourse(){
   if(!dateISO||!lokasi||!hubungi){ toast('Sila isi Tarikh, Lokasi & No. telefon.'); return; }
   const btn=document.getElementById('cfSave'); btn.disabled=true; btn.textContent='Menghantar…';
   try{
-    // Upload poster jika ada
-    let posterUrl=null;
-    const posterFile=document.getElementById('cfPoster').files[0];
-    if(posterFile){
-      if(posterFile.size>5*1024*1024){ toast('Poster terlalu besar — maks 5MB.'); btn.disabled=false; btn.textContent='Hantar'; return; }
-      const uid=state.user?.id||'anon';
-      const ext=posterFile.name.split('.').pop()||'jpg';
-      const path=uid+'/course-'+Date.now()+'.'+ext;
-      const {data:up,error:upErr}=await sb.storage.from('course-posters').upload(path,posterFile,{contentType:posterFile.type,upsert:false});
-      if(upErr) throw upErr;
-      const {data:{publicUrl}}=sb.storage.from('course-posters').getPublicUrl(path);
-      posterUrl=publicUrl;
-    }
+    // Muat naik galeri gambar (sehingga 10)
+    let images=[];
+    try{ images=await migUpload('Cf','course-posters','course',false); }
+    catch(_e){ toast('Gagal muat naik gambar. Cuba lagi.'); btn.disabled=false; btn.textContent='Hantar'; return; }
+    let posterUrl=images[0]||null;
     if(cfEditId){
-      const upd={ anjuran:nama, tarikh_label:fmtDateMs(dateISO), tarikh_date:dateISO, masa:masa, lokasi:lokasi, daerah:daerah, negeri:negeri, hubungi:hubungi };
-      if(posterUrl) upd.poster_url=posterUrl;
+      const upd={ anjuran:nama, tarikh_label:fmtDateMs(dateISO), tarikh_date:dateISO, masa:masa, lokasi:lokasi, daerah:daerah, negeri:negeri, hubungi:hubungi, images:images, poster_url:posterUrl };
       const {error:uerr}=await sb.from(cfEditTable).update(upd).eq('id',cfEditId);
       if(uerr) throw uerr;
       closeCourseForm();
@@ -2462,6 +2464,14 @@ async function submitCourse(){
       p_jenis:jenis, p_anjuran:nama, p_tarikh:fmtDateMs(dateISO), p_tarikh_date:dateISO, p_masa:masa,
       p_lokasi:lokasi, p_daerah:daerah, p_negeri:negeri, p_hubungi:hubungi, p_poster_url:posterUrl });
     if(error) throw error;
+    // Lampirkan galeri gambar pada rekod yang baru dihantar
+    if(images.length>1 && state.user){
+      try{
+        const _tbl=(cfMode==='mutawwif')?'mutawwif_courses':'courses';
+        const _q=await sb.from(_tbl).select('id').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(1);
+        if(_q.data&&_q.data[0]) await sb.from(_tbl).update({images:images}).eq('id',_q.data[0].id);
+      }catch(_e){}
+    }
     if(cfMode==='mutawwif'){ try{ const mc=await sb.from('mutawwif_courses').select('*').eq('status','approved');
       MUTAWWIF=(mc.data||[]).map(c=>({tarikh:c.tarikh_label, date:c.tarikh_date||'', masa:c.masa||'', lokasi:c.lokasi||'', daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||'', created:c.created_at||'', poster_url:c.poster_url||''})).sort((a,b)=>(a.date||'').localeCompare(b.date||'')); renderMutawwifAll(); }catch(e){} }
     closeCourseForm();
@@ -3615,6 +3625,7 @@ function renderSvc(){
       <div class="row-between"><b>${esc(o.name)}</b>${o.pill?`<span class="pill gold">${esc(o.pill)}</span>`:''}</div>
       ${o.desc?`<div class="tag">${esc(o.desc)}</div>`:''}
       ${wa}
+      ${galStrip(o.images)}
       ${isAdmin()?`<div style="margin-top:6px"><button class="shr-sm" style="border-color:#e0b4b4;color:#c0392b" onclick="deleteAd('service_submissions','${o.id}',this)">🗑️ Padam</button></div>`:''}
       <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(o.name)}" data-text="${esc(o.name+(o.desc?' — '+o.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
       </div></div></div>`;
@@ -3625,7 +3636,7 @@ function renderSvc(){
   cats.forEach(c=>{
     if(sel!=='all'&&sel!==c.id) return;
     const legacy=SERVICES.filter(s=>c.key.includes(s.tag)).map(s=>({name:s.name,icon:s.icon,desc:s.desc,pill:s.price,contact:'',photo:''}));
-    const subs=(SVCSUB||[]).filter(x=>matchCat(c,x.category)).map(x=>{used.add(x.id);return {name:x.name,icon:c.icon||'🛎️',desc:x.desc,pill:'',contact:x.contact,photo:x.photo};});
+    const subs=(SVCSUB||[]).filter(x=>matchCat(c,x.category)).map(x=>{used.add(x.id);return {id:x.id,name:x.name,icon:c.icon||'🛎️',desc:x.desc,pill:'',contact:x.contact,photo:x.photo,images:x.images};});
     const items=subs.concat(legacy);
     if(!items.length && !c.always) return;
     anySection=true;
@@ -3640,7 +3651,7 @@ function renderSvc(){
   if(sel==='all' && rest.length){
     anySection=true;
     html+=`<div class="section-title" style="font-size:15px;margin-top:6px">🛎️ Servis Lain</div>`;
-    html+=rest.map(x=>svcCard({name:x.name,icon:'🛎️',desc:x.desc,pill:'',contact:x.contact,photo:x.photo})).join('');
+    html+=rest.map(x=>svcCard({id:x.id,name:x.name,icon:'🛎️',desc:x.desc,pill:'',contact:x.contact,photo:x.photo,images:x.images})).join('');
   }
   if(!anySection) html+=`<div class="empty">Tiada rekod untuk kategori ini.</div>`;
   document.getElementById('dir-svc').innerHTML=html;
@@ -3649,7 +3660,7 @@ function renderShop(){
   const el=document.getElementById('shopList'); if(!el) return;
   const _bizNm=new Set((BIZ||[]).map(b=>(b.name||'').toLowerCase().trim()));
   const svc=SERVICES.filter(s=>s.tag==='Marketplace' && !_bizNm.has((s.name||'').toLowerCase().trim())).map(s=>{ const ph=(((s.desc||'').match(/\+?(9\d{8,14})/)||[])[1])||''; let d=s.desc||''; if(ph){ d=d.replace(new RegExp('\\+?'+ph),'').replace(/\s*•\s*•\s*/g,' • ').replace(/(^\s*•\s*)|(\s*•\s*$)/g,'').replace(/\s{2,}/g,' ').trim(); } return {name:s.name, category:'', location:'', contact:ph, website:'', desc:d, signboard:'', _biz:false}; });
-  const biz=(BIZ||[]).map(b=>({id:b.id, name:b.name, category:b.category, location:b.location, contact:b.contact, website:b.website, desc:b.desc, signboard:b.signboard, _biz:true}));
+  const biz=(BIZ||[]).map(b=>({id:b.id, name:b.name, category:b.category, location:b.location, contact:b.contact, website:b.website, desc:b.desc, signboard:b.signboard, images:b.images, _biz:true}));
   const items=biz.concat(svc);
   const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:10px">Senarai bisnes &amp; peniaga (kurma, air zam-zam, makanan, oleh-oleh &amp; lain-lain) yang berkaitan dengan umrah dan haji. Ada bisnes? Tekan “Promote bisnes anda di sini” untuk disenaraikan. 🛍️</div>`;
   if(!items.length){ el.innerHTML=intro+`<div class="empty">Belum ada bisnes disenaraikan. Jadilah yang pertama! 🤍</div>`; return; }
@@ -3673,6 +3684,7 @@ function renderShop(){
         <b style="font-size:13.5px;line-height:1.3;display:block">${esc(b.name)}</b>
         ${b.category?`<div class="tag" style="margin-top:2px">${esc(b.category)}</div>`:''}
         ${b.desc?`<div class="tag" style="margin-top:4px">${esc(b.desc)}</div>`:''}
+        ${b._biz?galStrip(b.images):''}
         <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${shr}${(isAdmin()&&b._biz&&b.id)?`<button class="shr-sm" style="border-color:#c9a227;color:#8a6d1a" onclick="openBizEdit('${b.id}')">✏️ Edit</button><button class="shr-sm" style="border-color:#e0b4b4;color:#c0392b" data-id="${b.id}" onclick="delBiz(this)">🗑️ Padam</button>`:''}</div>
       </div>
     </div></div>`;
@@ -3692,9 +3704,8 @@ function fillBizForm(b){
   if(g('bizWeb'))g('bizWeb').value=(b&&b.website)||'';
   if(g('bizDesc'))g('bizDesc').value=(b&&b.desc)||'';
   const lp=g('bizImgPreview'); if(lp){ if(b&&b.signboard){ lp.src=b.signboard; lp.style.display='block'; } else { lp.src=''; lp.style.display='none'; } }
-  const pp=g('bizPosterPreview'); if(pp){ pp.src=''; pp.style.display='none'; }
   if(g('bizImg'))g('bizImg').value='';
-  if(g('bizPoster'))g('bizPoster').value='';
+  try{ migInit('Biz', (b&&b.images)||[]); }catch(_e){}
 }
 function openBizAdd(){
   bizEditId=null; fillBizForm(null);
@@ -3787,8 +3798,7 @@ function closeBizForm(){
   ['bizNama','bizJenis','bizLokasi','bizContact','bizWeb','bizDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const fi=document.getElementById('bizImg'); if(fi) fi.value='';
   const lp=document.getElementById('bizImgPreview'); if(lp){ lp.src=''; lp.style.display='none'; }
-  const pf=document.getElementById('bizPoster'); if(pf) pf.value='';
-  const pp=document.getElementById('bizPosterPreview'); if(pp){ pp.src=''; pp.style.display='none'; }
+  try{ migInit('Biz',[]); }catch(_e){}
 }
 async function submitBizReg(){
   const nama=(document.getElementById('bizNama').value||'').trim();
@@ -3813,29 +3823,20 @@ async function submitBizReg(){
       const {data:{publicUrl}}=sb.storage.from('business-signboards').getPublicUrl(path);
       signUrl=publicUrl;
     }
-    let posterUrl=null;
-    const pf=document.getElementById('bizPoster');
-    const posterFile=pf&&pf.files?pf.files[0]:null;
-    if(posterFile){
-      if(posterFile.size>5*1024*1024){ toast('Poster terlalu besar — maks 5MB.'); btn.disabled=false; btn.textContent='Hantar Permohonan'; return; }
-      const pext=(posterFile.name.split('.').pop()||'jpg').toLowerCase();
-      const ppath='bizposter-'+Date.now()+'.'+pext;
-      const {error:pErr}=await sb.storage.from('business-signboards').upload(ppath,posterFile,{contentType:posterFile.type,upsert:false});
-      if(pErr) throw pErr;
-      const {data:{publicUrl:pu}}=sb.storage.from('business-signboards').getPublicUrl(ppath);
-      posterUrl=pu;
-    }
+    let bizImages=[];
+    try{ bizImages=await migUpload('Biz','business-signboards','bizposter',true); }
+    catch(_e){ toast('Gagal muat naik gambar. Cuba lagi.'); btn.disabled=false; btn.textContent='Hantar Permohonan'; return; }
+    let posterUrl=bizImages[0]||null;
     let error;
     if(bizEditId){
-      const upd={ name:nama, category:jenis||null, location:lokasi||null, contact:contact||null, website:web||null, description:desc||null };
+      const upd={ name:nama, category:jenis||null, location:lokasi||null, contact:contact||null, website:web||null, description:desc||null, images:bizImages, poster_url:posterUrl };
       if(signUrl) upd.signboard_url=signUrl;
-      if(posterUrl) upd.poster_url=posterUrl;
       ({error}=await sb.from('business_submissions').update(upd).eq('id',bizEditId));
     } else {
       ({error}=await sb.from('business_submissions').insert({
         name:nama, category:jenis||null, location:lokasi||null,
         contact:contact||null, website:web||null, description:desc||null,
-        signboard_url:signUrl, poster_url:posterUrl, user_id: state.user?state.user.id:null, status: isAdmin()?'approved':'pending'
+        signboard_url:signUrl, poster_url:posterUrl, images:bizImages, user_id: state.user?state.user.id:null, status: isAdmin()?'approved':'pending'
       }));
     }
     if(error) throw error;
@@ -3849,13 +3850,12 @@ async function submitBizReg(){
   btn.disabled=false; btn.textContent='Simpan';
 }
 
-function openSvcForm(){ const m=document.getElementById('svcRegModal'); if(m) m.classList.add('open'); }
+function openSvcForm(){ try{ migInit('Svc',[]); }catch(_e){} const m=document.getElementById('svcRegModal'); if(m) m.classList.add('open'); }
 function closeSvcForm(){
   const m=document.getElementById('svcRegModal'); if(m) m.classList.remove('open');
   ['svcNama','svcContact','svcLokasi','svcDesc'].forEach(id=>{const e=document.getElementById(id); if(e) e.value='';});
   const jz=document.getElementById('svcJenis'); if(jz) jz.value='Tolak Kerusi Roda';
-  const fi=document.getElementById('svcImg'); if(fi) fi.value='';
-  const lp=document.getElementById('svcImgPreview'); if(lp){ lp.src=''; lp.style.display='none'; }
+  try{ migInit('Svc',[]); }catch(_e){}
   svcEditId=null; if(typeof hideExtend==='function') hideExtend('svcExtendBox');
   const _h=document.querySelector('#svcRegModal h3'); if(_h) _h.textContent='Kongsi Servis Anda';
   const _sv=document.getElementById('svcSave'); if(_sv) _sv.textContent='Hantar Permohonan';
@@ -3875,21 +3875,12 @@ async function submitSvcReg(){
   const btn=document.getElementById('svcSave');
   btn.disabled=true; btn.textContent='Menghantar…';
   try{
-    let photoUrl=null;
-    const fi=document.getElementById('svcImg');
-    const imgFile=fi&&fi.files?fi.files[0]:null;
-    if(imgFile){
-      if(imgFile.size>5*1024*1024){ toast('Gambar terlalu besar — maks 5MB.'); btn.disabled=false; btn.textContent='Hantar Permohonan'; return; }
-      const ext=(imgFile.name.split('.').pop()||'jpg').toLowerCase();
-      const path='svc-'+Date.now()+'.'+ext;
-      const {error:upErr}=await sb.storage.from('service-photos').upload(path,imgFile,{contentType:imgFile.type,upsert:false});
-      if(upErr) throw upErr;
-      const {data:{publicUrl}}=sb.storage.from('service-photos').getPublicUrl(path);
-      photoUrl=publicUrl;
-    }
+    let svcImages=[];
+    try{ svcImages=await migUpload('Svc','service-photos','svc',true); }
+    catch(_e){ toast('Gagal muat naik gambar. Cuba lagi.'); btn.disabled=false; btn.textContent='Hantar Permohonan'; return; }
+    let photoUrl=svcImages[0]||null;
     if(svcEditId){
-      const upd={ name:nama, category:jenis||null, location:lokasi||null, contact:contact||null, description:desc||null };
-      if(photoUrl) upd.photo_url=photoUrl;
+      const upd={ name:nama, category:jenis||null, location:lokasi||null, contact:contact||null, description:desc||null, images:svcImages, photo_url:photoUrl };
       const {error:uerr}=await sb.from('service_submissions').update(upd).eq('id',svcEditId);
       if(uerr) throw uerr;
       closeSvcForm();
@@ -3900,7 +3891,7 @@ async function submitSvcReg(){
       const {error}=await sb.from('service_submissions').insert({
         name:nama, category:jenis||null, location:lokasi||null,
         contact:contact||null, description:desc||null,
-        photo_url:photoUrl, user_id: state.user?state.user.id:null, status:'pending'
+        photo_url:photoUrl, images:svcImages, user_id: state.user?state.user.id:null, status:'pending'
       });
       if(error) throw error;
       closeSvcForm();
@@ -4134,6 +4125,71 @@ document.addEventListener('click',function(e){
   e.stopPropagation(); e.preventDefault();
   openPoster(src);
 }, true);
+/* ===== Galeri iklan (multi-image) — sehingga 10 gambar ===== */
+window.__MIG = window.__MIG || {};
+function _migUid(){ return 'm'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36); }
+function migInit(key, urls){
+  let arr=urls; if(typeof arr==='string'){ try{ arr=JSON.parse(arr); }catch(_){ arr=[]; } }
+  if(!Array.isArray(arr)) arr=[];
+  window.__MIG[key]=arr.filter(Boolean).map(u=>({url:u,uid:_migUid()}));
+  migRender(key);
+}
+function migRender(key){
+  const box=document.getElementById('mig'+key); if(!box) return;
+  const items=window.__MIG[key]||[];
+  let h='<div class="mig-grid">';
+  items.forEach(function(it,i){
+    const src=it.url||(it.file?URL.createObjectURL(it.file):'');
+    h+='<div class="mig-t">'+(i===0?'<span class="mig-main">Utama</span>':'')+
+       '<img src="'+src+'">'+
+       '<button type="button" class="mig-x" title="Buang" onclick="migRemove(\''+key+'\',\''+it.uid+'\')">×</button>'+
+       (i>0?'<button type="button" class="mig-star" title="Jadikan utama" onclick="migMain(\''+key+'\',\''+it.uid+'\')">⭐</button>':'')+
+       '</div>';
+  });
+  if(items.length<10){
+    h+='<label class="mig-add"><span class="mig-plus">+</span><small>Tambah</small>'+
+       '<input type="file" accept="image/jpeg,image/png,image/webp" multiple style="display:none" onchange="migAdd(\''+key+'\',this)"></label>';
+  }
+  h+='</div><div class="mig-cnt">'+items.length+'/10 gambar'+(items.length?' • gambar pertama = paparan utama':'')+'</div>';
+  box.innerHTML=h;
+}
+function migAdd(key,input){
+  const items=window.__MIG[key]||(window.__MIG[key]=[]);
+  const files=Array.prototype.slice.call(input.files||[]);
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    if(items.length>=10){ toast('Maksimum 10 gambar sahaja.'); break; }
+    if(f.size>5*1024*1024){ toast('"'+f.name+'" terlalu besar — maks 5MB.'); continue; }
+    items.push({file:f,uid:_migUid()});
+  }
+  input.value=''; migRender(key);
+}
+function migRemove(key,uid){ window.__MIG[key]=(window.__MIG[key]||[]).filter(x=>x.uid!==uid); migRender(key); }
+function migMain(key,uid){ const a=window.__MIG[key]||[]; const i=a.findIndex(x=>x.uid===uid); if(i>0){ const it=a.splice(i,1)[0]; a.unshift(it); migRender(key); } }
+function migCount(key){ return (window.__MIG[key]||[]).length; }
+async function migUpload(key,bucket,prefix,flat){
+  const items=window.__MIG[key]||[]; const out=[];
+  const uid=(state.user&&state.user.id)||'anon';
+  for(let i=0;i<items.length;i++){
+    const it=items[i];
+    if(it.url){ out.push(it.url); continue; }
+    const f=it.file; const ext=((f.name.split('.').pop())||'jpg').toLowerCase();
+    const rand=Math.floor(Math.random()*1e6).toString(36);
+    const path=flat ? (prefix+'-'+Date.now()+'-'+rand+'.'+ext)
+                    : (uid+'/'+prefix+'-'+Date.now()+'-'+rand+'.'+ext);
+    const up=await sb.storage.from(bucket).upload(path,f,{contentType:f.type,upsert:false});
+    if(up.error) throw up.error;
+    const pub=sb.storage.from(bucket).getPublicUrl(path);
+    out.push(pub.data.publicUrl);
+  }
+  return out;
+}
+function galStrip(images){
+  let arr=images; if(typeof arr==='string'){ try{ arr=JSON.parse(arr); }catch(_){ arr=[]; } }
+  if(!Array.isArray(arr)) arr=[];
+  if(arr.length<2) return '';
+  return '<div class="gal-strip">'+arr.map(u=>'<img class="gal-thumb" src="'+esc(u)+'" loading="lazy" onerror="this.style.display=\'none\'">').join('')+'</div>';
+}
 function closeShare(){
   document.getElementById('shSheet').style.display='none';
   document.getElementById('shOverlay').style.display='none';
@@ -4906,7 +4962,7 @@ function openSvcEdit(row){
   const set=(id,v)=>{const e=document.getElementById(id); if(e) e.value=v||'';};
   set('svcNama',row.name); set('svcJenis',row.category||'Tolak Kerusi Roda');
   set('svcLokasi',row.location); set('svcContact',row.contact); set('svcDesc',row.description);
-  const pv=document.getElementById('svcImgPreview'); if(pv){ if(row.photo_url){ pv.src=row.photo_url; pv.style.display='block'; } else { pv.src=''; pv.style.display='none'; } }
+  try{ migInit('Svc', row.images || (row.photo_url?[row.photo_url]:[])); }catch(_e){}
   const h=document.querySelector('#svcRegModal h3'); if(h) h.textContent='Edit Servis';
   const sv=document.getElementById('svcSave'); if(sv) sv.textContent='Simpan';
   showExtend('svcExtendBox','service_submissions',row.id,row);
@@ -4932,7 +4988,7 @@ function openCourseEdit(type,row){
   set('cfLokasi',row.lokasi); set('cfHubungi',row.hubungi);
   const ng=document.getElementById('cfNegeri'); if(ng){ ng.value=row.negeri||''; if(typeof onCfNegeri==='function') onCfNegeri(); const dd=document.getElementById('cfDaerah'); if(dd) dd.value=row.daerah||''; }
   parseMasa(row.masa);
-  const pv=document.getElementById('cfPosterPreview'); if(pv){ if(row.poster_url){ pv.src=row.poster_url; pv.style.display='block'; } else { pv.src=''; pv.style.display='none'; } }
+  try{ migInit('Cf', row.images || (row.poster_url?[row.poster_url]:[])); }catch(_e){}
   const t=document.getElementById('cfTitle'); if(t) t.textContent=(cfMode==='mutawwif'?'Edit Kursus Mutawwif':'Edit Kursus Umrah');
   const sv=document.getElementById('cfSave'); if(sv) sv.textContent='Simpan';
   showExtend('cfExtendBox',type,row.id,row);
