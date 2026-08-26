@@ -413,6 +413,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .agx.card-premium{border-color:#ffc94d;box-shadow:0 4px 14px rgba(255,180,0,.14)}
   .agx-ribbon{position:absolute;top:13px;left:-34px;transform:rotate(-45deg);background:linear-gradient(90deg,#1e9f5a,#25b567);color:#fff;font-size:9px;font-weight:800;letter-spacing:.5px;padding:3px 40px;box-shadow:0 1px 4px rgba(0,0,0,.15);z-index:2}
   .agx-main{display:flex;gap:12px;padding:13px 14px 12px;align-items:flex-start}
+  .agx-logo-col{display:flex;flex-direction:column;align-items:center;flex:none}
   .agx-logo{width:52px;height:52px;flex:none;border-radius:12px;overflow:hidden;background:#fff}
   .agx-logo .ag-logo{width:52px;height:52px;object-fit:contain;padding:5px;box-sizing:border-box;background:#fff;border-radius:12px}
   .agx-logo .ag-init{width:52px;height:52px;font-size:21px;border-radius:12px}
@@ -1009,6 +1010,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div class="terkini" id="terkiniBox"></div>
         <div id="topAgHome"></div>
         <div id="bizPosterHome"></div>
+        <div id="sarHomeBox"></div>
       </section>
 
       <!-- SEMUA KURSUS -->
@@ -1055,23 +1057,32 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div class="ktitle-row"><div class="section-title">Cari Agensi Umrah<span class="u"></span></div><button class="kbtn kbtn-daftar" onclick="showAgReg()">Daftar agensi anda</button></div>
         <div class="card">
           <input id="agQuery" placeholder="🔍 Cari nama agensi…" oninput="renderAgencies()">
-          <label class="f">Rating Google minimum</label>
-          <div class="chips" id="agRating"></div>
-          <div class="chips" id="agPrice" style="display:none"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+            <div style="min-width:0">
+              <label class="f" style="font-size:12px;margin-bottom:3px">Rating Google min.</label>
+              <select id="agRatingSel" class="f" style="width:100%;font-size:13px;padding:6px 8px" onchange="setAgRating(parseFloat(this.value))"></select>
+            </div>
+            <div style="min-width:0">
+              <label class="f" style="font-size:12px;margin-bottom:3px">Susun ikut</label>
+              <select id="agSortSel" class="f" style="width:100%;font-size:13px;padding:6px 8px" onchange="setAgSort(this.value)"></select>
+            </div>
+            <div style="min-width:0">
+              <label class="f" style="font-size:12px;margin-bottom:3px">Julat harga pakej</label>
+              <select id="agPriceSel" class="f" style="width:100%;font-size:13px;padding:6px 8px" onchange="setAgPrice(this.value)"></select>
+            </div>
+            <div style="min-width:0">
+              <label class="f" style="font-size:12px;margin-bottom:3px">Negeri</label>
+              <select id="agNegeriSel" class="f" style="width:100%;font-size:13px;padding:6px 8px" onchange="setAgNegeri(this.value)"></select>
+            </div>
+          </div>
+          <div id="agDaerahRow" style="min-width:0;margin-top:8px;display:none">
+            <label class="f" style="font-size:12px;margin-bottom:3px">Daerah</label>
+            <select id="agDaerahSel" class="f" style="width:100%;font-size:13px;padding:6px 8px" onchange="setAgDaerah(this.value)"></select>
+          </div>
           <label class="f" style="display:flex;align-items:center;gap:8px;margin-top:12px">
             <input type="checkbox" id="agMotac" style="width:auto" onchange="renderAgencies()">
             Berlesen MOTAC sahaja
           </label>
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <div style="flex:1;min-width:0">
-              <label class="f" style="font-size:12px;margin-bottom:3px">Negeri</label>
-              <select id="agNegeriSel" class="f" style="width:100%;font-size:13px;padding:6px 8px" onchange="setAgNegeri(this.value)"></select>
-            </div>
-            <div id="agDaerahRow" style="flex:1;min-width:0;display:none">
-              <label class="f" style="font-size:12px;margin-bottom:3px">Daerah</label>
-              <select id="agDaerahSel" class="f" style="width:100%;font-size:13px;padding:6px 8px" onchange="setAgDaerah(this.value)"></select>
-            </div>
-          </div>
         </div>
         <div class="section-title" style="font-size:14px"><span id="agCount">—</span> agensi ditemui
           <span style="display:block;font-size:12px;font-weight:400;color:var(--muted);margin-top:5px">Syarikat anda tiada dalam senarai? <a onclick="showAgReg()" style="cursor:pointer;color:var(--primary);text-decoration:underline">Sila senaraikan di sini.</a></span>
@@ -2845,6 +2856,14 @@ function renderHome(){
     </button>`).join('');
   renderTerkini();
   renderPosterCarousel();
+  const _sar=document.getElementById('sarHomeBox'); if(_sar) _sar.innerHTML=sarCardHtml();
+}
+function sarCardHtml(){
+  return `<div class="card" style="background:linear-gradient(120deg,#fbf3d8,#fff);border-color:#f0e2b8;margin-top:16px">
+      <div class="row-between"><b>💱 Kadar Tukaran (SAR)</b><span class="pill gold">Anggaran</span></div>
+      <div class="kv"><span>1 SAR (Riyal Saudi)</span><b>RM ${SAR_RATE.toFixed(2)}</b></div>
+      <div class="kv"><span>RM 1,000 ≈</span><b>SAR ${(1000/SAR_RATE).toFixed(0)}</b></div>
+    </div>`;
 }
 
 /* ============ AGENCY ============ */
@@ -2890,16 +2909,14 @@ function agThumb(a){
 }
 function renderAgencyFilters(){
   const R=[0,4,4.5,4.8];
-  document.getElementById('agRating').innerHTML=R.map(r=>`
-    <button class="chip ${state.agRating===r?'on':''}" onclick="setAgRating(${r})">${r===0?'Semua':'⭐ '+r+'+'}</button>`).join('');
+  const rs=document.getElementById('agRatingSel');
+  if(rs) rs.innerHTML=R.map(r=>`<option value="${r}" ${state.agRating===r?'selected':''}>${r===0?'Semua rating':'⭐ '+r+'+ ke atas'}</option>`).join('');
+  const SO=[{v:'rating',t:'⭐ Rating tertinggi'},{v:'price',t:'💰 Termurah'},{v:'popular',t:'🔥 Popular'}];
+  const ss=document.getElementById('agSortSel');
+  if(ss) ss.innerHTML=SO.map(o=>`<option value="${o.v}" ${state.agSort===o.v?'selected':''}>${o.t}</option>`).join('');
   const PC=[{v:'',t:'Semua harga'},{v:'lt6',t:'< RM6k'},{v:'6-8',t:'RM6–8k'},{v:'gt8',t:'> RM8k'},{v:'promo',t:'🏷️ Ada promo'}];
-  const ap=document.getElementById('agPrice'); ap.style.display='';
-  ap.innerHTML=`<label class="f" style="margin-top:12px;display:block">Susun ikut</label>`+
-    `<div class="ag-sortrow"><button class="chip ${state.agSort==='rating'?'on':''}" onclick="setAgSort('rating')">⭐ Rating</button>`+
-    `<button class="chip ${state.agSort==='price'?'on':''}" onclick="setAgSort('price')">💰 Termurah</button>`+
-    `<button class="chip ${state.agSort==='popular'?'on':''}" onclick="setAgSort('popular')">🔥 Popular</button></div>`+
-    `<label class="f" style="display:block;margin-top:8px">Julat harga pakej</label>`+
-    PC.map(c=>`<button class="chip ${(state.agPrice||'')===c.v?'on':''}" onclick="setAgPrice('${c.v}')">${c.t}</button>`).join('');
+  const ps=document.getElementById('agPriceSel');
+  if(ps) ps.innerHTML=PC.map(c=>`<option value="${c.v}" ${(state.agPrice||'')===c.v?'selected':''}>${c.t}</option>`).join('');
   // Negeri dropdown — build unique sorted list, exclude entries with digits (postcodes etc.)
   const negeriSet=new Set();
   (AGENCIES||[]).forEach(a=>{const n=agNegeri(a.note); if(n&&!/\d/.test(n)) negeriSet.add(n);});
@@ -3033,6 +3050,10 @@ async function togglePremium(id, current){
 const ICO_PIN=`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`;
 const ICO_GLOBE=`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
 const ICO_PHONE=`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.23h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.27 6.27l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`;
+function agIconGrid(ico){
+  if(!ico||!ico.length) return '';
+  return `<div class="svc-icons">${ico.map((h,i)=>(ico.length%2===1&&ico.length>1&&i===ico.length-1)?h.replace('<a class="ag-icon-btn"','<a class="ag-icon-btn" style="grid-column:2"'):h).join('')}</div>`;
+}
 function agencyCardHtml(a, isPrem){
   const parts=(a.note||'').split('•').map(s=>s.trim());
   const hq=parts[0]||''; const contact=parts[1]||'';
@@ -3043,7 +3064,11 @@ function agencyCardHtml(a, isPrem){
   const isCheapest=Number(a.price)>0 && Number(a.price)===Number(window.__minAgPrice);
   const adminBtn=isAdmin()&&a.id?`<button class="shr-sm" style="border-color:#c9a227;color:#8a6d1a" onclick="togglePremium('${a.id}',${isPrem})">${isPrem?'★ Buang Premium':'☆ Premium'}</button>`:'';
   const mapQ=hq?encodeURIComponent(a.name+(hq?' '+hq:'')):'';
-  const icons=`${hq?`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Peta lokasi">${ICO_PIN}</a>`:''}${isUrl?`<a class="ag-icon-btn" href="${contact}" target="_blank" rel="noopener" data-tip="Laman web">${ICO_GLOBE}</a>`:''}${isPhone?`<a class="ag-icon-btn" href="tel:${contact.replace(/\s/g,'')}" data-tip="Telefon">${ICO_PHONE}</a>`:''}`;
+  const _ico=[];
+  if(hq) _ico.push(`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Peta lokasi">${ICO_PIN}</a>`);
+  if(isUrl) _ico.push(`<a class="ag-icon-btn" href="${contact}" target="_blank" rel="noopener" data-tip="Laman web">${ICO_GLOBE}</a>`);
+  if(isPhone) _ico.push(`<a class="ag-icon-btn" href="tel:${contact.replace(/\s/g,'')}" data-tip="Telefon">${ICO_PHONE}</a>`);
+  const icons=agIconGrid(_ico);
   const rv=a.id&&AG_REVIEW_SUMMARY[a.id];
   const rvBtn=`<button class="rv-trigger" onclick="openReviews('${a.id}','${esc(a.name)}')">${rv?`<span style="color:#f5a623">★</span> ${rv.avg} · <span style="text-decoration:underline">${rv.count} ulasan</span>`:'✍️ Ulasan Haramaen'}</button>`;
   const shrBtn=`<button class="shr-sm" data-title="${esc(a.name)}" data-text="${shrTxt}" data-url="${shrUrl}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>`;
@@ -3068,7 +3093,7 @@ function agencyCardHtml(a, isPrem){
   const badges=`${isPrem?'<span class="badge-premium">★ Premium</span>':''}${a.motac?'<span class="badge-motac">✓ MOTAC'+(a.lic&&a.lic!=='—'?' '+esc(a.lic):'')+'</span>':''}`;
   return `<div class="agx${isCheapest?' best':''}${isPrem?' card-premium':''}">${isCheapest?'<span class="agx-ribbon">TERMURAH</span>':''}
     <div class="agx-main">
-      <div class="agx-logo">${agThumb(a)}</div>
+      <div class="agx-logo-col"><div class="agx-logo">${agThumb(a)}</div>${icons}</div>
       <div class="agx-mid">
         <div class="agx-nm">${esc(a.name)}</div>
         ${locTxt?`<div class="agx-loc">📍 ${locTxt}</div>`:''}
@@ -3079,7 +3104,7 @@ function agencyCardHtml(a, isPrem){
       ${priceHtml}
     </div>
     ${isCheapest?'<div class="agx-foot">✈️ Biasanya termasuk penerbangan + hotel + visa</div>':''}
-    <div class="agx-actions">${icons}${rvBtn}${shrBtn}${pkgBtn}${logoBtn}${adminBtn}</div>
+    <div class="agx-actions">${rvBtn}${shrBtn}${pkgBtn}${logoBtn}${adminBtn}</div>
   </div>`;
 }
 function renderAgencies(){
@@ -3551,14 +3576,16 @@ function renderHotels(){
     const mine=state.myHotel&&state.myHotel.name===h.name;
     const web=/^https?:\/\//.test(h.note)?h.note:'';
     const distTxt=h.dist>=1?h.dist+' km':Math.round(h.dist*1000)+' m';
-    return `<div class="card"><div class="list-row">
-      <div class="thumb">${h.icon}</div>
-      <div style="flex:1">
+    const mapQ=encodeURIComponent(h.name+' '+city);
+    const _ico=[];
+    _ico.push(`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Peta lokasi">${ICO_PIN}</a>`);
+    if(web) _ico.push(`<a class="ag-icon-btn" href="${esc(web)}" target="_blank" rel="noopener" data-tip="Laman web">${ICO_GLOBE}</a>`);
+    return `<div class="card"><div class="list-row" style="align-items:flex-start">
+      <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0"><div class="thumb">${h.icon}</div>${agIconGrid(_ico)}</div>
+      <div style="flex:1;min-width:0;padding-left:12px">
         <div class="row-between"><b style="font-size:14px">${h.name}</b><span class="stars">${'★'.repeat(h.stars)}</span></div>
         <div class="tag">📍 ${distTxt} dari ${landmark}</div>
-        ${h.note?`<div class="tag" style="margin-top:2px">${web?'<a href="'+web+'" target="_blank" rel="noopener">🌐 Laman web</a>':h.note}</div>`:''}
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">
-          <button class="btn ghost sm" onclick="mapHotel('${h.name.replace(/'/g,"\\'")}')">🗺️ Peta</button>
           <button class="btn ${mine?'gold':'ghost'} sm" onclick="setMyHotel('${h.name.replace(/'/g,"\\'")}')">${mine?'✓ Hotel saya':'Jadikan hotel saya'}</button>
           <button class="shr-sm" data-title="${esc(h.name)}" data-text="${esc(h.name+' — '+distTxt+' dari '+landmark+', '+city)}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
         </div>
@@ -3595,16 +3622,20 @@ function renderMed(){
   document.getElementById('dir-med').innerHTML=
     `<div class="dir-filter"><label>Jenis</label><select onchange="state.medFilter=this.value;renderMed()">${opts}</select></div>`+
     `<div class="muted" style="font-size:12.5px;margin-bottom:10px">Sumber perubatan & kecemasan — berguna untuk jemaah DIY Umrah. 🚑</div>`+
-    (list.map(h=>`<div class="card"><div class="list-row">
-      <div class="thumb">${h.icon}</div><div style="flex:1">
+    (list.map(h=>{
+      const mapQ=encodeURIComponent(h.name+' Makkah');
+      const _ico=[];
+      _ico.push(`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Peta lokasi">${ICO_PIN}</a>`);
+      if(h.apply_url) _ico.push(`<a class="ag-icon-btn" href="${esc(h.apply_url)}" target="_blank" rel="noopener" data-tip="Web / Mohon">${ICO_GLOBE}</a>`);
+      if(h.tel) _ico.push(`<a class="ag-icon-btn" href="tel:${esc(String(h.tel).replace(/\s/g,''))}" data-tip="Telefon">${ICO_PHONE}</a>`);
+      return `<div class="card"><div class="list-row" style="align-items:flex-start">
+      <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0"><div class="thumb">${h.icon}</div>${agIconGrid(_ico)}</div>
+      <div style="flex:1;min-width:0;padding-left:12px">
       <div class="row-between"><b>${h.name}</b><span class="pill ${h.type==='Insurans'?'blue':(h.type==='Farmasi'?'gold':'red')}">${h.type}</span></div>
       <div class="tag">${h.tag}${h.dist!==null?' · 📍 '+h.dist+' km':''}</div>
-      <div class="row-between" style="margin-top:8px">
-        <span class="tag">${h.tel?'☎ '+esc(h.tel):''}</span>
-        ${h.apply_url?`<a class="btn sm" href="${esc(h.apply_url)}" target="_blank" rel="noopener">🔗 Mohon Sekarang</a>`:(h.tel?`<button class="btn ghost sm" onclick="toast('Menghubungi ${h.name}…')">Hubungi</button>`:'')}
-      </div>
-      <div style="margin-top:6px"><button class="shr-sm" data-title="${esc(h.name)}" data-text="${esc(h.name+' ('+h.type+') — di Makkah')}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
-      </div></div></div></div>`).join('') || `<div class="empty">Tiada rekod untuk jenis ini.</div>`);
+      ${h.tel?`<div class="tag" style="margin-top:3px">☎ ${esc(h.tel)}</div>`:''}
+      <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(h.name)}" data-text="${esc(h.name+' ('+h.type+') — di Makkah')}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
+      </div></div></div>`;}).join('') || `<div class="empty">Tiada rekod untuk jenis ini.</div>`);
 }
 function renderSvc(){
   const cats=[
@@ -3629,11 +3660,6 @@ function renderSvc(){
   const sel=state.svcFilter||'all';
   const opts=`<option value="all"${sel==='all'?' selected':''}>Semua kategori</option>`+cats.map(c=>`<option value="${c.id}"${sel===c.id?' selected':''}>${c.label}</option>`).join('');
   let html=`<div class="dir-filter"><label>Kategori</label><select onchange="state.svcFilter=this.value;renderSvc()">${opts}</select></div>`;
-  html+=`<div class="card" style="background:linear-gradient(120deg,#fbf3d8,#fff);border-color:#f0e2b8">
-      <div class="row-between"><b>💱 Kadar Tukaran (SAR)</b><span class="pill gold">Anggaran</span></div>
-      <div class="kv"><span>1 SAR (Riyal Saudi)</span><b>RM ${SAR_RATE.toFixed(2)}</b></div>
-      <div class="kv"><span>RM 1,000 ≈</span><b>SAR ${(1000/SAR_RATE).toFixed(0)}</b></div>
-    </div>`;
   function svcCard(o){
     let imgs=o.images; if(typeof imgs==='string'){ try{ imgs=JSON.parse(imgs); }catch(_){ imgs=[]; } }
     if(!Array.isArray(imgs)) imgs=[]; if(!imgs.length && o.photo) imgs=[o.photo];
@@ -3649,7 +3675,7 @@ function renderSvc(){
     if(o.location) _ico.push(`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Lokasi">${ICO_PIN}</a>`);
     if(o.website) _ico.push(`<a class="ag-icon-btn" href="${esc(webUrl)}" target="_blank" rel="noopener" data-tip="Web/Sosial">${ICO_GLOBE}</a>`);
     if(o.contact) _ico.push(`<a class="ag-icon-btn" href="${esc(waLink(o.contact))}" target="_blank" rel="noopener" data-tip="WhatsApp" onclick="trackAd('service_submissions','${o.id}','click')">${ICO_PHONE}</a>`);
-    const icons=_ico.length?`<div class="svc-icons">${_ico.map((h,i)=>(_ico.length%2===1&&_ico.length>1&&i===_ico.length-1)?h.replace('<a class="ag-icon-btn"','<a class="ag-icon-btn" style="grid-column:2"'):h).join('')}</div>`:'';
+    const icons=agIconGrid(_ico);
     const locLine=o.location?`<div class="tag" style="margin-top:3px;color:var(--muted)">📍 ${esc(o.location)}</div>`:'';
     return `<div class="card"><div class="list-row" style="align-items:flex-start">
       <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">${img}${icons}</div>
@@ -3700,12 +3726,12 @@ function renderShop(){
     const img=b.signboard?`<img src="${esc(b.signboard)}" alt="${esc(b.name)}" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.parentNode.textContent='🛍️'">`:'🛍️';
     const mapQ=b.location?encodeURIComponent(b.name+' '+b.location):'';
     const webUrl=b.website?(b.website.match(/^https?:\/\//)?b.website:'https://'+b.website):'';
-    const hasIcon=b.location||b.website||b.contact;
-    const icons=`<div class="ag-icon-wrap">
-      ${b.location?`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Lokasi">${ICO_PIN}</a>`:''}
-      ${b.website?`<a class="ag-icon-btn" href="${esc(webUrl)}" target="_blank" rel="noopener" data-tip="Web/Sosial">${ICO_GLOBE}</a>`:''}
-      ${b.contact?`<a class="ag-icon-btn" href="${esc(waLink(b.contact))}" target="_blank" rel="noopener" data-tip="WhatsApp" onclick="trackAd('business_submissions','${b.id}','click')">${ICO_PHONE}</a>`:''}
-    </div>`;
+    const _ico=[];
+    if(b.location) _ico.push(`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Lokasi">${ICO_PIN}</a>`);
+    if(b.website) _ico.push(`<a class="ag-icon-btn" href="${esc(webUrl)}" target="_blank" rel="noopener" data-tip="Web/Sosial">${ICO_GLOBE}</a>`);
+    if(b.contact) _ico.push(`<a class="ag-icon-btn" href="${esc(waLink(b.contact))}" target="_blank" rel="noopener" data-tip="WhatsApp" onclick="trackAd('business_submissions','${b.id}','click')">${ICO_PHONE}</a>`);
+    const hasIcon=_ico.length;
+    const icons=agIconGrid(_ico);
     const shr=`<button class="shr-sm" data-title="${esc(b.name)}" data-text="${esc(b.name+(b.desc?' — '+b.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>`;
     return `<div class="card"><div class="list-row" style="align-items:flex-start">
       <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
