@@ -505,7 +505,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   /* Galeri iklan (multi-image upload) */
   .mig-grid{display:flex;flex-wrap:wrap;gap:9px;margin:4px 0 5px}
   .mig-t{position:relative;width:84px;height:84px;border-radius:11px;overflow:hidden;border:1px solid var(--line);flex:none}
-  .mig-t img{width:100%;height:100%;object-fit:cover;display:block}
+  .mig-t img{width:100%;height:100%;object-fit:cover;display:block;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .mig-x{position:absolute;top:3px;right:3px;width:21px;height:21px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:14px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
   .mig-star{position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;border:0;background:rgba(0,0,0,.42);font-size:11px;line-height:1;cursor:pointer;padding:0}
   .mig-main{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(49,27,146,.85));color:#fff;font-size:8.5px;font-weight:800;text-align:center;padding:9px 2px 3px;letter-spacing:.3px;z-index:1}
@@ -516,6 +516,12 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .gal-strip{display:flex;gap:7px;overflow-x:auto;margin-top:8px;padding-bottom:4px;scrollbar-width:none}
   .gal-strip::-webkit-scrollbar{display:none}
   .gal-thumb{width:70px;height:70px;object-fit:cover;border-radius:9px;flex:none;cursor:zoom-in;box-shadow:0 1px 5px rgba(0,0,0,.12)}
+  .mig-menu{position:absolute;z-index:9998;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.24);padding:6px;min-width:200px;animation:migPop .12s ease}
+  .mig-menu button{display:block;width:100%;text-align:left;border:0;background:none;font-family:inherit;font-size:13.5px;padding:11px 12px;border-radius:8px;cursor:pointer;color:var(--ink)}
+  .mig-menu button:hover{background:#f4f0fb}
+  .mig-menu .mig-menu-cancel{color:var(--muted);font-size:12.5px;text-align:center;margin-top:2px}
+  .mig-menu .mig-menu-info{padding:11px 12px;font-size:13px;font-weight:700;color:var(--green-d)}
+  @keyframes migPop{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
   .sb-link .nav-badge{margin-left:auto}
   .tb-menu-item .nav-badge{margin-left:auto}
   .tb-dot{position:absolute;top:-3px;right:-3px;min-width:17px;height:17px;background:var(--danger);color:#fff;border-radius:9px;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3);pointer-events:none;z-index:2}
@@ -1777,7 +1783,7 @@ function initMoreDrag(){
 function pickMore(v){ closeMore(); go(v); }
 /* ---- AI Assistant ---- */
 let AICHAT=[]; let aiBusy=false;
-const HRM_AI_CONTEXT="Anda ialah Pembantu AI HARAMAEN, aplikasi panduan umrah. Jawab dalam Bahasa Melayu yang ringkas, mesra dan tepat. PERATURAN IKLAN HARAMAEN yang anda WAJIB tahu: (1) Caj: Buat masa ini SEMUA penyenaraian iklan (kursus umrah, kursus mutawwif, servis, bisnes) adalah PERCUMA — HARAMAEN tidak mengenakan sebarang caj untuk beriklan buat masa ini. (2) Setiap iklan MESTI patuh Syariah. (3) Tiada unsur penipuan (scam). (4) Tiada maklumat mengelirukan (misleading/palsu). (5) Mesti mematuhi undang-undang. (6) Setiap iklan WAJIB disemak & diluluskan admin dahulu sebelum dipaparkan kepada umum. Iklan yang melanggar mana-mana peraturan ini boleh ditolak atau dibuang tanpa notis. Tempoh iklan ialah 90 hari; selepas tamat iklan menjadi tidak aktif sehingga pemilik 'boost' semula (percuma) untuk 90 hari lagi. Pengiklan hantar iklan melalui borang dalam app dan boleh urus di menu 'Iklan Saya' (paparan, klik, boost, edit).";
+const HRM_AI_CONTEXT="Anda ialah Pembantu AI HARAMAEN, aplikasi panduan umrah. Jawab dalam Bahasa Melayu yang ringkas, mesra dan tepat. PERATURAN IKLAN HARAMAEN yang anda WAJIB tahu: (1) Caj: Buat masa ini SEMUA penyenaraian iklan (kursus umrah, kursus mutawwif, servis, bisnes) adalah PERCUMA — HARAMAEN tidak mengenakan sebarang caj untuk beriklan buat masa ini. (2) Setiap iklan MESTI patuh Syariah. (3) Tiada unsur penipuan (scam). (4) Tiada maklumat mengelirukan (misleading/palsu). (5) Mesti mematuhi undang-undang. (6) Setiap iklan WAJIB disemak & diluluskan admin dahulu sebelum dipaparkan kepada umum. Iklan yang melanggar mana-mana peraturan ini boleh ditolak atau dibuang tanpa notis. Tempoh iklan ialah 90 hari; selepas tamat iklan menjadi tidak aktif sehingga pemilik 'boost' semula (percuma) untuk 90 hari lagi. Pengiklan hantar iklan melalui borang dalam app dan boleh urus di menu 'Iklan Saya' (paparan, klik, boost, edit). Setiap iklan boleh memuat naik sehingga 10 gambar (galeri): dalam borang iklan tekan petak '+ Tambah' untuk pilih gambar (boleh pilih beberapa sekali gus, maks 5MB setiap satu, format JPG/PNG/WEBP); tekan butang '×' pada gambar untuk membuangnya. Gambar pertama menjadi paparan utama (poster). Untuk menukar gambar utama, TEKAN & TAHAN (long-press) gambar berkenaan, kemudian pilih 'Jadikan gambar utama' — gambar itu akan berpindah automatik ke kedudukan pertama. Untuk edit gambar iklan sedia ada, buka menu 'Iklan Saya' lalu tekan Edit pada iklan tersebut.";
 function renderAssistant(){
   aiBubbles();
   const sug=document.getElementById('aiSuggest'); if(!sug) return;
@@ -3751,7 +3757,7 @@ function bizPosters(where){
     (SVCSUB||[]).forEach(x=>{ if(x.photo) items.push({url:x.photo, name:x.name||'Servis', view:'svc', ts:x.boosted||x.created||'', type:'service_submissions', id:x.id}); });
     if(!items.length) return '';
     items.sort((a,b)=>String(b.ts).localeCompare(String(a.ts)));
-    const imgs=items.map(it=>`<img class="p-car-img" src="${esc(it.url)}" alt="Poster ${esc(it.name)}" loading="lazy" onclick="trackAd('${it.type}','${it.id}','click');go('${it.view}')">`).join('');
+    const imgs=items.map(it=>`<img class="p-car-img" src="${esc(it.url)}" alt="Poster ${esc(it.name)}" loading="eager" fetchpriority="high" decoding="async" onclick="trackAd('${it.type}','${it.id}','click');go('${it.view}')">`).join('');
     if(items.length<2) return `<div class="p-carousel" style="margin-top:16px">${imgs}</div>`;
     const dur=Math.max(28, items.length*7);
     return `<div class="p-marquee" id="pmqWrap" style="margin-top:16px"><div class="p-mq-track" id="pmqTrack">${imgs}${imgs}</div></div>`;
@@ -4140,17 +4146,16 @@ function migRender(key){
   let h='<div class="mig-grid">';
   items.forEach(function(it,i){
     const src=it.url||(it.file?URL.createObjectURL(it.file):'');
-    h+='<div class="mig-t">'+(i===0?'<span class="mig-main">Utama</span>':'')+
-       '<img src="'+src+'">'+
+    h+='<div class="mig-t" data-key="'+key+'" data-uid="'+it.uid+'">'+(i===0?'<span class="mig-main">Utama</span>':'')+
+       '<img src="'+src+'" draggable="false">'+
        '<button type="button" class="mig-x" title="Buang" onclick="migRemove(\''+key+'\',\''+it.uid+'\')">×</button>'+
-       (i>0?'<button type="button" class="mig-star" title="Jadikan utama" onclick="migMain(\''+key+'\',\''+it.uid+'\')">⭐</button>':'')+
        '</div>';
   });
   if(items.length<10){
     h+='<label class="mig-add"><span class="mig-plus">+</span><small>Tambah</small>'+
        '<input type="file" accept="image/jpeg,image/png,image/webp" multiple style="display:none" onchange="migAdd(\''+key+'\',this)"></label>';
   }
-  h+='</div><div class="mig-cnt">'+items.length+'/10 gambar'+(items.length?' • gambar pertama = paparan utama':'')+'</div>';
+  h+='</div><div class="mig-cnt">'+items.length+'/10 gambar'+(items.length>1?' • tekan &amp; tahan gambar untuk jadikan utama':(items.length?' • gambar pertama = paparan utama':''))+'</div>';
   box.innerHTML=h;
 }
 function migAdd(key,input){
@@ -4190,6 +4195,48 @@ function galStrip(images){
   if(arr.length<2) return '';
   return '<div class="gal-strip">'+arr.map(u=>'<img class="gal-thumb" src="'+esc(u)+'" loading="lazy" onerror="this.style.display=\'none\'">').join('')+'</div>';
 }
+/* Tekan & tahan gambar galeri → menu 'Jadikan gambar utama' */
+var _migLpTimer=null,_migLpXY=null;
+function _migLpStart(e){
+  var t=e.target&&e.target.closest?e.target.closest('.mig-t'):null;
+  if(!t) return;
+  if(e.target.closest('.mig-x')) return;
+  _migLpXY={x:(e.clientX||0),y:(e.clientY||0)};
+  clearTimeout(_migLpTimer);
+  _migLpTimer=setTimeout(function(){ _migLpTimer=null; showMigMenu(t); try{ navigator.vibrate&&navigator.vibrate(18); }catch(_){} },420);
+}
+function _migLpMove(e){
+  if(!_migLpTimer||!_migLpXY) return;
+  if(Math.abs((e.clientX||0)-_migLpXY.x)>10||Math.abs((e.clientY||0)-_migLpXY.y)>10){ clearTimeout(_migLpTimer); _migLpTimer=null; }
+}
+function _migLpEnd(){ if(_migLpTimer){ clearTimeout(_migLpTimer); _migLpTimer=null; } }
+function hideMigMenu(){ var m=document.getElementById('migMenu'); if(m) m.remove(); }
+function showMigMenu(t){
+  hideMigMenu();
+  var key=t.getAttribute('data-key'), uid=t.getAttribute('data-uid');
+  var arr=(window.__MIG&&window.__MIG[key])||[]; var idx=arr.findIndex(function(x){return x.uid===uid;});
+  var m=document.createElement('div'); m.className='mig-menu'; m.id='migMenu';
+  var body=(idx===0)
+    ? '<div class="mig-menu-info">✓ Ini gambar utama</div>'
+    : '<button type="button" onclick="migMain(\''+key+'\',\''+uid+'\');hideMigMenu();">⭐ Jadikan gambar utama</button>';
+  m.innerHTML=body+'<button type="button" class="mig-menu-cancel" onclick="hideMigMenu()">Batal</button>';
+  document.body.appendChild(m);
+  var r=t.getBoundingClientRect(); var vw=document.documentElement.clientWidth, vh=document.documentElement.clientHeight;
+  var mw=Math.max(200,m.offsetWidth), mh=m.offsetHeight;
+  var left=r.left+window.scrollX;
+  if(left+mw>window.scrollX+vw-8) left=window.scrollX+vw-mw-8;
+  if(left<window.scrollX+8) left=window.scrollX+8;
+  var top=r.bottom+window.scrollY+6;
+  if(r.bottom+6+mh>vh && r.top-6-mh>0) top=r.top+window.scrollY-mh-6;
+  m.style.left=left+'px'; m.style.top=top+'px';
+}
+document.addEventListener('pointerdown',_migLpStart,true);
+document.addEventListener('pointermove',_migLpMove,true);
+document.addEventListener('pointerup',_migLpEnd,true);
+document.addEventListener('pointercancel',_migLpEnd,true);
+document.addEventListener('contextmenu',function(e){ if(e.target&&e.target.closest&&e.target.closest('.mig-t')) e.preventDefault(); },true);
+document.addEventListener('pointerdown',function(e){ var m=document.getElementById('migMenu'); if(m && !(e.target.closest&&(e.target.closest('#migMenu')||e.target.closest('.mig-t')))) hideMigMenu(); });
+window.addEventListener('scroll',function(){ hideMigMenu(); },true);
 function closeShare(){
   document.getElementById('shSheet').style.display='none';
   document.getElementById('shOverlay').style.display='none';
