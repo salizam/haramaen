@@ -28,6 +28,7 @@
 <meta name="twitter:image" content="https://haramaen.net/icon-512.png">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"HARAMAEN","alternateName":"Haramaen Panduan Umrah","url":"https://haramaen.net/","inLanguage":"ms-MY","description":"Platform panduan umrah lengkap Malaysia — agensi umrah berlesen MOTAC, harga pakej, kursus umrah & mutawwif, direktori servis, doa, waktu solat & eBook panduan ibadah umrah."}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"HARAMAEN","url":"https://haramaen.net/","logo":"https://haramaen.net/icon-512.png"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"HARAMAEN","url":"https://haramaen.net/","applicationCategory":"TravelApplication","operatingSystem":"Web, Android, iOS","inLanguage":"ms-MY","description":"App panduan umrah Malaysia — agensi berlesen MOTAC, harga pakej, kursus, direktori servis, waktu solat & eBook.","offers":{"@type":"Offer","price":"0","priceCurrency":"MYR"}}</script>
 <link rel="manifest" href="manifest.json?v=4">
 <script>/* Hide login flash while auth resolves (OAuth return or stored session) */
 try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);var _h=false;try{for(var _i=0;_i<localStorage.length;_i++){if(/^sb-.*-auth-token$/.test(localStorage.key(_i))){_h=true;break;}}}catch(e){}if(_r||_h)document.documentElement.classList.add('auth-pending');}catch(e){}</script>
@@ -894,6 +895,36 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .fb-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
   .fb-filter button{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
   .fb-filter button.on{background:var(--green);color:#fff;border-color:var(--green)}
+  /* ===== Popup galak buka di telefon (desktop sahaja) ===== */
+  .dtp-overlay{position:fixed;inset:0;background:rgba(20,10,40,.55);z-index:10050;display:none;align-items:center;justify-content:center;padding:20px}
+  .dtp-overlay.on{display:flex;animation:dtpFade .2s ease}
+  @keyframes dtpFade{from{opacity:0}to{opacity:1}}
+  .dtp-card{background:#fff;border-radius:20px;max-width:360px;width:100%;padding:26px 26px 22px;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.35);animation:dtpPop .25s cubic-bezier(.2,.8,.3,1.2)}
+  @keyframes dtpPop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+  .dtp-x{position:absolute;top:12px;right:12px;width:30px;height:30px;border:none;background:#f0ecfb;color:var(--green-d);border-radius:50%;font-size:15px;cursor:pointer;line-height:1}
+  .dtp-x:hover{background:#e6ddfb}
+  .dtp-emoji{font-size:38px;line-height:1;margin-bottom:6px}
+  .dtp-title{font-size:19px;font-weight:800;color:var(--ink);margin-bottom:8px;line-height:1.25}
+  .dtp-sub{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:16px}
+  .dtp-qrwrap{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;display:inline-block;box-shadow:0 3px 12px rgba(94,53,177,.12)}
+  .dtp-qr{width:180px;height:180px;display:block}
+  .dtp-url{font-size:13px;font-weight:700;color:var(--green);margin-top:10px;letter-spacing:.3px}
+  .dtp-btn{margin-top:16px;background:var(--green);color:#fff;border:none;border-radius:11px;padding:10px 22px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;width:100%}
+  .dtp-btn:hover{background:var(--green-d)}
+  /* ===== Kalkulator tukaran SAR (gaya XE) ===== */
+  .cur-box{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column}
+  .cur-row{display:flex;align-items:center;gap:8px}
+  .cur-row.a{order:1}.cur-mid{order:2}.cur-row.b{order:3}
+  .cur-box.rev .cur-row.a{order:3}.cur-box.rev .cur-row.b{order:1}
+  .cur-cur{display:flex;align-items:center;gap:6px;font-weight:800;font-size:14px;color:var(--ink);min-width:74px}
+  .cur-flag{font-size:19px}
+  .cur-inp{flex:1;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:17px;font-weight:800;color:var(--ink);text-align:right;font-family:inherit;background:#faf9ff;min-width:0}
+  .cur-inp:focus{outline:none;border-color:var(--green);background:#fff}
+  .cur-mid{display:flex;align-items:center;justify-content:center;gap:8px;margin:9px 0;color:var(--muted);font-size:11.5px;font-weight:600}
+  .cur-swap{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#f0ecfb;color:var(--green-d);cursor:pointer;font-size:15px;display:grid;place-items:center;flex:none}
+  .cur-swap:hover{background:#e6ddfb}
+  .cur-line{flex:1;height:1px;background:var(--line)}
+  .cur-note{font-size:11px;color:var(--muted);margin-top:9px;text-align:center}
 </style>
 </head>
 <body>
@@ -2858,11 +2889,29 @@ function renderHome(){
   renderPosterCarousel();
   const _sar=document.getElementById('sarHomeBox'); if(_sar) _sar.innerHTML=sarCardHtml();
 }
+function curNum(v){ v=(v==null?'':v).toString().replace(/[^0-9.]/g,''); var n=parseFloat(v); return isNaN(n)?0:n; }
+function curCalc(from){
+  var m=document.getElementById('curMYR'), s=document.getElementById('curSAR');
+  if(!m||!s||!SAR_RATE) return;
+  if(from==='sar'){ m.value=(curNum(s.value)*SAR_RATE).toFixed(2); }
+  else { s.value=(curNum(m.value)/SAR_RATE).toFixed(2); }
+}
+function curSwap(){ var b=document.getElementById('curBox'); if(b) b.classList.toggle('rev'); }
 function sarCardHtml(){
   return `<div class="card" style="background:linear-gradient(120deg,#fbf3d8,#fff);border-color:#f0e2b8;margin-top:16px">
       <div class="row-between"><b>💱 Kadar Tukaran (SAR)</b><span class="pill gold">Anggaran</span></div>
-      <div class="kv"><span>1 SAR (Riyal Saudi)</span><b>RM ${SAR_RATE.toFixed(2)}</b></div>
-      <div class="kv"><span>RM 1,000 ≈</span><b>SAR ${(1000/SAR_RATE).toFixed(0)}</b></div>
+      <div class="cur-box" id="curBox">
+        <div class="cur-row a">
+          <div class="cur-cur"><span class="cur-flag">🇲🇾</span> RM</div>
+          <input class="cur-inp" id="curMYR" type="text" inputmode="decimal" value="100" oninput="curCalc('myr')">
+        </div>
+        <div class="cur-mid"><div class="cur-line"></div><button type="button" class="cur-swap" onclick="curSwap()" title="Tukar kedudukan">⇅</button><span>1 SAR = RM ${SAR_RATE.toFixed(2)}</span><div class="cur-line"></div></div>
+        <div class="cur-row b">
+          <div class="cur-cur"><span class="cur-flag">🇸🇦</span> SAR</div>
+          <input class="cur-inp" id="curSAR" type="text" inputmode="decimal" value="${(100/SAR_RATE).toFixed(2)}" oninput="curCalc('sar')">
+        </div>
+      </div>
+      <div class="cur-note">Kadar anggaran — sahkan dengan money changer sebelum bertukar. 💱</div>
     </div>`;
 }
 
@@ -4201,7 +4250,7 @@ function migRender(key){
   items.forEach(function(it,i){
     const src=it.url||(it.file?URL.createObjectURL(it.file):'');
     h+='<div class="mig-t" data-key="'+key+'" data-uid="'+it.uid+'">'+(i===0?'<span class="mig-main">Utama</span>':'')+
-       '<img src="'+src+'" draggable="false">'+
+       '<img src="'+src+'" alt="Gambar iklan" draggable="false">'+
        '<button type="button" class="mig-x" title="Buang" onclick="migRemove(\''+key+'\',\''+it.uid+'\')">×</button>'+
        '</div>';
   });
@@ -4248,7 +4297,7 @@ function galStrip(images){
   if(!Array.isArray(arr)) arr=[];
   if(arr.length<2) return '';
   const data=esc(JSON.stringify(arr));
-  return '<div class="gal-strip" data-imgs="'+data+'">'+arr.map((u,i)=>'<img class="gal-thumb" src="'+esc(u)+'" loading="lazy" onclick="galOpen(this,'+i+')" onerror="this.style.display=\'none\'">').join('')+'</div>';
+  return '<div class="gal-strip" data-imgs="'+data+'">'+arr.map((u,i)=>'<img class="gal-thumb" alt="Gambar iklan" src="'+esc(u)+'" loading="lazy" onclick="galOpen(this,'+i+')" onerror="this.style.display=\'none\'">').join('')+'</div>';
 }
 /* ===== Pemapar galeri (gallery viewer) — selak semua gambar iklan ===== */
 var _galImgs=[], _galI=0;
@@ -4718,12 +4767,12 @@ const PRAYERS=[['Fajr','Subuh'],['Dhuhr','Zohor'],['Asr','Asar'],['Maghrib','Mag
 const PICON={Subuh:'mosque',Syuruk:'clock',Zohor:'mosque',Asar:'mosque',Maghrib:'mosque',Isyak:'mosque'};
 const PBGC={Subuh:'#E8EAF6',Syuruk:'#FFF3E0',Zohor:'#FFFDE7',Asar:'#E3F2FD',Maghrib:'#FBE9E7',Isyak:'#EDE7F6'};
 const PSVG={
-  Subuh:`<img src="fajr.png" width="38" height="38">`,
-  Syuruk:`<img src="syuruk.png" width="38" height="38">`,
-  Zohor:`<img src="dhuhr.png" width="38" height="38">`,
-  Asar:`<img src="asar.png" width="38" height="38">`,
-  Maghrib:`<img src="maghrib.png" width="38" height="38">`,
-  Isyak:`<img src="isha.png" width="38" height="38">`
+  Subuh:`<img src="fajr.png" width="38" height="38" alt="Ikon waktu Subuh">`,
+  Syuruk:`<img src="syuruk.png" width="38" height="38" alt="Ikon waktu Syuruk">`,
+  Zohor:`<img src="dhuhr.png" width="38" height="38" alt="Ikon waktu Zohor">`,
+  Asar:`<img src="asar.png" width="38" height="38" alt="Ikon waktu Asar">`,
+  Maghrib:`<img src="maghrib.png" width="38" height="38" alt="Ikon waktu Maghrib">`,
+  Isyak:`<img src="isha.png" width="38" height="38" alt="Ikon waktu Isyak">`
 };;
 const CITY={me:{t:'Lokasi Saya'}, makkah:{t:'Makkah',lat:21.4225,lng:39.8262,method:4}, madinah:{t:'Madinah',lat:24.4672,lng:39.6111,method:4}};
 /* Pilih kaedah pengiraan waktu solat ikut zon waktu peranti (JAKIM utk Malaysia, dll) */
@@ -4885,6 +4934,14 @@ function toast(msg,ms=2800){
 }
 
 /* ============ BOOT ============ */
+function closeDtp(){ var o=document.getElementById('dtpOverlay'); if(o) o.classList.remove('on'); }
+function showDesktopTip(){
+  try{
+    if(!window.matchMedia || !window.matchMedia('(min-width:900px) and (pointer:fine)').matches) return;
+    var o=document.getElementById('dtpOverlay'); if(o) o.classList.add('on');
+  }catch(e){}
+}
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var o=document.getElementById('dtpOverlay'); if(o&&o.classList.contains('on')) closeDtp(); } });
 function boot(){
   buildNav();
   injectRteToolbars();
@@ -4898,6 +4955,7 @@ function boot(){
   loadHeroWx();
   paintIcons();
   if(isAdmin()){ refreshAdminBadges(); if(!window.__admBadgeTimer){ window.__admBadgeTimer=setInterval(()=>{ if(isAdmin()) refreshAdminBadges(); }, 90000); } }
+  showDesktopTip();
   // Restore view dari URL hash selepas semua data dimuatkan
   const rawHash=(location.hash||'').replace(/^#/,'');
   if(rawHash.indexOf('article=')===0){
@@ -5262,6 +5320,17 @@ if('serviceWorker' in navigator){
     <button class="sh-icon-btn" onclick="doShare('copy')"><div class="sh-ico" style="background:#6c757d">🔗</div><span>Salin Link</span></button>
   </div>
   <button class="sh-close" onclick="closeShare()">Tutup</button>
+</div>
+<div id="dtpOverlay" class="dtp-overlay" onclick="if(event.target===this)closeDtp()">
+  <div class="dtp-card">
+    <button class="dtp-x" onclick="closeDtp()" aria-label="Tutup">✕</button>
+    <div class="dtp-emoji">🕋</div>
+    <div class="dtp-title">Bawa Haramaen ke telefon anda</div>
+    <div class="dtp-sub">Imbas kod QR ini dengan kamera telefon, kemudian <b>Add to Home Screen</b> — akses pantas panduan umrah anda, bila-bila masa &amp; di mana sahaja. 📱</div>
+    <div class="dtp-qrwrap"><img class="dtp-qr" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjltbSIgaGVpZ2h0PSIyOW1tIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAyOSAyOSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMiwySDNWM0gyek0zLDJINFYzSDN6TTQsMkg1VjNINHpNNSwySDZWM0g1ek02LDJIN1YzSDZ6TTcsMkg4VjNIN3pNOCwySDlWM0g4ek0xMCwySDExVjNIMTB6TTEyLDJIMTNWM0gxMnpNMTQsMkgxNVYzSDE0ek0xNiwySDE3VjNIMTZ6TTIwLDJIMjFWM0gyMHpNMjEsMkgyMlYzSDIxek0yMiwySDIzVjNIMjJ6TTIzLDJIMjRWM0gyM3pNMjQsMkgyNVYzSDI0ek0yNSwySDI2VjNIMjV6TTI2LDJIMjdWM0gyNnpNMiwzSDNWNEgyek04LDNIOVY0SDh6TTEyLDNIMTNWNEgxMnpNMTMsM0gxNFY0SDEzek0xNCwzSDE1VjRIMTR6TTE1LDNIMTZWNEgxNXpNMTYsM0gxN1Y0SDE2ek0yMCwzSDIxVjRIMjB6TTI2LDNIMjdWNEgyNnpNMiw0SDNWNUgyek00LDRINVY1SDR6TTUsNEg2VjVINXpNNiw0SDdWNUg2ek04LDRIOVY1SDh6TTEwLDRIMTFWNUgxMHpNMTEsNEgxMlY1SDExek0xMyw0SDE0VjVIMTN6TTE1LDRIMTZWNUgxNXpNMTYsNEgxN1Y1SDE2ek0yMCw0SDIxVjVIMjB6TTIyLDRIMjNWNUgyMnpNMjMsNEgyNFY1SDIzek0yNCw0SDI1VjVIMjR6TTI2LDRIMjdWNUgyNnpNMiw1SDNWNkgyek00LDVINVY2SDR6TTUsNUg2VjZINXpNNiw1SDdWNkg2ek04LDVIOVY2SDh6TTExLDVIMTJWNkgxMXpNMTMsNUgxNFY2SDEzek0xNCw1SDE1VjZIMTR6TTE1LDVIMTZWNkgxNXpNMTYsNUgxN1Y2SDE2ek0xNyw1SDE4VjZIMTd6TTIwLDVIMjFWNkgyMHpNMjIsNUgyM1Y2SDIyek0yMyw1SDI0VjZIMjN6TTI0LDVIMjVWNkgyNHpNMjYsNUgyN1Y2SDI2ek0yLDZIM1Y3SDJ6TTQsNkg1VjdINHpNNSw2SDZWN0g1ek02LDZIN1Y3SDZ6TTgsNkg5VjdIOHpNMTQsNkgxNVY3SDE0ek0xNSw2SDE2VjdIMTV6TTE2LDZIMTdWN0gxNnpNMTgsNkgxOVY3SDE4ek0yMCw2SDIxVjdIMjB6TTIyLDZIMjNWN0gyMnpNMjMsNkgyNFY3SDIzek0yNCw2SDI1VjdIMjR6TTI2LDZIMjdWN0gyNnpNMiw3SDNWOEgyek04LDdIOVY4SDh6TTEwLDdIMTFWOEgxMHpNMTEsN0gxMlY4SDExek0xMiw3SDEzVjhIMTJ6TTEzLDdIMTRWOEgxM3pNMTYsN0gxN1Y4SDE2ek0yMCw3SDIxVjhIMjB6TTI2LDdIMjdWOEgyNnpNMiw4SDNWOUgyek0zLDhINFY5SDN6TTQsOEg1VjlINHpNNSw4SDZWOUg1ek02LDhIN1Y5SDZ6TTcsOEg4VjlIN3pNOCw4SDlWOUg4ek0xMCw4SDExVjlIMTB6TTEyLDhIMTNWOUgxMnpNMTQsOEgxNVY5SDE0ek0xNiw4SDE3VjlIMTZ6TTE4LDhIMTlWOUgxOHpNMjAsOEgyMVY5SDIwek0yMSw4SDIyVjlIMjF6TTIyLDhIMjNWOUgyMnpNMjMsOEgyNFY5SDIzek0yNCw4SDI1VjlIMjR6TTI1LDhIMjZWOUgyNXpNMjYsOEgyN1Y5SDI2ek0xMiw5SDEzVjEwSDEyek0xMyw5SDE0VjEwSDEzek0xNCw5SDE1VjEwSDE0ek0xNiw5SDE3VjEwSDE2ek0xNyw5SDE4VjEwSDE3ek0xOCw5SDE5VjEwSDE4ek0yLDEwSDNWMTFIMnpNNCwxMEg1VjExSDR6TTgsMTBIOVYxMUg4ek05LDEwSDEwVjExSDl6TTExLDEwSDEyVjExSDExek0xNCwxMEgxNVYxMUgxNHpNMTgsMTBIMTlWMTFIMTh6TTIxLDEwSDIyVjExSDIxek0yNCwxMEgyNVYxMUgyNHpNMjYsMTBIMjdWMTFIMjZ6TTIsMTFIM1YxMkgyek0zLDExSDRWMTJIM3pNOSwxMUgxMFYxMkg5ek0xMCwxMUgxMVYxMkgxMHpNMTIsMTFIMTNWMTJIMTJ6TTEzLDExSDE0VjEySDEzek0xNiwxMUgxN1YxMkgxNnpNMTcsMTFIMThWMTJIMTd6TTE4LDExSDE5VjEySDE4ek0yMCwxMUgyMVYxMkgyMHpNMjEsMTFIMjJWMTJIMjF6TTIzLDExSDI0VjEySDIzek0yNSwxMUgyNlYxMkgyNXpNMjYsMTFIMjdWMTJIMjZ6TTIsMTJIM1YxM0gyek0zLDEySDRWMTNIM3pNNSwxMkg2VjEzSDV6TTYsMTJIN1YxM0g2ek03LDEySDhWMTNIN3pNOCwxMkg5VjEzSDh6TTksMTJIMTBWMTNIOXpNMTAsMTJIMTFWMTNIMTB6TTExLDEySDEyVjEzSDExek0xMiwxMkgxM1YxM0gxMnpNMTQsMTJIMTVWMTNIMTR6TTE1LDEySDE2VjEzSDE1ek0xNywxMkgxOFYxM0gxN3pNMTksMTJIMjBWMTNIMTl6TTIwLDEySDIxVjEzSDIwek0yMSwxMkgyMlYxM0gyMXpNMjIsMTJIMjNWMTNIMjJ6TTIzLDEySDI0VjEzSDIzek0yNCwxMkgyNVYxM0gyNHpNMjYsMTJIMjdWMTNIMjZ6TTcsMTNIOFYxNEg3ek0xMCwxM0gxMVYxNEgxMHpNMTQsMTNIMTVWMTRIMTR6TTE4LDEzSDE5VjE0SDE4ek0xOSwxM0gyMFYxNEgxOXpNMjIsMTNIMjNWMTRIMjJ6TTIzLDEzSDI0VjE0SDIzek0yLDE0SDNWMTVIMnpNMywxNEg0VjE1SDN6TTUsMTRINlYxNUg1ek03LDE0SDhWMTVIN3pNOCwxNEg5VjE1SDh6TTEyLDE0SDEzVjE1SDEyek0xNCwxNEgxNVYxNUgxNHpNMTYsMTRIMTdWMTVIMTZ6TTE3LDE0SDE4VjE1SDE3ek0xOCwxNEgxOVYxNUgxOHpNMjAsMTRIMjFWMTVIMjB6TTIxLDE0SDIyVjE1SDIxek0yNiwxNEgyN1YxNUgyNnpNNiwxNUg3VjE2SDZ6TTEwLDE1SDExVjE2SDEwek0xMiwxNUgxM1YxNkgxMnpNMTQsMTVIMTVWMTZIMTR6TTE1LDE1SDE2VjE2SDE1ek0xNywxNUgxOFYxNkgxN3pNMTgsMTVIMTlWMTZIMTh6TTE5LDE1SDIwVjE2SDE5ek0yMCwxNUgyMVYxNkgyMHpNMjEsMTVIMjJWMTZIMjF6TTI1LDE1SDI2VjE2SDI1ek0yNiwxNUgyN1YxNkgyNnpNMiwxNkgzVjE3SDJ6TTMsMTZINFYxN0gzek02LDE2SDdWMTdINnpNOCwxNkg5VjE3SDh6TTEwLDE2SDExVjE3SDEwek0xMiwxNkgxM1YxN0gxMnpNMTQsMTZIMTVWMTdIMTR6TTE3LDE2SDE4VjE3SDE3ek0xOSwxNkgyMFYxN0gxOXpNMjAsMTZIMjFWMTdIMjB6TTIzLDE2SDI0VjE3SDIzek0yNCwxNkgyNVYxN0gyNHpNMjYsMTZIMjdWMTdIMjZ6TTQsMTdINVYxOEg0ek01LDE3SDZWMThINXpNOSwxN0gxMFYxOEg5ek0xMiwxN0gxM1YxOEgxMnpNMTMsMTdIMTRWMThIMTN6TTE0LDE3SDE1VjE4SDE0ek0xNiwxN0gxN1YxOEgxNnpNMjAsMTdIMjFWMThIMjB6TTIxLDE3SDIyVjE4SDIxek0yMiwxN0gyM1YxOEgyMnpNMjMsMTdIMjRWMThIMjN6TTIsMThIM1YxOUgyek0zLDE4SDRWMTlIM3pNNywxOEg4VjE5SDd6TTgsMThIOVYxOUg4ek0xMSwxOEgxMlYxOUgxMXpNMTIsMThIMTNWMTlIMTJ6TTE1LDE4SDE2VjE5SDE1ek0xNiwxOEgxN1YxOUgxNnpNMTcsMThIMThWMTlIMTd6TTE4LDE4SDE5VjE5SDE4ek0xOSwxOEgyMFYxOUgxOXpNMjAsMThIMjFWMTlIMjB6TTIxLDE4SDIyVjE5SDIxek0yMiwxOEgyM1YxOUgyMnpNMjUsMThIMjZWMTlIMjV6TTEwLDE5SDExVjIwSDEwek0xMiwxOUgxM1YyMEgxMnpNMTUsMTlIMTZWMjBIMTV6TTE4LDE5SDE5VjIwSDE4ek0yMiwxOUgyM1YyMEgyMnpNMjYsMTlIMjdWMjBIMjZ6TTIsMjBIM1YyMUgyek0zLDIwSDRWMjFIM3pNNCwyMEg1VjIxSDR6TTUsMjBINlYyMUg1ek02LDIwSDdWMjFINnpNNywyMEg4VjIxSDd6TTgsMjBIOVYyMUg4ek0xMCwyMEgxMVYyMUgxMHpNMTEsMjBIMTJWMjFIMTF6TTEzLDIwSDE0VjIxSDEzek0xOCwyMEgxOVYyMUgxOHpNMjAsMjBIMjFWMjFIMjB6TTIyLDIwSDIzVjIxSDIyek0yNiwyMEgyN1YyMUgyNnpNMiwyMUgzVjIySDJ6TTgsMjFIOVYyMkg4ek0xNSwyMUgxNlYyMkgxNXpNMTcsMjFIMThWMjJIMTd6TTE4LDIxSDE5VjIySDE4ek0yMiwyMUgyM1YyMkgyMnpNMjUsMjFIMjZWMjJIMjV6TTIsMjJIM1YyM0gyek00LDIySDVWMjNINHpNNSwyMkg2VjIzSDV6TTYsMjJIN1YyM0g2ek04LDIySDlWMjNIOHpNMTEsMjJIMTJWMjNIMTF6TTEzLDIySDE0VjIzSDEzek0xNCwyMkgxNVYyM0gxNHpNMTUsMjJIMTZWMjNIMTV6TTE3LDIySDE4VjIzSDE3ek0xOCwyMkgxOVYyM0gxOHpNMTksMjJIMjBWMjNIMTl6TTIwLDIySDIxVjIzSDIwek0yMSwyMkgyMlYyM0gyMXpNMjIsMjJIMjNWMjNIMjJ6TTI2LDIySDI3VjIzSDI2ek0yLDIzSDNWMjRIMnpNNCwyM0g1VjI0SDR6TTUsMjNINlYyNEg1ek02LDIzSDdWMjRINnpNOCwyM0g5VjI0SDh6TTEyLDIzSDEzVjI0SDEyek0xNCwyM0gxNVYyNEgxNHpNMTcsMjNIMThWMjRIMTd6TTE5LDIzSDIwVjI0SDE5ek0yMiwyM0gyM1YyNEgyMnpNMjQsMjNIMjVWMjRIMjR6TTI1LDIzSDI2VjI0SDI1ek0yLDI0SDNWMjVIMnpNNCwyNEg1VjI1SDR6TTUsMjRINlYyNUg1ek02LDI0SDdWMjVINnpNOCwyNEg5VjI1SDh6TTEwLDI0SDExVjI1SDEwek0xMiwyNEgxM1YyNUgxMnpNMTQsMjRIMTVWMjVIMTR6TTE1LDI0SDE2VjI1SDE1ek0xNiwyNEgxN1YyNUgxNnpNMTksMjRIMjBWMjVIMTl6TTIxLDI0SDIyVjI1SDIxek0yMiwyNEgyM1YyNUgyMnpNMjMsMjRIMjRWMjVIMjN6TTI1LDI0SDI2VjI1SDI1ek0yNiwyNEgyN1YyNUgyNnpNMiwyNUgzVjI2SDJ6TTgsMjVIOVYyNkg4ek0xMSwyNUgxMlYyNkgxMXpNMTIsMjVIMTNWMjZIMTJ6TTEzLDI1SDE0VjI2SDEzek0xNCwyNUgxNVYyNkgxNHpNMTYsMjVIMTdWMjZIMTZ6TTE4LDI1SDE5VjI2SDE4ek0yMSwyNUgyMlYyNkgyMXpNMjIsMjVIMjNWMjZIMjJ6TTIsMjZIM1YyN0gyek0zLDI2SDRWMjdIM3pNNCwyNkg1VjI3SDR6TTUsMjZINlYyN0g1ek02LDI2SDdWMjdINnpNNywyNkg4VjI3SDd6TTgsMjZIOVYyN0g4ek0xMCwyNkgxMVYyN0gxMHpNMTUsMjZIMTZWMjdIMTV6TTE2LDI2SDE3VjI3SDE2ek0xOCwyNkgxOVYyN0gxOHpNMjAsMjZIMjFWMjdIMjB6TTIzLDI2SDI0VjI3SDIzek0yNiwyNkgyN1YyN0gyNnoiIGlkPSJxci1wYXRoIiBmaWxsPSIjMDAwMDAwIiBmaWxsLW9wYWNpdHk9IjEiIGZpbGwtcnVsZT0ibm9uemVybyIgc3Ryb2tlPSJub25lIi8+PC9zdmc+" alt="Kod QR Haramaen"></div>
+    <div class="dtp-url">haramaen.net</div>
+    <button class="dtp-btn" onclick="closeDtp()">Nanti dulu</button>
+  </div>
 </div>
 </body>
 </html>
