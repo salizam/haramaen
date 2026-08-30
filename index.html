@@ -904,6 +904,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .dtp-x{position:absolute;top:12px;right:12px;width:30px;height:30px;border:none;background:#f0ecfb;color:var(--green-d);border-radius:50%;font-size:15px;cursor:pointer;line-height:1}
   .dtp-x:hover{background:#e6ddfb}
   .dtp-emoji{font-size:38px;line-height:1;margin-bottom:6px}
+  .dtp-logo{width:52px;height:52px;margin:0 auto 8px;background:var(--logo) center/contain no-repeat}
   .dtp-title{font-size:19px;font-weight:800;color:var(--ink);margin-bottom:8px;line-height:1.25}
   .dtp-sub{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:16px}
   .dtp-qrwrap{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;display:inline-block;box-shadow:0 3px 12px rgba(94,53,177,.12)}
@@ -1119,6 +1120,14 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
           <span style="display:block;font-size:12px;font-weight:400;color:var(--muted);margin-top:5px">Syarikat anda tiada dalam senarai? <a onclick="showAgReg()" style="cursor:pointer;color:var(--primary);text-decoration:underline">Sila senaraikan di sini.</a></span>
         </div>
         <div id="agencyList"></div>
+      </section>
+
+      <!-- TUKARAN WANG -->
+      <section class="view" id="v-tukaran">
+        <button class="backbtn" onclick="go('home')">← Kembali</button>
+        <div class="section-title">Tukaran Wang<span class="u"></span></div>
+        <div class="muted" style="font-size:12.5px;margin-bottom:6px">Kira anggaran tukaran wang Ringgit ↔ Riyal Saudi (SAR) segera. 💱</div>
+        <div id="tukaranBox"></div>
       </section>
 
       <!-- DU'A -->
@@ -1737,7 +1746,8 @@ const SVG={
   ai:'<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',
   kursus:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
   shop:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
-  wheelchair:'<circle cx="16" cy="4" r="1"/><path d="m18 19 1-7-6 1"/><path d="m5 8 3-3 5.5 3-2.36 3.5"/><path d="M4.24 14.5a5 5 0 0 0 6.88 6"/><path d="M13.76 17.5a5 5 0 0 0-6.88-6"/>'
+  wheelchair:'<circle cx="16" cy="4" r="1"/><path d="m18 19 1-7-6 1"/><path d="m5 8 3-3 5.5 3-2.36 3.5"/><path d="M4.24 14.5a5 5 0 0 0 6.88 6"/><path d="M13.76 17.5a5 5 0 0 0-6.88-6"/>',
+  tukar:'<rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>'
 };
 function svg(k){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${SVG[k]||SVG.home}</svg>`;}
 /* fill data-i icon spans */
@@ -1765,7 +1775,7 @@ const BOTTOM=[
   {v:'agency',t:'Agensi',i:'plane',c:'#10808e'},
   {v:'assistant',t:'AI',i:'ai',c:'#0ea5e9'},
 ];
-const TITLES={home:"HARAMAEN",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
+const TITLES={home:"HARAMAEN",tukaran:"Tukaran Wang",agency:"Cari Agensi",dua:"Kirim Doa",stay:"Penginapan",
   med:"Perubatan",svc:"Servis",shop:"Beli-Belah",guide:"Panduan Umrah",news:"Berita Umrah",tips:"Tip Umrah",article:"Artikel",lost:"Orang Hilang",solah:"Waktu Solat",kursus:"Kursus Umrah",mutawwif:"Kursus Mutawwif",assistant:"AI Assistant",admin:"Admin Dashboard"};
 const ADMIN_EMAILS=['salizam.oasys@gmail.com'];
 function isAdmin(){ return !!(state.user && ADMIN_EMAILS.includes((state.user.email||'').toLowerCase())); }
@@ -1781,7 +1791,7 @@ function buildNav(){
   renderMoreSheet();
   paintIcons();
 }
-const VALID_VIEWS=['home','agency','dua','stay','med','svc','shop','guide','news','lost','solah','kursus','mutawwif','assistant','admin','tips','article','myads','adstats'];
+const VALID_VIEWS=['home','agency','dua','stay','med','svc','shop','guide','news','lost','solah','kursus','mutawwif','assistant','admin','tips','article','myads','adstats','tukaran'];
 function go(v, fromHistory){
   if(!state.user && v!=='home'){ showLogin(); return; }
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
@@ -2202,6 +2212,7 @@ const MENU=[
   {t:'Penginapan',         s:'Hotel & penginapan pilihan terbaik',       c:'#d99a2b', i:'bed',    v:'stay'},
   {t:'Orang Hilang',       s:'Pusat maklumat & bantuan',                 c:'#d32f2f', i:'pin',    v:'lost'},
   {t:'Berita Umrah',       s:'Berita & info terkini umrah & haji',       c:'#2d63b8', i:'book',   v:'news'},
+  {t:'Tukaran Wang',       s:'Kira tukaran RM ↔ SAR segera',          c:'#1e9e5a', i:'tukar',  v:'tukaran'},
 ];
 const MY_NEGERI=['Johor','Kedah','Kelantan','Melaka','Negeri Sembilan','Pahang','Perak','Perlis','Pulau Pinang','Sabah','Sarawak','Selangor','Terengganu','W.P. Kuala Lumpur','W.P. Labuan','W.P. Putrajaya'];
 const DAERAH={
@@ -2890,30 +2901,31 @@ function renderHome(){
   const _sar=document.getElementById('sarHomeBox'); if(_sar) _sar.innerHTML=sarCardHtml();
 }
 function curNum(v){ v=(v==null?'':v).toString().replace(/[^0-9.]/g,''); var n=parseFloat(v); return isNaN(n)?0:n; }
-function curCalc(from){
-  var m=document.getElementById('curMYR'), s=document.getElementById('curSAR');
+function curCalc(from,sfx){ sfx=sfx||'';
+  var m=document.getElementById('curMYR'+sfx), s=document.getElementById('curSAR'+sfx);
   if(!m||!s||!SAR_RATE) return;
   if(from==='sar'){ m.value=(curNum(s.value)*SAR_RATE).toFixed(2); }
   else { s.value=(curNum(m.value)/SAR_RATE).toFixed(2); }
 }
-function curSwap(){ var b=document.getElementById('curBox'); if(b) b.classList.toggle('rev'); }
-function sarCardHtml(){
+function curSwap(sfx){ sfx=sfx||''; var b=document.getElementById('curBox'+sfx); if(b) b.classList.toggle('rev'); }
+function curCardHtml(sfx){ sfx=sfx||'';
   return `<div class="card" style="background:linear-gradient(120deg,#fbf3d8,#fff);border-color:#f0e2b8;margin-top:16px">
       <div class="row-between"><b>💱 Kadar Tukaran (SAR)</b><span class="pill gold">Anggaran</span></div>
-      <div class="cur-box" id="curBox">
+      <div class="cur-box" id="curBox${sfx}">
         <div class="cur-row a">
           <div class="cur-cur"><span class="cur-flag">🇲🇾</span> RM</div>
-          <input class="cur-inp" id="curMYR" type="text" inputmode="decimal" value="100" oninput="curCalc('myr')">
+          <input class="cur-inp" id="curMYR${sfx}" type="text" inputmode="decimal" value="100" oninput="curCalc('myr','${sfx}')">
         </div>
-        <div class="cur-mid"><div class="cur-line"></div><button type="button" class="cur-swap" onclick="curSwap()" title="Tukar kedudukan">⇅</button><span>1 SAR = RM ${SAR_RATE.toFixed(2)}</span><div class="cur-line"></div></div>
+        <div class="cur-mid"><div class="cur-line"></div><button type="button" class="cur-swap" onclick="curSwap('${sfx}')" title="Tukar kedudukan">⇅</button><span>1 SAR = RM ${SAR_RATE.toFixed(2)}</span><div class="cur-line"></div></div>
         <div class="cur-row b">
           <div class="cur-cur"><span class="cur-flag">🇸🇦</span> SAR</div>
-          <input class="cur-inp" id="curSAR" type="text" inputmode="decimal" value="${(100/SAR_RATE).toFixed(2)}" oninput="curCalc('sar')">
+          <input class="cur-inp" id="curSAR${sfx}" type="text" inputmode="decimal" value="${(100/SAR_RATE).toFixed(2)}" oninput="curCalc('sar','${sfx}')">
         </div>
       </div>
       <div class="cur-note">Kadar anggaran — sahkan dengan money changer sebelum bertukar. 💱</div>
     </div>`;
 }
+function sarCardHtml(){ return curCardHtml(''); }
 
 /* ============ AGENCY ============ */
 function agDomain(note){
@@ -4956,6 +4968,7 @@ function boot(){
   paintIcons();
   if(isAdmin()){ refreshAdminBadges(); if(!window.__admBadgeTimer){ window.__admBadgeTimer=setInterval(()=>{ if(isAdmin()) refreshAdminBadges(); }, 90000); } }
   showDesktopTip();
+  var _tk=document.getElementById('tukaranBox'); if(_tk) _tk.innerHTML=curCardHtml('v');
   // Restore view dari URL hash selepas semua data dimuatkan
   const rawHash=(location.hash||'').replace(/^#/,'');
   if(rawHash.indexOf('article=')===0){
@@ -5324,7 +5337,7 @@ if('serviceWorker' in navigator){
 <div id="dtpOverlay" class="dtp-overlay" onclick="if(event.target===this)closeDtp()">
   <div class="dtp-card">
     <button class="dtp-x" onclick="closeDtp()" aria-label="Tutup">✕</button>
-    <div class="dtp-emoji">🕋</div>
+    <div class="dtp-logo"></div>
     <div class="dtp-title">Bawa Haramaen ke telefon anda</div>
     <div class="dtp-sub">Imbas kod QR ini dengan kamera telefon, kemudian <b>Add to Home Screen</b> — akses pantas panduan umrah anda, bila-bila masa &amp; di mana sahaja. 📱</div>
     <div class="dtp-qrwrap"><img class="dtp-qr" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjltbSIgaGVpZ2h0PSIyOW1tIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAyOSAyOSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMiwySDNWM0gyek0zLDJINFYzSDN6TTQsMkg1VjNINHpNNSwySDZWM0g1ek02LDJIN1YzSDZ6TTcsMkg4VjNIN3pNOCwySDlWM0g4ek0xMCwySDExVjNIMTB6TTEyLDJIMTNWM0gxMnpNMTQsMkgxNVYzSDE0ek0xNiwySDE3VjNIMTZ6TTIwLDJIMjFWM0gyMHpNMjEsMkgyMlYzSDIxek0yMiwySDIzVjNIMjJ6TTIzLDJIMjRWM0gyM3pNMjQsMkgyNVYzSDI0ek0yNSwySDI2VjNIMjV6TTI2LDJIMjdWM0gyNnpNMiwzSDNWNEgyek04LDNIOVY0SDh6TTEyLDNIMTNWNEgxMnpNMTMsM0gxNFY0SDEzek0xNCwzSDE1VjRIMTR6TTE1LDNIMTZWNEgxNXpNMTYsM0gxN1Y0SDE2ek0yMCwzSDIxVjRIMjB6TTI2LDNIMjdWNEgyNnpNMiw0SDNWNUgyek00LDRINVY1SDR6TTUsNEg2VjVINXpNNiw0SDdWNUg2ek04LDRIOVY1SDh6TTEwLDRIMTFWNUgxMHpNMTEsNEgxMlY1SDExek0xMyw0SDE0VjVIMTN6TTE1LDRIMTZWNUgxNXpNMTYsNEgxN1Y1SDE2ek0yMCw0SDIxVjVIMjB6TTIyLDRIMjNWNUgyMnpNMjMsNEgyNFY1SDIzek0yNCw0SDI1VjVIMjR6TTI2LDRIMjdWNUgyNnpNMiw1SDNWNkgyek00LDVINVY2SDR6TTUsNUg2VjZINXpNNiw1SDdWNkg2ek04LDVIOVY2SDh6TTExLDVIMTJWNkgxMXpNMTMsNUgxNFY2SDEzek0xNCw1SDE1VjZIMTR6TTE1LDVIMTZWNkgxNXpNMTYsNUgxN1Y2SDE2ek0xNyw1SDE4VjZIMTd6TTIwLDVIMjFWNkgyMHpNMjIsNUgyM1Y2SDIyek0yMyw1SDI0VjZIMjN6TTI0LDVIMjVWNkgyNHpNMjYsNUgyN1Y2SDI2ek0yLDZIM1Y3SDJ6TTQsNkg1VjdINHpNNSw2SDZWN0g1ek02LDZIN1Y3SDZ6TTgsNkg5VjdIOHpNMTQsNkgxNVY3SDE0ek0xNSw2SDE2VjdIMTV6TTE2LDZIMTdWN0gxNnpNMTgsNkgxOVY3SDE4ek0yMCw2SDIxVjdIMjB6TTIyLDZIMjNWN0gyMnpNMjMsNkgyNFY3SDIzek0yNCw2SDI1VjdIMjR6TTI2LDZIMjdWN0gyNnpNMiw3SDNWOEgyek04LDdIOVY4SDh6TTEwLDdIMTFWOEgxMHpNMTEsN0gxMlY4SDExek0xMiw3SDEzVjhIMTJ6TTEzLDdIMTRWOEgxM3pNMTYsN0gxN1Y4SDE2ek0yMCw3SDIxVjhIMjB6TTI2LDdIMjdWOEgyNnpNMiw4SDNWOUgyek0zLDhINFY5SDN6TTQsOEg1VjlINHpNNSw4SDZWOUg1ek02LDhIN1Y5SDZ6TTcsOEg4VjlIN3pNOCw4SDlWOUg4ek0xMCw4SDExVjlIMTB6TTEyLDhIMTNWOUgxMnpNMTQsOEgxNVY5SDE0ek0xNiw4SDE3VjlIMTZ6TTE4LDhIMTlWOUgxOHpNMjAsOEgyMVY5SDIwek0yMSw4SDIyVjlIMjF6TTIyLDhIMjNWOUgyMnpNMjMsOEgyNFY5SDIzek0yNCw4SDI1VjlIMjR6TTI1LDhIMjZWOUgyNXpNMjYsOEgyN1Y5SDI2ek0xMiw5SDEzVjEwSDEyek0xMyw5SDE0VjEwSDEzek0xNCw5SDE1VjEwSDE0ek0xNiw5SDE3VjEwSDE2ek0xNyw5SDE4VjEwSDE3ek0xOCw5SDE5VjEwSDE4ek0yLDEwSDNWMTFIMnpNNCwxMEg1VjExSDR6TTgsMTBIOVYxMUg4ek05LDEwSDEwVjExSDl6TTExLDEwSDEyVjExSDExek0xNCwxMEgxNVYxMUgxNHpNMTgsMTBIMTlWMTFIMTh6TTIxLDEwSDIyVjExSDIxek0yNCwxMEgyNVYxMUgyNHpNMjYsMTBIMjdWMTFIMjZ6TTIsMTFIM1YxMkgyek0zLDExSDRWMTJIM3pNOSwxMUgxMFYxMkg5ek0xMCwxMUgxMVYxMkgxMHpNMTIsMTFIMTNWMTJIMTJ6TTEzLDExSDE0VjEySDEzek0xNiwxMUgxN1YxMkgxNnpNMTcsMTFIMThWMTJIMTd6TTE4LDExSDE5VjEySDE4ek0yMCwxMUgyMVYxMkgyMHpNMjEsMTFIMjJWMTJIMjF6TTIzLDExSDI0VjEySDIzek0yNSwxMUgyNlYxMkgyNXpNMjYsMTFIMjdWMTJIMjZ6TTIsMTJIM1YxM0gyek0zLDEySDRWMTNIM3pNNSwxMkg2VjEzSDV6TTYsMTJIN1YxM0g2ek03LDEySDhWMTNIN3pNOCwxMkg5VjEzSDh6TTksMTJIMTBWMTNIOXpNMTAsMTJIMTFWMTNIMTB6TTExLDEySDEyVjEzSDExek0xMiwxMkgxM1YxM0gxMnpNMTQsMTJIMTVWMTNIMTR6TTE1LDEySDE2VjEzSDE1ek0xNywxMkgxOFYxM0gxN3pNMTksMTJIMjBWMTNIMTl6TTIwLDEySDIxVjEzSDIwek0yMSwxMkgyMlYxM0gyMXpNMjIsMTJIMjNWMTNIMjJ6TTIzLDEySDI0VjEzSDIzek0yNCwxMkgyNVYxM0gyNHpNMjYsMTJIMjdWMTNIMjZ6TTcsMTNIOFYxNEg3ek0xMCwxM0gxMVYxNEgxMHpNMTQsMTNIMTVWMTRIMTR6TTE4LDEzSDE5VjE0SDE4ek0xOSwxM0gyMFYxNEgxOXpNMjIsMTNIMjNWMTRIMjJ6TTIzLDEzSDI0VjE0SDIzek0yLDE0SDNWMTVIMnpNMywxNEg0VjE1SDN6TTUsMTRINlYxNUg1ek03LDE0SDhWMTVIN3pNOCwxNEg5VjE1SDh6TTEyLDE0SDEzVjE1SDEyek0xNCwxNEgxNVYxNUgxNHpNMTYsMTRIMTdWMTVIMTZ6TTE3LDE0SDE4VjE1SDE3ek0xOCwxNEgxOVYxNUgxOHpNMjAsMTRIMjFWMTVIMjB6TTIxLDE0SDIyVjE1SDIxek0yNiwxNEgyN1YxNUgyNnpNNiwxNUg3VjE2SDZ6TTEwLDE1SDExVjE2SDEwek0xMiwxNUgxM1YxNkgxMnpNMTQsMTVIMTVWMTZIMTR6TTE1LDE1SDE2VjE2SDE1ek0xNywxNUgxOFYxNkgxN3pNMTgsMTVIMTlWMTZIMTh6TTE5LDE1SDIwVjE2SDE5ek0yMCwxNUgyMVYxNkgyMHpNMjEsMTVIMjJWMTZIMjF6TTI1LDE1SDI2VjE2SDI1ek0yNiwxNUgyN1YxNkgyNnpNMiwxNkgzVjE3SDJ6TTMsMTZINFYxN0gzek02LDE2SDdWMTdINnpNOCwxNkg5VjE3SDh6TTEwLDE2SDExVjE3SDEwek0xMiwxNkgxM1YxN0gxMnpNMTQsMTZIMTVWMTdIMTR6TTE3LDE2SDE4VjE3SDE3ek0xOSwxNkgyMFYxN0gxOXpNMjAsMTZIMjFWMTdIMjB6TTIzLDE2SDI0VjE3SDIzek0yNCwxNkgyNVYxN0gyNHpNMjYsMTZIMjdWMTdIMjZ6TTQsMTdINVYxOEg0ek01LDE3SDZWMThINXpNOSwxN0gxMFYxOEg5ek0xMiwxN0gxM1YxOEgxMnpNMTMsMTdIMTRWMThIMTN6TTE0LDE3SDE1VjE4SDE0ek0xNiwxN0gxN1YxOEgxNnpNMjAsMTdIMjFWMThIMjB6TTIxLDE3SDIyVjE4SDIxek0yMiwxN0gyM1YxOEgyMnpNMjMsMTdIMjRWMThIMjN6TTIsMThIM1YxOUgyek0zLDE4SDRWMTlIM3pNNywxOEg4VjE5SDd6TTgsMThIOVYxOUg4ek0xMSwxOEgxMlYxOUgxMXpNMTIsMThIMTNWMTlIMTJ6TTE1LDE4SDE2VjE5SDE1ek0xNiwxOEgxN1YxOUgxNnpNMTcsMThIMThWMTlIMTd6TTE4LDE4SDE5VjE5SDE4ek0xOSwxOEgyMFYxOUgxOXpNMjAsMThIMjFWMTlIMjB6TTIxLDE4SDIyVjE5SDIxek0yMiwxOEgyM1YxOUgyMnpNMjUsMThIMjZWMTlIMjV6TTEwLDE5SDExVjIwSDEwek0xMiwxOUgxM1YyMEgxMnpNMTUsMTlIMTZWMjBIMTV6TTE4LDE5SDE5VjIwSDE4ek0yMiwxOUgyM1YyMEgyMnpNMjYsMTlIMjdWMjBIMjZ6TTIsMjBIM1YyMUgyek0zLDIwSDRWMjFIM3pNNCwyMEg1VjIxSDR6TTUsMjBINlYyMUg1ek02LDIwSDdWMjFINnpNNywyMEg4VjIxSDd6TTgsMjBIOVYyMUg4ek0xMCwyMEgxMVYyMUgxMHpNMTEsMjBIMTJWMjFIMTF6TTEzLDIwSDE0VjIxSDEzek0xOCwyMEgxOVYyMUgxOHpNMjAsMjBIMjFWMjFIMjB6TTIyLDIwSDIzVjIxSDIyek0yNiwyMEgyN1YyMUgyNnpNMiwyMUgzVjIySDJ6TTgsMjFIOVYyMkg4ek0xNSwyMUgxNlYyMkgxNXpNMTcsMjFIMThWMjJIMTd6TTE4LDIxSDE5VjIySDE4ek0yMiwyMUgyM1YyMkgyMnpNMjUsMjFIMjZWMjJIMjV6TTIsMjJIM1YyM0gyek00LDIySDVWMjNINHpNNSwyMkg2VjIzSDV6TTYsMjJIN1YyM0g2ek04LDIySDlWMjNIOHpNMTEsMjJIMTJWMjNIMTF6TTEzLDIySDE0VjIzSDEzek0xNCwyMkgxNVYyM0gxNHpNMTUsMjJIMTZWMjNIMTV6TTE3LDIySDE4VjIzSDE3ek0xOCwyMkgxOVYyM0gxOHpNMTksMjJIMjBWMjNIMTl6TTIwLDIySDIxVjIzSDIwek0yMSwyMkgyMlYyM0gyMXpNMjIsMjJIMjNWMjNIMjJ6TTI2LDIySDI3VjIzSDI2ek0yLDIzSDNWMjRIMnpNNCwyM0g1VjI0SDR6TTUsMjNINlYyNEg1ek02LDIzSDdWMjRINnpNOCwyM0g5VjI0SDh6TTEyLDIzSDEzVjI0SDEyek0xNCwyM0gxNVYyNEgxNHpNMTcsMjNIMThWMjRIMTd6TTE5LDIzSDIwVjI0SDE5ek0yMiwyM0gyM1YyNEgyMnpNMjQsMjNIMjVWMjRIMjR6TTI1LDIzSDI2VjI0SDI1ek0yLDI0SDNWMjVIMnpNNCwyNEg1VjI1SDR6TTUsMjRINlYyNUg1ek02LDI0SDdWMjVINnpNOCwyNEg5VjI1SDh6TTEwLDI0SDExVjI1SDEwek0xMiwyNEgxM1YyNUgxMnpNMTQsMjRIMTVWMjVIMTR6TTE1LDI0SDE2VjI1SDE1ek0xNiwyNEgxN1YyNUgxNnpNMTksMjRIMjBWMjVIMTl6TTIxLDI0SDIyVjI1SDIxek0yMiwyNEgyM1YyNUgyMnpNMjMsMjRIMjRWMjVIMjN6TTI1LDI0SDI2VjI1SDI1ek0yNiwyNEgyN1YyNUgyNnpNMiwyNUgzVjI2SDJ6TTgsMjVIOVYyNkg4ek0xMSwyNUgxMlYyNkgxMXpNMTIsMjVIMTNWMjZIMTJ6TTEzLDI1SDE0VjI2SDEzek0xNCwyNUgxNVYyNkgxNHpNMTYsMjVIMTdWMjZIMTZ6TTE4LDI1SDE5VjI2SDE4ek0yMSwyNUgyMlYyNkgyMXpNMjIsMjVIMjNWMjZIMjJ6TTIsMjZIM1YyN0gyek0zLDI2SDRWMjdIM3pNNCwyNkg1VjI3SDR6TTUsMjZINlYyN0g1ek02LDI2SDdWMjdINnpNNywyNkg4VjI3SDd6TTgsMjZIOVYyN0g4ek0xMCwyNkgxMVYyN0gxMHpNMTUsMjZIMTZWMjdIMTV6TTE2LDI2SDE3VjI3SDE2ek0xOCwyNkgxOVYyN0gxOHpNMjAsMjZIMjFWMjdIMjB6TTIzLDI2SDI0VjI3SDIzek0yNiwyNkgyN1YyN0gyNnoiIGlkPSJxci1wYXRoIiBmaWxsPSIjMDAwMDAwIiBmaWxsLW9wYWNpdHk9IjEiIGZpbGwtcnVsZT0ibm9uemVybyIgc3Ryb2tlPSJub25lIi8+PC9zdmc+" alt="Kod QR Haramaen"></div>
