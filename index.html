@@ -385,6 +385,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .k-poster-td{padding:6px 4px;vertical-align:middle}
   .k-poster-thumb{width:64px;height:80px;object-fit:cover;border-radius:8px;cursor:zoom-in;display:block;box-shadow:0 1px 5px rgba(0,0,0,.2)}
   .k-poster-thumb:hover{opacity:.85}
+  .k-poster-wrap{position:relative;display:inline-block}
+  .k-poster-count{position:absolute;right:3px;bottom:3px;background:rgba(0,0,0,.7);color:#fff;font-size:9px;font-weight:800;border-radius:6px;padding:1px 5px;pointer-events:none}
   #v-agency img,#v-stay img,#v-med img,#v-svc img,#v-shop img:not(.p-car-img),#v-mutawwif img{cursor:zoom-in}
   .ag-price{margin-top:7px;font-weight:800;font-size:15.5px;color:var(--ink);letter-spacing:-.3px}
   .ag-price .ag-from{font-size:10.5px;font-weight:600;color:var(--muted)}
@@ -1926,13 +1928,13 @@ async function loadData(){
   NEWS=(nw.data||[]);
   COURSES=(co.data||[]).map(c=>({id:c.id, atype:'courses', tarikh:c.tarikh_label, date:c.tarikh_date||'', masa:c.masa||'', lokasi:c.lokasi||'',
     daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||'', created:c.created_at||'',
-    poster_url:c.poster_url||'', exp:c.expires_at||'', boosted:c.boosted_at||''}))
+    poster_url:c.poster_url||'', images:c.images||[], exp:c.expires_at||'', boosted:c.boosted_at||''}))
     .filter(c=> (!c.date || c.date>=_todayISO()) && _pubActive(c.exp))
     .sort(_pubSortDate);
   try{ const mc=await sb.from('mutawwif_courses').select('*').eq('status','approved');
     MUTAWWIF=(mc.data||[]).map(c=>({id:c.id, atype:'mutawwif_courses', tarikh:c.tarikh_label, date:c.tarikh_date||'', masa:c.masa||'', lokasi:c.lokasi||'',
       daerah:c.daerah||'', negeri:c.negeri||'', hubungi:c.hubungi||'', anjuran:c.anjuran||'', created:c.created_at||'',
-      poster_url:c.poster_url||'', exp:c.expires_at||'', boosted:c.boosted_at||''}))
+      poster_url:c.poster_url||'', images:c.images||[], exp:c.expires_at||'', boosted:c.boosted_at||''}))
       .filter(c=> (!c.date || c.date>=_todayISO()) && _pubActive(c.exp))
       .sort(_pubSortDate); }catch(e){ MUTAWWIF=[]; }
   try{ const r=await sb.rpc('list_duas',{p_visitor:vid()}); LATEST_DUAS=(r&&r.data)||[]; }catch(e){ LATEST_DUAS=[]; }
@@ -2284,8 +2286,9 @@ function courseRow(k,dist){
   const shrT=esc(k.lokasi||'Kursus Umrah');
   const shrX=esc('Kursus Umrah: '+(k.lokasi||'')+(k.tarikh?' — '+k.tarikh:'')+(loc2?' ('+loc2+')':''));
   const shrU=esc(location.href);
-  const posterTd=k.poster_url
-    ?`<td class="k-poster-td"><img class="k-poster-thumb" src="${esc(k.poster_url)}" alt="Poster" loading="lazy" onclick="openPoster('${esc(k.poster_url)}')" onerror="this.style.display='none'"></td>`
+  const _kimgs=(function(){ var a=k.images; if(typeof a==='string'){ try{a=JSON.parse(a)}catch(_){a=[]} } if(!Array.isArray(a)) a=[]; var out=[]; if(k.poster_url) out.push(k.poster_url); a.forEach(function(u){ if(u&&out.indexOf(u)<0) out.push(u); }); return out; })();
+  const posterTd=_kimgs.length
+    ?`<td class="k-poster-td"><div class="k-poster-wrap"><img class="k-poster-thumb" src="${esc(_kimgs[0])}" alt="Poster kursus" loading="lazy" data-imgs="${esc(JSON.stringify(_kimgs))}" onclick="galOpen(this,0)" onerror="this.style.display='none'">${_kimgs.length>1?`<span class="k-poster-count">+${_kimgs.length-1}</span>`:''}</div></td>`
     :`<td class="k-poster-td"></td>`;
   const mapQ=encodeURIComponent([k.lokasi,loc2].filter(Boolean).join(', '));
   const mapLink=mapQ?`<br><a href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" class="k-map-link">🗺️ Peta</a>`:'';
@@ -3785,7 +3788,10 @@ function renderShop(){
   const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:10px">Senarai bisnes &amp; peniaga (kurma, air zam-zam, makanan, oleh-oleh &amp; lain-lain) yang berkaitan dengan umrah dan haji. Ada bisnes? Tekan “Promote bisnes anda di sini” untuk disenaraikan. 🛍️</div>`;
   if(!items.length){ el.innerHTML=intro+`<div class="empty">Belum ada bisnes disenaraikan. Jadilah yang pertama! 🤍</div>`; return; }
   function shopCard(b){
-    const img=b.signboard?`<img src="${esc(b.signboard)}" alt="${esc(b.name)}" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.parentNode.textContent='🛍️'">`:'🛍️';
+    let _bimgs=b.images; if(typeof _bimgs==='string'){ try{_bimgs=JSON.parse(_bimgs)}catch(_){_bimgs=[]} } if(!Array.isArray(_bimgs)) _bimgs=[];
+    const _ballimgs=[]; if(b.signboard) _ballimgs.push(b.signboard); _bimgs.forEach(function(u){ if(u&&_ballimgs.indexOf(u)<0) _ballimgs.push(u); });
+    const _bgal=esc(JSON.stringify(_ballimgs));
+    const img=_ballimgs.length?`<img src="${esc(_ballimgs[0])}" alt="${esc(b.name)}" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in" loading="lazy" onerror="this.parentNode.textContent='🛍️'" data-imgs="${_bgal}" onclick="galOpen(this,0)">`:'🛍️';
     const mapQ=b.location?encodeURIComponent(b.name+' '+b.location):'';
     const webUrl=b.website?(b.website.match(/^https?:\/\//)?b.website:'https://'+b.website):'';
     const _ico=[];
@@ -3804,7 +3810,7 @@ function renderShop(){
         <b style="font-size:13.5px;line-height:1.3;display:block">${esc(b.name)}</b>
         ${b.category?`<div class="tag" style="margin-top:2px">${esc(b.category)}</div>`:''}
         ${b.desc?`<div class="tag" style="margin-top:4px">${esc(b.desc)}</div>`:''}
-        ${b._biz?galStrip(b.images):''}
+        ${b._biz?galStrip(_ballimgs):''}
         <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${shr}${(isAdmin()&&b._biz&&b.id)?`<button class="shr-sm" style="border-color:#c9a227;color:#8a6d1a" onclick="openBizEdit('${b.id}')">✏️ Edit</button><button class="shr-sm" style="border-color:#e0b4b4;color:#c0392b" data-id="${b.id}" onclick="delBiz(this)">🗑️ Padam</button>`:''}</div>
       </div>
     </div></div>`;
