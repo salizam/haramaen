@@ -105,8 +105,11 @@ exports.handler = async function(event){
     '<meta name="twitter:title" content="' + esc(title) + '">' +
     '<meta name="twitter:description" content="' + esc(desc) + '">' +
     '<meta name="twitter:image" content="' + esc(image) + '">' +
-    '<meta http-equiv="refresh" content="0; url=' + esc(redirect) + '">' +
-    '<script>location.replace(' + JSON.stringify(redirect) + ');<\/script>' +
+    // NOTE: NO <meta http-equiv="refresh"> — social crawlers (Facebook, WhatsApp,
+    // Twitter) follow a meta-refresh and would scrape the destination's generic OG
+    // instead of the per-item tags above. Crawlers don't run JavaScript, so we
+    // redirect real humans with JS only (after a tick, so the tags are always present).
+    '<script>setTimeout(function(){location.replace(' + JSON.stringify(redirect) + ');},60);<\/script>' +
     '</head><body style="font-family:system-ui,-apple-system,sans-serif;padding:28px;text-align:center;color:#311B92">' +
     '<p>Membuka HARAMAEN…</p>' +
     '<p><a href="' + esc(redirect) + '">Klik di sini jika tidak beralih automatik</a></p>' +
