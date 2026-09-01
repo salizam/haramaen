@@ -561,6 +561,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   .p-car-img:hover,.p-car-img:active{opacity:.82}
   .p-marquee{overflow:hidden;padding:4px 0 8px;touch-action:pan-y;cursor:grab}
   .p-marquee.grabbing{cursor:grabbing}
+  .card.ad-flash{animation:adFlash 1.7s ease}
+  @keyframes adFlash{0%,100%{box-shadow:0 0 0 0 rgba(201,162,39,0);border-color:var(--line)}18%,62%{box-shadow:0 0 0 3px rgba(201,162,39,.55);border-color:var(--gold)}}
   /* --- Iklan Saya --- */
   .mya-sub{font-size:12.5px;color:var(--muted);margin:2px 0 14px}
   .mya-back{background:#efe9fb;border:none;color:var(--green-d);font-weight:800;font-size:12.5px;padding:7px 12px;border-radius:9px;cursor:pointer}
@@ -3801,7 +3803,7 @@ function renderShop(){
     const hasIcon=_ico.length;
     const icons=agIconGrid(_ico);
     const shr=`<button class="shr-sm" data-title="${esc(b.name)}" data-text="${esc(b.name+(b.desc?' — '+b.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>`;
-    return `<div class="card"><div class="list-row" style="align-items:flex-start">
+    return `<div class="card"${(b._biz&&b.id)?` id="biz-${esc(String(b.id))}"`:''}><div class="list-row" style="align-items:flex-start">
       <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
         <div class="thumb" style="margin-bottom:0">${img}</div>
         ${hasIcon?icons:''}
@@ -3819,6 +3821,7 @@ function renderShop(){
   const shown=q?items.filter(b=>[b.name,b.category,b.desc,b.location].some(v=>(v||'').toLowerCase().includes(q))):items;
   const listHtml=shown.length?shown.map(shopCard).join(''):`<div class="empty">Tiada bisnes sepadan dengan carian “${esc(q)}”.</div>`;
   el.innerHTML=bizPosters('shop')+intro+listHtml;
+  initPosterDrag('pmqWrapShop','pmqTrackShop','__pmqRAFShop');
 }
 let bizEditId=null;
 function fillBizForm(b){
@@ -3882,13 +3885,25 @@ function bizPosters(where){
     const dur=Math.max(28, items.length*7);
     return `<div class="p-marquee" id="pmqWrap" style="margin-top:16px"><div class="p-mq-track" id="pmqTrack">${imgs}${imgs}</div></div>`;
   }
-  const posters=(BIZ||[]).filter(b=>b.poster);
-  if(!posters.length) return '';
-  return `<div class="p-carousel">${posters.map(b=>`<img class="p-car-img" src="${esc(b.poster)}" alt="Poster ${esc(b.name)}" loading="lazy" onclick="go('shop')">`).join('')}</div>`;
+  // where==='shop': karusel bergerak (marquee) iklan bisnes; klik imej -> skrol ke baris iklan
+  const sitems=[];
+  (BIZ||[]).forEach(function(b){ var u=b.poster||b.signboard||(Array.isArray(b.images)&&b.images[0])||''; if(u&&b.id) sitems.push({url:u, name:b.name||'Bisnes', id:b.id}); });
+  if(!sitems.length) return '';
+  const simgs=sitems.map(function(it){ return `<img class="p-car-img" src="${esc(it.url)}" alt="Iklan ${esc(it.name)}" loading="lazy" onclick="scrollToAd('${esc(String(it.id))}')">`; }).join('');
+  if(sitems.length<2) return `<div class="p-carousel" style="margin-bottom:10px">${simgs}</div>`;
+  return `<div class="p-marquee" id="pmqWrapShop" style="margin-bottom:10px"><div class="p-mq-track" id="pmqTrackShop">${simgs}${simgs}</div></div>`;
 }
-function initPosterDrag(){
-  var wrap=document.getElementById('pmqWrap'), track=document.getElementById('pmqTrack');
-  if(window.__pmqRAF){ cancelAnimationFrame(window.__pmqRAF); window.__pmqRAF=null; }
+function scrollToAd(id){
+  var el=document.getElementById('biz-'+id);
+  if(!el) return;
+  try{ el.scrollIntoView({behavior:'smooth', block:'center'}); }catch(_){ el.scrollIntoView(); }
+  el.classList.remove('ad-flash'); void el.offsetWidth; el.classList.add('ad-flash');
+  setTimeout(function(){ if(el) el.classList.remove('ad-flash'); }, 1700);
+}
+function initPosterDrag(wrapId,trackId,rafKey){
+  wrapId=wrapId||'pmqWrap'; trackId=trackId||'pmqTrack'; rafKey=rafKey||'__pmqRAF';
+  var wrap=document.getElementById(wrapId), track=document.getElementById(trackId);
+  if(window[rafKey]){ cancelAnimationFrame(window[rafKey]); window[rafKey]=null; }
   if(!wrap||!track) return;
   var half=0;
   function measure(){ half=track.scrollWidth/2; }
@@ -3898,7 +3913,7 @@ function initPosterDrag(){
   try{ if(window.matchMedia('(prefers-reduced-motion:reduce)').matches) speed=0; }catch(_){}
   function norm(){ if(half>0){ while(offset<=-half) offset+=half; while(offset>0) offset-=half; } }
   function apply(){ track.style.transform='translateX('+offset+'px)'; }
-  function frame(){ if(!dragging){ offset-=speed; norm(); apply(); } window.__pmqRAF=requestAnimationFrame(frame); }
+  function frame(){ if(!dragging){ offset-=speed; norm(); apply(); } window[rafKey]=requestAnimationFrame(frame); }
   wrap.addEventListener('pointerdown',function(e){
     dragging=true; moved=0; lastX=e.clientX; wrap.classList.add('grabbing');
     try{ wrap.setPointerCapture(e.pointerId); }catch(_){}
@@ -3916,7 +3931,7 @@ function initPosterDrag(){
   wrap.addEventListener('pointercancel',endDrag);
   track.addEventListener('click',function(e){ if(moved>8){ e.stopPropagation(); e.preventDefault(); moved=0; } },true);
   Array.prototype.forEach.call(track.querySelectorAll('img'),function(img){ if(!img.complete){ img.addEventListener('load',measure,{once:true}); } });
-  window.__pmqRAF=requestAnimationFrame(frame);
+  window[rafKey]=requestAnimationFrame(frame);
 }
 function closeBizForm(){
   bizEditId=null;
