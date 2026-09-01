@@ -2287,7 +2287,7 @@ function courseRow(k,dist){
   const dtxt=(dist!=null)?`<br><small class="kdist">📍 ~${Math.round(dist)} km</small>`:'';
   const shrT=esc(k.lokasi||'Kursus Umrah');
   const shrX=esc('Kursus Umrah: '+(k.lokasi||'')+(k.tarikh?' — '+k.tarikh:'')+(loc2?' ('+loc2+')':''));
-  const shrU=esc(location.href);
+  const shrU=esc(shareUrl(k.atype==='mutawwif'?'mutawwif':'course',k.id));
   const _kimgs=(function(){ var a=k.images; if(typeof a==='string'){ try{a=JSON.parse(a)}catch(_){a=[]} } if(!Array.isArray(a)) a=[]; var out=[]; if(k.poster_url) out.push(k.poster_url); a.forEach(function(u){ if(u&&out.indexOf(u)<0) out.push(u); }); return out; })();
   const posterTd=_kimgs.length
     ?`<td class="k-poster-td"><div class="k-poster-wrap"><img class="k-poster-thumb" src="${esc(_kimgs[0])}" alt="Poster kursus" loading="lazy" data-imgs="${esc(JSON.stringify(_kimgs))}" onclick="galOpen(this,0)" onerror="this.style.display='none'">${_kimgs.length>1?`<span class="k-poster-count">+${_kimgs.length-1}</span>`:''}</div></td>`
@@ -3126,7 +3126,7 @@ function agencyCardHtml(a, isPrem){
   const isUrl=/^https?:\/\//.test(contact);
   const isPhone=contact&&!isUrl;
   const shrTxt=esc(a.name+(hq?' — '+hq:''));
-  const shrUrl=esc(location.href);
+  const shrUrl=esc(shareUrl('agency',a.id));
   const isCheapest=Number(a.price)>0 && Number(a.price)===Number(window.__minAgPrice);
   const adminBtn=isAdmin()&&a.id?`<button class="shr-sm" style="border-color:#c9a227;color:#8a6d1a" onclick="togglePremium('${a.id}',${isPrem})">${isPrem?'★ Buang Premium':'☆ Premium'}</button>`:'';
   const mapQ=hq?encodeURIComponent(a.name+(hq?' '+hq:'')):'';
@@ -3653,7 +3653,7 @@ function renderHotels(){
         <div class="tag">📍 ${distTxt} dari ${landmark}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">
           <button class="btn ${mine?'gold':'ghost'} sm" onclick="setMyHotel('${h.name.replace(/'/g,"\\'")}')">${mine?'✓ Hotel saya':'Jadikan hotel saya'}</button>
-          <button class="shr-sm" data-title="${esc(h.name)}" data-text="${esc(h.name+' — '+distTxt+' dari '+landmark+', '+city)}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
+          <button class="shr-sm" data-title="${esc(h.name)}" data-text="${esc(h.name+' — '+distTxt+' dari '+landmark+', '+city)}" data-url="${esc(shareUrl('hotel',h.id))}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
         </div>
       </div></div></div>`;}).join('');
 }
@@ -3701,7 +3701,7 @@ function renderMed(){
       <div class="row-between"><b>${h.name}</b><span class="pill ${h.type==='Insurans'?'blue':(h.type==='Farmasi'?'gold':'red')}">${h.type}</span></div>
       <div class="tag">${h.tag}${h.dist!==null?' · 📍 '+h.dist+' km':''}</div>
       ${h.tel?`<div class="tag" style="margin-top:3px">☎ ${esc(h.tel)}</div>`:''}
-      <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(h.name)}" data-text="${esc(h.name+' ('+h.type+') — di Makkah')}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
+      <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(h.name)}" data-text="${esc(h.name+' ('+h.type+') — di Makkah')}" data-url="${esc(shareUrl('hotel',h.id))}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
       </div></div></div>`;}).join('') || `<div class="empty">Tiada rekod untuk jenis ini.</div>`);
 }
 function renderSvc(){
@@ -3752,7 +3752,7 @@ function renderSvc(){
       ${locLine}
       ${galStrip(imgs)}
       ${isAdmin()?`<div style="margin-top:6px"><button class="shr-sm" style="border-color:#e0b4b4;color:#c0392b" onclick="deleteAd('service_submissions','${o.id}',this)">🗑️ Padam</button></div>`:''}
-      <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(o.name)}" data-text="${esc(o.name+(o.desc?' — '+o.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
+      <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(o.name)}" data-text="${esc(o.name+(o.desc?' — '+o.desc:''))}" data-url="${esc(shareUrl('svc',o.id))}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
       </div></div></div>`;
   }
   const matchCat=(c,txt)=>c.key.some(k=>(txt||'').toLowerCase().includes(k.toLowerCase()));
@@ -3802,7 +3802,7 @@ function renderShop(){
     if(b.contact) _ico.push(`<a class="ag-icon-btn" href="${esc(waLink(b.contact))}" target="_blank" rel="noopener" data-tip="WhatsApp" onclick="trackAd('business_submissions','${b.id}','click')">${ICO_PHONE}</a>`);
     const hasIcon=_ico.length;
     const icons=agIconGrid(_ico);
-    const shr=`<button class="shr-sm" data-title="${esc(b.name)}" data-text="${esc(b.name+(b.desc?' — '+b.desc:''))}" data-url="${esc(location.href)}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>`;
+    const shr=`<button class="shr-sm" data-title="${esc(b.name)}" data-text="${esc(b.name+(b.desc?' — '+b.desc:''))}" data-url="${esc(shareUrl('biz',b.id))}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>`;
     return `<div class="card"${(b._biz&&b.id)?` id="biz-${esc(String(b.id))}"`:''}><div class="list-row" style="align-items:flex-start">
       <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
         <div class="thumb" style="margin-bottom:0">${img}</div>
@@ -4237,6 +4237,7 @@ async function ebookDelete(id,btn){
 
 /* ============ SHARE ============ */
 let _sd={};
+function shareUrl(type,id){ return (id!=null&&id!=='')?('https://haramaen.net/.netlify/functions/share?type='+encodeURIComponent(type)+'&id='+encodeURIComponent(id)):location.href; }
 function shareItem(el){
   const title=el.dataset.title||'';
   const text=el.dataset.text||'';
@@ -4466,7 +4467,7 @@ function renderArticle(){
   const author=item.author||'Haramaen';
   const tagPill=kind==='tip'?(item.category?`<span class="pill" style="background:#fff3d6;color:#8a6d1a">${esc(item.category)}</span>`:''):`<span class="pill ${newsTagCls(item.tag)}">${esc(item.tag||'Info')}</span>`;
   const img=item.image_url?`<img class="art-img" src="${esc(item.image_url)}" alt="${esc(item.title)}" onerror="this.style.display='none'">`:'';
-  const shrUrl=esc(location.href);
+  const shrUrl=esc(shareUrl(kind==='tip'?'tip':'news',item.id));
   const upSvg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="6"/><polyline points="6 12 12 6 18 12"/></svg>';
   const shareSvg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>';
   const fabAdmin=!isAdmin()?'':(kind==='news'
