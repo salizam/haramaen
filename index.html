@@ -1224,7 +1224,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
       </section>
 
       <section class="view" id="v-tips">
-        <div class="section-title">Tip Umrah<span class="u"></span></div>
+        <div class="ktitle-row"><div class="section-title">Tip Umrah<span class="u"></span></div><button class="kbtn kbtn-daftar" onclick="openTipForm()">✍️ Kongsi Tip Umrah</button></div>
         <div class="art-search"><input id="tipSearch" placeholder="🔍 Cari tip…" oninput="state.tipQ=this.value; renderTipsList()"></div>
         <div id="tipsListBox"></div>
       </section>
@@ -1359,6 +1359,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Servis menunggu kelulusan</span><span class="acc-badge" id="bSvc"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingSvc"><div class="empty">Memuatkan…</div></div></div></div></div>
         <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Agensi menunggu kelulusan</span><span class="acc-badge" id="bAgency"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingAgency"><div class="empty">Memuatkan…</div></div></div></div></div>
         <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Kursus Mutawwif menunggu kelulusan</span><span class="acc-badge" id="bMutawwif"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingMutawwif"><div class="empty">Memuatkan…</div></div></div></div></div>
+        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Tip Umrah menunggu kelulusan</span><span class="acc-badge" id="bTip"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingTip"><div class="empty">Memuatkan…</div></div></div></div></div>
         <div class="acc"><button class="acc-h" onclick="toggleFbAcc(this)"><span>Maklum Balas Pengguna</span><span class="acc-badge" id="fbCount"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div class="fb-filter" id="fbFilter"><button class="on" onclick="filterFb('all',this)">Semua</button><button onclick="filterFb('5',this)">★★★★★</button><button onclick="filterFb('4',this)">★★★★</button><button onclick="filterFb('3',this)">★★★</button><button onclick="filterFb('unrated',this)">Tanpa rating</button></div>
         <div id="admFeedback"><div class="empty">Memuatkan…</div></div></div></div></div>
         <div class="acc"><button class="acc-h" onclick="accToggle(this);loadUsersList()"><span>👥 Jumlah Pengguna</span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admUsers"><div class="empty">Memuatkan…</div></div></div></div></div>
@@ -1619,6 +1620,34 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
     <div class="modal-actions">
       <button class="m-cancel" onclick="closeSvcForm()">Batal</button>
       <button class="m-save" id="svcSave" onclick="submitSvcReg()">Hantar Permohonan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: KONGSI TIP UMRAH (PENGGUNA) -->
+<div class="modal" id="tipRegModal">
+  <div class="modal-box">
+    <h3>✍️ Kongsi Tip Umrah Anda</h3>
+    <div class="mh-sub">Kongsi pengalaman &amp; nasihat berguna anda dengan bakal jemaah. Tip akan disemak admin sebelum disiarkan. 🤍</div>
+    <label class="fl">Tajuk Tip <span style="color:#e74c3c">*</span></label>
+    <input id="tipTajuk" placeholder="cth: Cara elak sesat semasa tawaf">
+    <label class="fl">Kategori</label>
+    <select id="tipKategori" class="f">
+      <option>Ibadah</option>
+      <option>Kesihatan</option>
+      <option>Barang &amp; Persediaan</option>
+      <option>Kewangan</option>
+      <option>Penerbangan</option>
+      <option>Umum</option>
+    </select>
+    <label class="fl">Kandungan Tip <span style="color:#e74c3c">*</span></label>
+    <textarea id="tipKandungan" style="min-height:120px" placeholder="Kongsi pengalaman &amp; nasihat anda di sini…"></textarea>
+    <label class="fl">Gambar <span style="font-weight:400;color:var(--muted)">(pilihan — JPG/PNG/WEBP, maks 5MB)</span></label>
+    <input id="tipImg" type="file" accept="image/*" onchange="previewTipImg(this)">
+    <img id="tipImgPreview" style="display:none;max-width:100%;border-radius:10px;margin-top:8px" alt="">
+    <div class="modal-actions">
+      <button class="m-cancel" onclick="closeTipForm()">Batal</button>
+      <button class="m-save" id="tipSave" onclick="submitTipReg()">Hantar untuk Kelulusan</button>
     </div>
   </div>
 </div>
@@ -2649,12 +2678,12 @@ async function refreshAdminBadges(){
   if(!isAdmin()) return;
   const q=(t)=>sb.from(t).select('id',{count:'exact',head:true}).eq('status','pending');
   try{
-    const [c,b,sv,ag,mu,fb]=await Promise.all([sb.rpc('admin_list_pending_courses'),q('business_submissions'),q('service_submissions'),q('agencies'),q('mutawwif_courses'),sb.from('feedback').select('created_at')]);
-    const cK=(c.data&&c.data.length)||0, cB=b.count||0, cS=sv.count||0, cA=ag.count||0, cM=mu.count||0;
-    setBadge('bKursus',cK); setBadge('bBiz',cB); setBadge('bSvc',cS); setBadge('bAgency',cA); setBadge('bMutawwif',cM);
+    const [c,b,sv,ag,mu,tp,fb]=await Promise.all([sb.rpc('admin_list_pending_courses'),q('business_submissions'),q('service_submissions'),q('agencies'),q('mutawwif_courses'),q('umrah_tips'),sb.from('feedback').select('created_at')]);
+    const cK=(c.data&&c.data.length)||0, cB=b.count||0, cS=sv.count||0, cA=ag.count||0, cM=mu.count||0, cT=tp.count||0;
+    setBadge('bKursus',cK); setBadge('bBiz',cB); setBadge('bSvc',cS); setBadge('bAgency',cA); setBadge('bMutawwif',cM); setBadge('bTip',cT);
     const fbNew=fbNewCount((fb&&fb.data)||[]);
     setBadge('fbCount',fbNew);
-    const total=cK+cB+cS+cA+cM+fbNew;
+    const total=cK+cB+cS+cA+cM+cT+fbNew;
     setBadge('navAdminBadge',total); setBadge('moreAdminBadge',total); setBadge('tbAdminBadge',total); setBadge('tbNotifDot',total);
   }catch(e){}
 }
@@ -2671,6 +2700,7 @@ function renderAdmin(){
   loadPendingService();
   loadPendingAgency();
   loadPendingMutawwif();
+  loadPendingTips();
   loadFeedback();
 }
 async function loadAdminStats(quiet){
@@ -4043,6 +4073,79 @@ async function submitSvcReg(){
     toast('Gagal hantar. Cuba lagi.');
   }
   btn.disabled=false; btn.textContent='Hantar Permohonan';
+}
+
+/* ============ KONGSI TIP UMRAH (PENGGUNA) ============ */
+function openTipForm(){ if(!state.user){ showLogin(); return; } var m=document.getElementById('tipRegModal'); if(m) m.classList.add('open'); }
+function closeTipForm(){
+  var m=document.getElementById('tipRegModal'); if(m) m.classList.remove('open');
+  ['tipTajuk','tipKandungan'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  var fi=document.getElementById('tipImg'); if(fi) fi.value='';
+  var lp=document.getElementById('tipImgPreview'); if(lp){ lp.src=''; lp.style.display='none'; }
+}
+function previewTipImg(input){
+  var prev=document.getElementById('tipImgPreview');
+  if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; }
+  else { prev.style.display='none'; }
+}
+async function submitTipReg(){
+  if(!state.user){ showLogin(); return; }
+  var tajuk=(document.getElementById('tipTajuk').value||'').trim();
+  var kandungan=(document.getElementById('tipKandungan').value||'').trim();
+  if(!tajuk){ toast('Sila isi tajuk tip.'); return; }
+  if(!kandungan){ toast('Sila isi kandungan tip.'); return; }
+  var kategori=(document.getElementById('tipKategori').value||'').trim();
+  var btn=document.getElementById('tipSave'); btn.disabled=true; btn.textContent='Menghantar…';
+  try{
+    var imgUrl=null;
+    var fi=document.getElementById('tipImg'); var f=fi&&fi.files?fi.files[0]:null;
+    if(f){
+      if(f.size>5*1024*1024){ toast('Gambar terlalu besar — maks 5MB.'); btn.disabled=false; btn.textContent='Hantar untuk Kelulusan'; return; }
+      var ext=(f.name.split('.').pop()||'jpg').toLowerCase();
+      var path='tip-'+Date.now()+'.'+ext;
+      var up=await sb.storage.from('service-photos').upload(path,f,{contentType:f.type,upsert:false});
+      if(up.error) throw up.error;
+      imgUrl=sb.storage.from('service-photos').getPublicUrl(path).data.publicUrl;
+    }
+    var bodyHtml=esc(kandungan).replace(/\n/g,'<br>');
+    var {error}=await sb.from('umrah_tips').insert({ title:tajuk, body:bodyHtml, category:kategori||null, image_url:imgUrl, author:actorName(), submitted_by:state.user.id, status:'pending' });
+    if(error) throw error;
+    closeTipForm();
+    toast('Terima kasih! Tip anda sedang disemak admin. 🙏');
+  }catch(e){ toast('Gagal hantar. Cuba lagi.'); }
+  btn.disabled=false; btn.textContent='Hantar untuk Kelulusan';
+}
+async function loadPendingTips(){
+  var box=document.getElementById('admPendingTip'); if(!box) return;
+  try{
+    var {data,error}=await sb.from('umrah_tips').select('*').eq('status','pending').order('created_at',{ascending:false});
+    if(error) throw error;
+    var list=data||[];
+    box.innerHTML = list.length ? list.map(function(t){ return `
+      <div class="pend" data-id="${esc(String(t.id))}">
+        ${t.image_url?`<img class="pend-poster" src="${esc(t.image_url)}" alt="Gambar" loading="lazy" onerror="this.style.display='none'">`:''}
+        <h4>💡 ${esc(t.title||'Tip')}${t.category?` <span style="font-weight:600;color:var(--muted);font-size:12px">(${esc(t.category)})</span>`:''}</h4>
+        <div class="pmeta">${t.body?esc(String(t.body).replace(/<br\s*\/?>/gi,' ').replace(/<[^>]*>/g,'')).slice(0,240):''}<br><b>Pemohon:</b> ${esc(t.author||'Tanpa nama')}</div>
+        <div class="pend-act">
+          <button class="b-approve" onclick="setTip('${esc(String(t.id))}','published',this)">✓ Lulus</button>
+          <button class="b-reject" onclick="setTip('${esc(String(t.id))}','rejected',this)">✕ Tolak</button>
+          <button class="b-reject" onclick="deleteAd('umrah_tips','${esc(String(t.id))}',this)">🗑️ Padam</button>
+        </div>
+      </div>`; }).join('') : '<div class="empty">Tiada tip menunggu kelulusan.</div>';
+  }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat senarai (pastikan login sebagai admin).</div>'; }
+}
+async function setTip(id,status,btn){
+  if(status==='rejected' && !confirm('Adakah anda pasti untuk menolak tip ini?')) return;
+  if(btn) btn.disabled=true;
+  try{
+    var {error}=await sb.from('umrah_tips').update({status:status}).eq('id',id);
+    if(error) throw error;
+    toast(status==='published'?'Tip diluluskan & kini tersiar.':'Tip ditolak.');
+    if(status==='published'){
+      try{ var r=await sb.from('umrah_tips').select('*').eq('status','published').order('created_at',{ascending:false}).limit(50); TIPS=(r&&r.data)||[]; if(document.getElementById('tipsListBox')) renderTipsList(); }catch(e){}
+    }
+    loadPendingTips(); refreshAdminBadges();
+  }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
 }
 
 /* ============ PANDUAN UMRAH ============ */
