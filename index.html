@@ -1162,7 +1162,7 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
 
       <!-- STAY -->
       <section class="view" id="v-stay">
-        <div class="section-title">Penginapan<span class="u"></span></div>
+        <div class="ktitle-row"><div class="section-title">Penginapan<span class="u"></span></div><button class="kbtn kbtn-daftar" onclick="openStayForm()">Kongsi penginapan anda</button></div>
         <div class="card" style="background:linear-gradient(120deg,var(--green),var(--green-l));color:#fff;border:0">
           <div class="row-between">
             <div>
@@ -1180,18 +1180,21 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
           <button class="ho-tab" data-c="KLIA" onclick="setHoCity('KLIA')">✈️ Berhampiran KLIA</button>
         </div>
         <div class="section-title" id="hoTitle" style="font-size:15px;margin-top:6px">Hotel berhampiran Masjidil Haram</div>
+        <div class="card" style="padding:10px 12px;margin:8px 0 12px"><input id="stayQuery" placeholder="🔍 Cari hotel (nama…)" oninput="renderHotels()"></div>
         <div id="hotelList"></div>
       </section>
 
       <!-- DIRECTORY -->
       <section class="view" id="v-med">
-        <div class="section-title">Perubatan<span class="u"></span></div>
+        <div class="ktitle-row"><div class="section-title">Perubatan<span class="u"></span></div><button class="kbtn kbtn-daftar" onclick="openMedForm()">Kongsi servis anda</button></div>
+        <div class="card" style="padding:10px 12px;margin-bottom:12px"><input id="medQuery" placeholder="🔍 Cari perubatan (nama, jenis…)" oninput="renderMed()"></div>
         <div id="dir-med"></div>
       </section>
 
       <!-- SERVIS -->
       <section class="view" id="v-svc">
         <div class="ktitle-row"><div class="section-title">Servis<span class="u"></span></div><button class="kbtn kbtn-daftar" onclick="openSvcForm()">Kongsi servis anda</button></div>
+        <div class="card" style="padding:10px 12px;margin-bottom:12px"><input id="svcQuery" placeholder="🔍 Cari servis (nama, keterangan, lokasi…)" oninput="renderSvc()"></div>
         <div id="dir-svc"></div>
       </section>
 
@@ -1360,6 +1363,8 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
         <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Agensi menunggu kelulusan</span><span class="acc-badge" id="bAgency"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingAgency"><div class="empty">Memuatkan…</div></div></div></div></div>
         <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Kursus Mutawwif menunggu kelulusan</span><span class="acc-badge" id="bMutawwif"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingMutawwif"><div class="empty">Memuatkan…</div></div></div></div></div>
         <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Tip Umrah menunggu kelulusan</span><span class="acc-badge" id="bTip"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingTip"><div class="empty">Memuatkan…</div></div></div></div></div>
+        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Perubatan menunggu kelulusan</span><span class="acc-badge" id="bMed"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingMed"><div class="empty">Memuatkan…</div></div></div></div></div>
+        <div class="acc"><button class="acc-h" onclick="accToggle(this)"><span>Penginapan menunggu kelulusan</span><span class="acc-badge" id="bStay"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admPendingStay"><div class="empty">Memuatkan…</div></div></div></div></div>
         <div class="acc"><button class="acc-h" onclick="toggleFbAcc(this)"><span>Maklum Balas Pengguna</span><span class="acc-badge" id="fbCount"></span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div class="fb-filter" id="fbFilter"><button class="on" onclick="filterFb('all',this)">Semua</button><button onclick="filterFb('5',this)">★★★★★</button><button onclick="filterFb('4',this)">★★★★</button><button onclick="filterFb('3',this)">★★★</button><button onclick="filterFb('unrated',this)">Tanpa rating</button></div>
         <div id="admFeedback"><div class="empty">Memuatkan…</div></div></div></div></div>
         <div class="acc"><button class="acc-h" onclick="accToggle(this);loadUsersList()"><span>👥 Jumlah Pengguna</span><span class="acc-arw">▾</span></button><div class="acc-body"><div class="acc-inner"><div id="admUsers"><div class="empty">Memuatkan…</div></div></div></div></div>
@@ -1652,6 +1657,93 @@ try{var _r=/access_token=|[?&]code=|error=/.test(location.hash+location.search);
   </div>
 </div>
 
+<!-- MODAL: KONGSI PERUBATAN (PENGGUNA) -->
+<div class="modal" id="medRegModal">
+  <div class="modal-box">
+    <h3>🩺 Kongsi Servis Perubatan Anda</h3>
+    <div class="mh-sub">Senaraikan hospital, klinik, farmasi atau insurans anda dalam direktori Perubatan. Akan disemak admin sebelum disiarkan. 🤍</div>
+    <label class="fl">Nama <span style="color:#e74c3c">*</span></label>
+    <input id="medNama" placeholder="cth: Klinik Ummah Shah Alam">
+    <div class="modal-row">
+      <div>
+        <label class="fl">Jenis</label>
+        <select id="medJenis" class="f">
+          <option value="clinic">Klinik</option>
+          <option value="hospital">Hospital</option>
+          <option value="pharmacy">Farmasi</option>
+          <option value="insurance">Insurans</option>
+          <option value="other">Lain-lain</option>
+        </select>
+      </div>
+      <div>
+        <label class="fl">No. Telefon</label>
+        <input id="medTel" placeholder="cth: 03-XXXXXXXX">
+      </div>
+    </div>
+    <label class="fl">Alamat / Lokasi <span style="font-weight:400;color:var(--muted)">(untuk peta)</span></label>
+    <input id="medAlamat" placeholder="cth: No. 1, Jalan …, Shah Alam">
+    <label class="fl">Laman Web / Link <span style="font-weight:400;color:var(--muted)">(jika ada)</span></label>
+    <input id="medWeb" placeholder="cth: https://…">
+    <label class="fl">Keterangan Ringkas</label>
+    <textarea id="medDesc" placeholder="Perkhidmatan, waktu operasi, dll…"></textarea>
+    <div class="modal-actions">
+      <button class="m-cancel" onclick="closeMedForm()">Batal</button>
+      <button class="m-save" id="medSave" onclick="submitMedReg()">Hantar untuk Kelulusan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: KONGSI PENGINAPAN (PENGGUNA) -->
+<div class="modal" id="stayRegModal">
+  <div class="modal-box">
+    <h3>🏨 Kongsi Penginapan Anda</h3>
+    <div class="mh-sub">Senaraikan hotel / homestay anda dalam direktori Penginapan. Akan disemak admin sebelum disiarkan. 🤍</div>
+    <label class="fl">Nama <span style="color:#e74c3c">*</span></label>
+    <input id="stayNama" placeholder="cth: Homestay Makkah View">
+    <div class="modal-row">
+      <div>
+        <label class="fl">Jenis</label>
+        <select id="stayJenis" class="f">
+          <option value="hotel">Hotel</option>
+          <option value="homestay">Homestay</option>
+          <option value="apartment">Apartmen</option>
+        </select>
+      </div>
+      <div>
+        <label class="fl">Bandar</label>
+        <select id="stayBandar" class="f">
+          <option value="Makkah">Makkah</option>
+          <option value="Madinah">Madinah</option>
+          <option value="KLIA">Berhampiran KLIA</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-row">
+      <div>
+        <label class="fl">Jarak dari masjid (km) <span style="font-weight:400;color:var(--muted)">(pilihan)</span></label>
+        <input id="stayJarak" type="number" step="0.1" min="0" placeholder="cth: 0.8">
+      </div>
+      <div>
+        <label class="fl">Bintang <span style="font-weight:400;color:var(--muted)">(pilihan)</span></label>
+        <select id="stayBintang" class="f">
+          <option value="">—</option>
+          <option value="1">1 ★</option>
+          <option value="2">2 ★</option>
+          <option value="3">3 ★</option>
+          <option value="4">4 ★</option>
+          <option value="5">5 ★</option>
+        </select>
+      </div>
+    </div>
+    <label class="fl">Nota / Laman Web <span style="font-weight:400;color:var(--muted)">(pilihan)</span></label>
+    <textarea id="stayNota" placeholder="Cth: harga bilik, kemudahan, atau link tempahan https://…"></textarea>
+    <div class="modal-actions">
+      <button class="m-cancel" onclick="closeStayForm()">Batal</button>
+      <button class="m-save" id="staySave" onclick="submitStayReg()">Hantar untuk Kelulusan</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: EDIT BERITA (ADMIN) -->
 <div class="modal" id="enModal">
   <div class="modal-box" style="max-width:540px">
@@ -1939,7 +2031,7 @@ let AGENCIES=[], HOTELS=[], VOLUNTEERS=[], HOSPITALS=[], SERVICES=[], COURSES=[]
 let MUTAWWIF=[];
 let NEWS=[], LATEST_DUAS=[], TIPS=[], AG_REVIEW_SUMMARY={}, EBOOKS=[];
 let admTimer=null;
-const MED_MAP={hospital:{t:'Hospital',i:'🏥'}, pharmacy:{t:'Farmasi',i:'💊'}, insurance:{t:'Insurans',i:'🛡️'}};
+const MED_MAP={hospital:{t:'Hospital',i:'🏥'}, pharmacy:{t:'Farmasi',i:'💊'}, insurance:{t:'Insurans',i:'🛡️'}, clinic:{t:'Klinik',i:'🩺'}, other:{t:'Lain-lain',i:'🏥'}};
 function _todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 const SVC_ICON={wheelchair:'♿', kaaba:'🕋', guide:'🧕', exchange:'💱', laundry:'🧺', car:'🚕', shop:'🛍️'};
 async function loadData(){
@@ -1974,11 +2066,11 @@ async function loadData(){
   AGENCIES=(ag.data||[]).map(a=>({id:a.id, name:a.name, rating:Number(a.rating), reviews:Number(a.reviews_count||0),
     motac:a.motac_licensed, lic:a.motac_license||'—', price:Number(a.price), tier:a.tier, note:a.note||'', logo_url:a.logo_url||'', premium:!!a.is_premium,
     price_old:Number(a.price_old)||0, duration_days:Number(a.duration_days)||0, hotel_star:Number(a.hotel_star)||0, flight_note:a.flight_note||'', package_tier:a.package_tier||''}));
-  HOTELS=(ho.data||[]).map(h=>({name:h.name, dist:Number(h.distance_km), price:Number(h.price_per_night),
-    stars:Number(h.stars), icon:h.type==='homestay'?'🏠':'🏨', lat:Number(h.lat), lng:Number(h.lng), note:h.note||'', city:h.city||'Makkah'}));
+  HOTELS=(ho.data||[]).filter(h=>(h.status||'approved')!=='pending').map(h=>({id:h.id, status:h.status||'approved', name:h.name, dist:(h.distance_km==null?null:Number(h.distance_km)), price:Number(h.price_per_night),
+    stars:Number(h.stars)||0, icon:h.type==='homestay'?'🏠':'🏨', lat:Number(h.lat), lng:Number(h.lng), note:h.note||'', city:h.city||'Makkah'}));
   VOLUNTEERS=(vo.data||[]).map(v=>({name:v.name, loc:v.location, done:Number(v.duas_delivered||0), note:v.note||''}));
-  HOSPITALS=(me.data||[]).map(m=>{const k=MED_MAP[m.type]||{t:m.type,i:'🏥'};
-    return {name:m.name, type:k.t, icon:k.i, dist:m.distance_km===null?null:Number(m.distance_km), tel:m.phone, tag:m.tag||'', apply_url:m.apply_url||'', location:m.location||''};});
+  HOSPITALS=(me.data||[]).filter(m=>(m.status||'approved')!=='pending').map(m=>{const k=MED_MAP[m.type]||{t:m.type,i:'🏥'};
+    return {id:m.id, status:m.status||'approved', name:m.name, type:k.t, icon:k.i, dist:m.distance_km===null?null:Number(m.distance_km), tel:m.phone, tag:m.tag||'', apply_url:m.apply_url||'', location:m.location||''};});
   SERVICES=(sv.data||[]).map(s=>({name:s.name, icon:SVC_ICON[s.icon]||'🕋', desc:s.description||'', price:s.price_label||'', tag:s.tag||''}));
   try{ const bz=await sb.from('business_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); BIZ=(bz.data||[]).map(b=>({id:b.id, name:b.name||'', category:b.category||'', location:b.location||'', contact:b.contact||'', website:b.website||'', desc:b.description||'', signboard:b.signboard_url||'', poster:b.poster_url||'', images:b.images||[], created:b.created_at||'', exp:b.expires_at||'', boosted:b.boosted_at||''})).filter(b=>_pubActive(b.exp)).sort(_pubSortNew); }catch(e){ BIZ=[]; }
   try{ const ss=await sb.from('service_submissions').select('*').eq('status','approved').order('created_at',{ascending:false}); SVCSUB=(ss.data||[]).map(x=>({id:x.id, name:x.name||'', category:x.category||'', location:x.location||'', contact:x.contact||'', website:x.website||'', desc:x.description||'', photo:x.photo_url||'', images:x.images||[], created:x.created_at||'', exp:x.expires_at||'', boosted:x.boosted_at||''})).filter(x=>_pubActive(x.exp)).sort(_pubSortNew); }catch(e){ SVCSUB=[]; }
@@ -2678,12 +2770,12 @@ async function refreshAdminBadges(){
   if(!isAdmin()) return;
   const q=(t)=>sb.from(t).select('id',{count:'exact',head:true}).eq('status','pending');
   try{
-    const [c,b,sv,ag,mu,tp,fb]=await Promise.all([sb.rpc('admin_list_pending_courses'),q('business_submissions'),q('service_submissions'),q('agencies'),q('mutawwif_courses'),q('umrah_tips'),sb.from('feedback').select('created_at')]);
-    const cK=(c.data&&c.data.length)||0, cB=b.count||0, cS=sv.count||0, cA=ag.count||0, cM=mu.count||0, cT=tp.count||0;
-    setBadge('bKursus',cK); setBadge('bBiz',cB); setBadge('bSvc',cS); setBadge('bAgency',cA); setBadge('bMutawwif',cM); setBadge('bTip',cT);
+    const [c,b,sv,ag,mu,tp,md,ht,fb]=await Promise.all([sb.rpc('admin_list_pending_courses'),q('business_submissions'),q('service_submissions'),q('agencies'),q('mutawwif_courses'),q('umrah_tips'),q('medical_directory').then(r=>r,()=>({count:0})),q('hotels').then(r=>r,()=>({count:0})),sb.from('feedback').select('created_at')]);
+    const cK=(c.data&&c.data.length)||0, cB=b.count||0, cS=sv.count||0, cA=ag.count||0, cM=mu.count||0, cT=tp.count||0, cMed=md.count||0, cStay=ht.count||0;
+    setBadge('bKursus',cK); setBadge('bBiz',cB); setBadge('bSvc',cS); setBadge('bAgency',cA); setBadge('bMutawwif',cM); setBadge('bTip',cT); setBadge('bMed',cMed); setBadge('bStay',cStay);
     const fbNew=fbNewCount((fb&&fb.data)||[]);
     setBadge('fbCount',fbNew);
-    const total=cK+cB+cS+cA+cM+cT+fbNew;
+    const total=cK+cB+cS+cA+cM+cT+cMed+cStay+fbNew;
     setBadge('navAdminBadge',total); setBadge('moreAdminBadge',total); setBadge('tbAdminBadge',total); setBadge('tbNotifDot',total);
   }catch(e){}
 }
@@ -2701,6 +2793,8 @@ function renderAdmin(){
   loadPendingAgency();
   loadPendingMutawwif();
   loadPendingTips();
+  loadPendingMed();
+  loadPendingStay();
   loadFeedback();
 }
 async function loadAdminStats(quiet){
@@ -3665,13 +3759,14 @@ function renderHotels(){
   const landmark=city==='Madinah'?'Masjid Nabawi':(city==='KLIA'?'KLIA':'Masjidil Haram');
   const _t=document.getElementById('hoTitle'); if(_t) _t.textContent=city==='KLIA'?'Hotel & transit berhampiran KLIA':'Hotel berhampiran '+landmark;
   document.querySelectorAll('.ho-tab').forEach(b=>b.classList.toggle('on', b.getAttribute('data-c')===city));
-  let list=HOTELS.filter(h=>(h.city||'Makkah')===city).sort((a,b)=>a.dist-b.dist);
+  const q=(((document.getElementById('stayQuery')||{}).value)||'').toLowerCase().trim();
+  let list=HOTELS.filter(h=>(h.city||'Makkah')===city && (!q||String(h.name||'').toLowerCase().includes(q))).sort((a,b)=>(a.dist==null?1e9:a.dist)-(b.dist==null?1e9:b.dist));
   const el=document.getElementById('hotelList');
-  if(!list.length){el.innerHTML='<div class="empty">Tiada hotel.</div>';return;}
+  if(!list.length){el.innerHTML='<div class="empty">'+(q?'Tiada hotel sepadan dengan carian.':'Tiada hotel.')+'</div>';return;}
   el.innerHTML=list.map(h=>{
     const mine=state.myHotel&&state.myHotel.name===h.name;
     const web=/^https?:\/\//.test(h.note)?h.note:'';
-    const distTxt=h.dist>=1?h.dist+' km':Math.round(h.dist*1000)+' m';
+    const distTxt=(h.dist==null)?'':(h.dist>=1?h.dist+' km':Math.round(h.dist*1000)+' m');
     const mapQ=encodeURIComponent(h.name+' '+city);
     const _ico=[];
     _ico.push(`<a class="ag-icon-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" data-tip="Peta lokasi">${ICO_PIN}</a>`);
@@ -3680,7 +3775,7 @@ function renderHotels(){
       <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0"><div class="thumb">${h.icon}</div>${agIconGrid(_ico)}</div>
       <div style="flex:1;min-width:0;padding-left:12px">
         <div class="row-between"><b style="font-size:14px">${h.name}</b><span class="stars">${'★'.repeat(h.stars)}</span></div>
-        <div class="tag">📍 ${distTxt} dari ${landmark}</div>
+        ${distTxt?`<div class="tag">📍 ${distTxt} dari ${landmark}</div>`:''}
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">
           <button class="btn ${mine?'gold':'ghost'} sm" onclick="setMyHotel('${h.name.replace(/'/g,"\\'")}')">${mine?'✓ Hotel saya':'Jadikan hotel saya'}</button>
           <button class="shr-sm" data-title="${esc(h.name)}" data-text="${esc(h.name+' — '+distTxt+' dari '+landmark+', '+city)}" data-url="${esc(shareUrl('hotel',h.id))}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button>
@@ -3713,7 +3808,8 @@ function dirTab(t,el){
 function renderMed(){
   const types=[...new Set(['Hospital','Farmasi','Insurans',...HOSPITALS.map(h=>h.type)])];
   const sel=state.medFilter||'all';
-  const list=HOSPITALS.filter(h=>sel==='all'||h.type===sel);
+  const q=(((document.getElementById('medQuery')||{}).value)||'').toLowerCase().trim();
+  const list=HOSPITALS.filter(h=>(sel==='all'||h.type===sel) && (!q || [h.name,h.type,h.tag,h.tel,h.location].some(v=>String(v||'').toLowerCase().includes(q))));
   const opts=`<option value="all"${sel==='all'?' selected':''}>Semua jenis</option>`+types.map(t=>`<option value="${t}"${sel===t?' selected':''}>${t}</option>`).join('');
   document.getElementById('dir-med').innerHTML=
     `<div class="dir-filter"><label>Jenis</label><select onchange="state.medFilter=this.value;renderMed()">${opts}</select></div>`+
@@ -3732,7 +3828,7 @@ function renderMed(){
       <div class="tag">${h.tag}${h.dist!==null?' · 📍 '+h.dist+' km':''}</div>
       ${h.tel?`<div class="tag" style="margin-top:3px">☎ ${esc(h.tel)}</div>`:''}
       <div style="margin-top:8px"><button class="shr-sm" data-title="${esc(h.name)}" data-text="${esc(h.name+' ('+h.type+') — di Makkah')}" data-url="${esc(shareUrl('hotel',h.id))}" onclick="shareItem(this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:-2px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Kongsi</button></div>
-      </div></div></div>`;}).join('') || `<div class="empty">Tiada rekod untuk jenis ini.</div>`);
+      </div></div></div>`;}).join('') || `<div class="empty">${q?'Tiada rekod sepadan dengan carian.':'Tiada rekod untuk jenis ini.'}</div>`);
 }
 function renderSvc(){
   const cats=[
@@ -3755,6 +3851,8 @@ function renderSvc(){
     {id:'terjemah', icon:'🌐', key:['Terjemah','Juru bahasa','Translation','Translator'], title:'🌐 Terjemahan', label:'Terjemahan'},
   ];
   const sel=state.svcFilter||'all';
+  const q=(((document.getElementById('svcQuery')||{}).value)||'').toLowerCase().trim();
+  const matchQ=(o)=> !q || [o&&o.name,o&&o.desc,o&&o.category,o&&o.location].some(v=>String(v||'').toLowerCase().includes(q));
   const opts=`<option value="all"${sel==='all'?' selected':''}>Semua kategori</option>`+cats.map(c=>`<option value="${c.id}"${sel===c.id?' selected':''}>${c.label}</option>`).join('');
   let html=`<div class="dir-filter"><label>Kategori</label><select onchange="state.svcFilter=this.value;renderSvc()">${opts}</select></div>`;
   function svcCard(o){
@@ -3790,10 +3888,10 @@ function renderSvc(){
   let anySection=false;
   cats.forEach(c=>{
     if(sel!=='all'&&sel!==c.id) return;
-    const legacy=SERVICES.filter(s=>c.key.includes(s.tag)).map(s=>({name:s.name,icon:s.icon,desc:s.desc,pill:s.price,contact:'',photo:'',location:'',website:''}));
-    const subs=(SVCSUB||[]).filter(x=>matchCat(c,x.category)).map(x=>{used.add(x.id);return {id:x.id,name:x.name,icon:c.icon||'🛎️',desc:x.desc,pill:'',contact:x.contact,photo:x.photo,images:x.images,location:x.location,website:x.website};});
+    const legacy=SERVICES.filter(s=>c.key.includes(s.tag)).map(s=>({name:s.name,icon:s.icon,desc:s.desc,pill:s.price,contact:'',photo:'',location:'',website:''})).filter(matchQ);
+    const subs=(SVCSUB||[]).filter(x=>matchCat(c,x.category)&&matchQ(x)).map(x=>{used.add(x.id);return {id:x.id,name:x.name,icon:c.icon||'🛎️',desc:x.desc,pill:'',contact:x.contact,photo:x.photo,images:x.images,location:x.location,website:x.website};});
     const items=subs.concat(legacy);
-    if(!items.length && !c.always) return;
+    if(!items.length && (!c.always||q)) return;
     anySection=true;
     html+=`<div class="section-title" style="font-size:15px;margin-top:6px">${c.title}</div>`;
     if(!items.length){
@@ -3802,13 +3900,13 @@ function renderSvc(){
     }
     html+=items.map(svcCard).join('');
   });
-  const rest=(SVCSUB||[]).filter(x=>!used.has(x.id));
+  const rest=(SVCSUB||[]).filter(x=>!used.has(x.id)&&matchQ(x));
   if(sel==='all' && rest.length){
     anySection=true;
     html+=`<div class="section-title" style="font-size:15px;margin-top:6px">🛎️ Servis Lain</div>`;
     html+=rest.map(x=>svcCard({id:x.id,name:x.name,icon:'🛎️',desc:x.desc,pill:'',contact:x.contact,photo:x.photo,images:x.images,location:x.location,website:x.website})).join('');
   }
-  if(!anySection) html+=`<div class="empty">Tiada rekod untuk kategori ini.</div>`;
+  if(!anySection) html+=`<div class="empty">${q?'Tiada servis sepadan dengan carian.':'Tiada rekod untuk kategori ini.'}</div>`;
   document.getElementById('dir-svc').innerHTML=html;
 }
 function renderShop(){
@@ -4145,6 +4243,104 @@ async function setTip(id,status,btn){
       try{ var r=await sb.from('umrah_tips').select('*').eq('status','published').order('created_at',{ascending:false}).limit(50); TIPS=(r&&r.data)||[]; if(document.getElementById('tipsListBox')) renderTipsList(); }catch(e){}
     }
     loadPendingTips(); refreshAdminBadges();
+  }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
+}
+
+/* ============ KONGSI PERUBATAN & PENGINAPAN (PENGGUNA) ============ */
+function openMedForm(){ if(!state.user){ showLogin(); return; } var m=document.getElementById('medRegModal'); if(m) m.classList.add('open'); }
+function closeMedForm(){ var m=document.getElementById('medRegModal'); if(m) m.classList.remove('open'); ['medNama','medTel','medAlamat','medWeb','medDesc'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; }); }
+async function submitMedReg(){
+  if(!state.user){ showLogin(); return; }
+  var nama=(document.getElementById('medNama').value||'').trim();
+  if(!nama){ toast('Sila isi nama.'); return; }
+  var jenis=(document.getElementById('medJenis').value||'other');
+  var tel=(document.getElementById('medTel').value||'').trim();
+  var alamat=(document.getElementById('medAlamat').value||'').trim();
+  var web=(document.getElementById('medWeb').value||'').trim();
+  var desc=(document.getElementById('medDesc').value||'').trim();
+  var btn=document.getElementById('medSave'); btn.disabled=true; btn.textContent='Menghantar…';
+  try{
+    var {error}=await sb.from('medical_directory').insert({ name:nama, type:jenis, phone:tel||null, location:alamat||null, apply_url:web||null, tag:desc||null, submitted_by:state.user.id, status:'pending' });
+    if(error) throw error;
+    closeMedForm(); toast('Terima kasih! Servis anda sedang disemak admin. 🙏');
+  }catch(e){ toast('Gagal hantar. Cuba lagi (pastikan SQL Perubatan telah dijalankan).'); }
+  btn.disabled=false; btn.textContent='Hantar untuk Kelulusan';
+}
+async function loadPendingMed(){
+  var box=document.getElementById('admPendingMed'); if(!box) return;
+  try{
+    var {data,error}=await sb.from('medical_directory').select('*').eq('status','pending');
+    if(error) throw error;
+    var list=data||[];
+    box.innerHTML = list.length ? list.map(function(m){ return `
+      <div class="pend" data-id="${esc(String(m.id))}">
+        <h4>🩺 ${esc(m.name||'-')}${m.type?` <span style="font-weight:600;color:var(--muted);font-size:12px">(${esc(m.type)})</span>`:''}</h4>
+        <div class="pmeta"><b>Telefon:</b> ${esc(m.phone||'-')}<br><b>Alamat:</b> ${esc(m.location||'-')}<br>${m.apply_url?`<b>Web:</b> ${esc(m.apply_url)}<br>`:''}${m.tag?`<b>Keterangan:</b> ${esc(m.tag)}`:''}</div>
+        <div class="pend-act">
+          <button class="b-approve" onclick="setMed('${esc(String(m.id))}','approved',this)">✓ Lulus</button>
+          <button class="b-reject" onclick="setMed('${esc(String(m.id))}','rejected',this)">✕ Tolak</button>
+          <button class="b-reject" onclick="deleteAd('medical_directory','${esc(String(m.id))}',this)">🗑️ Padam</button>
+        </div>
+      </div>`; }).join('') : '<div class="empty">Tiada menunggu kelulusan.</div>';
+  }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat (pastikan SQL Perubatan telah dijalankan).</div>'; }
+}
+async function setMed(id,status,btn){
+  if(status==='rejected' && !confirm('Adakah anda pasti untuk menolak listing ini?')) return;
+  if(btn) btn.disabled=true;
+  try{
+    var {error}=await sb.from('medical_directory').update({status:status}).eq('id',id);
+    if(error) throw error;
+    toast(status==='approved'?'Diluluskan & kini dipapar di Perubatan.':'Ditolak.');
+    if(status==='approved'){ try{ await loadData(); renderMed(); }catch(e){} }
+    loadPendingMed(); refreshAdminBadges();
+  }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
+}
+function openStayForm(){ if(!state.user){ showLogin(); return; } var m=document.getElementById('stayRegModal'); if(m) m.classList.add('open'); }
+function closeStayForm(){ var m=document.getElementById('stayRegModal'); if(m) m.classList.remove('open'); ['stayNama','stayJarak','stayNota'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; }); var bt=document.getElementById('stayBintang'); if(bt) bt.value=''; }
+async function submitStayReg(){
+  if(!state.user){ showLogin(); return; }
+  var nama=(document.getElementById('stayNama').value||'').trim();
+  if(!nama){ toast('Sila isi nama.'); return; }
+  var jenis=(document.getElementById('stayJenis').value||'hotel');
+  var bandar=(document.getElementById('stayBandar').value||'Makkah');
+  var jarak=parseFloat(document.getElementById('stayJarak').value); if(isNaN(jarak)) jarak=null;
+  var bintang=parseInt(document.getElementById('stayBintang').value); if(isNaN(bintang)) bintang=null;
+  var nota=(document.getElementById('stayNota').value||'').trim();
+  var btn=document.getElementById('staySave'); btn.disabled=true; btn.textContent='Menghantar…';
+  try{
+    var {error}=await sb.from('hotels').insert({ name:nama, type:jenis, city:bandar, distance_km:jarak, stars:bintang, note:nota||null, submitted_by:state.user.id, status:'pending' });
+    if(error) throw error;
+    closeStayForm(); toast('Terima kasih! Penginapan anda sedang disemak admin. 🙏');
+  }catch(e){ toast('Gagal hantar. Cuba lagi (pastikan SQL Penginapan telah dijalankan).'); }
+  btn.disabled=false; btn.textContent='Hantar untuk Kelulusan';
+}
+async function loadPendingStay(){
+  var box=document.getElementById('admPendingStay'); if(!box) return;
+  try{
+    var {data,error}=await sb.from('hotels').select('*').eq('status','pending');
+    if(error) throw error;
+    var list=data||[];
+    box.innerHTML = list.length ? list.map(function(h){ return `
+      <div class="pend" data-id="${esc(String(h.id))}">
+        <h4>🏨 ${esc(h.name||'-')}${h.type?` <span style="font-weight:600;color:var(--muted);font-size:12px">(${esc(h.type)})</span>`:''}</h4>
+        <div class="pmeta"><b>Bandar:</b> ${esc(h.city||'-')}${h.distance_km!=null?` · ${esc(String(h.distance_km))} km`:''}${h.stars?` · ${esc(String(h.stars))}★`:''}<br>${h.note?`<b>Nota:</b> ${esc(h.note)}`:''}</div>
+        <div class="pend-act">
+          <button class="b-approve" onclick="setStay('${esc(String(h.id))}','approved',this)">✓ Lulus</button>
+          <button class="b-reject" onclick="setStay('${esc(String(h.id))}','rejected',this)">✕ Tolak</button>
+          <button class="b-reject" onclick="deleteAd('hotels','${esc(String(h.id))}',this)">🗑️ Padam</button>
+        </div>
+      </div>`; }).join('') : '<div class="empty">Tiada menunggu kelulusan.</div>';
+  }catch(e){ box.innerHTML='<div class="empty">Tak dapat muat (pastikan SQL Penginapan telah dijalankan).</div>'; }
+}
+async function setStay(id,status,btn){
+  if(status==='rejected' && !confirm('Adakah anda pasti untuk menolak listing ini?')) return;
+  if(btn) btn.disabled=true;
+  try{
+    var {error}=await sb.from('hotels').update({status:status}).eq('id',id);
+    if(error) throw error;
+    toast(status==='approved'?'Diluluskan & kini dipapar di Penginapan.':'Ditolak.');
+    if(status==='approved'){ try{ await loadData(); renderHotels(); }catch(e){} }
+    loadPendingStay(); refreshAdminBadges();
   }catch(e){ toast('Gagal kemas kini.'); if(btn) btn.disabled=false; }
 }
 
