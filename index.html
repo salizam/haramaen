@@ -1918,7 +1918,7 @@ function buildNav(){
 }
 const VALID_VIEWS=['home','agency','dua','stay','med','svc','shop','guide','news','lost','solah','kursus','mutawwif','assistant','admin','tips','article','myads','adstats','tukaran'];
 function go(v, fromHistory){
-  if(!state.user && v!=='home'){ showLogin(); return; }
+  if(!state.user && (v==='admin'||v==='myads'||v==='adstats')){ showLogin(); return; }
   document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
   const el=document.getElementById('v-'+v); if(el) el.classList.add('active');
   document.querySelectorAll('[data-v]').forEach(t=>t.classList.toggle('active', t.getAttribute('data-v')===v));
@@ -2581,7 +2581,7 @@ function fillMasa(){
 }
 let cfMode='course';
 function openMutawwifForm(){ cfMode='mutawwif'; openCourseForm(true); }
-function openCourseForm(_keep){
+function openCourseForm(_keep){ if(!state.user){ showLogin(); return; }
   if(!_keep) cfMode='course';
   const _t=document.getElementById('cfTitle'); if(_t) _t.textContent=(cfMode==='mutawwif'?'Daftar Kursus Mutawwif':'Daftar Kursus Umrah');
   const _sub=document.getElementById('cfSub'); if(_sub) _sub.textContent=(cfMode==='mutawwif'?'Isi maklumat kursus mutawwif. Kursus akan disemak admin dahulu sebelum dipaparkan dalam senarai.':'Isi maklumat kursus. Kursus akan disemak admin dahulu sebelum dipaparkan dalam senarai.');
@@ -3440,7 +3440,7 @@ async function submitFeedback(){
   closeFeedback();
   toast('Terima kasih! Maklum balas anda telah kami terima. 🙏');
 }
-function showAgReg(){document.getElementById('agRegModal').classList.add('open');}
+function showAgReg(){ if(!state.user){ showLogin(); return; } document.getElementById('agRegModal').classList.add('open');}
 function closeAgReg(){
   document.getElementById('agRegModal').classList.remove('open');
   ['arNama','arMotac','arRating','arHq','arWeb','arPhone','arPrice','arLogoUrl'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
@@ -3490,6 +3490,7 @@ function duaTab(t,el){
   if(t==='feed') loadFeed();
 }
 async function submitDua(){
+  if(!state.user){ showLogin(); return; }
   const text=document.getElementById('duaText').value.trim();
   if(!text){toast('Sila tulis doa anda dulu 🤲');return;}
   const name=actorName();
@@ -3988,7 +3989,7 @@ async function delBiz(btn){
     toast('Bisnes dipadam. 🗑️');
   }catch(e){ toast('Gagal padam — semak kebenaran admin.'); btn.disabled=false; btn.textContent='🗑️ Padam'; btn.removeAttribute('data-armed'); }
 }
-function openBizForm(){ bizEditId=null; fillBizForm(null); const h=document.querySelector('#bizRegModal h3'); if(h)h.textContent='Promote Bisnes Anda'; const sv=document.getElementById('bizSave'); if(sv)sv.textContent='Hantar Permohonan'; const m=document.getElementById('bizRegModal'); if(m) m.classList.add('open'); }
+function openBizForm(){ if(!state.user){ showLogin(); return; } bizEditId=null; fillBizForm(null); const h=document.querySelector('#bizRegModal h3'); if(h)h.textContent='Promote Bisnes Anda'; const sv=document.getElementById('bizSave'); if(sv)sv.textContent='Hantar Permohonan'; const m=document.getElementById('bizRegModal'); if(m) m.classList.add('open'); }
 function previewBizImg(input){
   const prev=document.getElementById('bizImgPreview');
   if(input.files&&input.files[0]){ prev.src=URL.createObjectURL(input.files[0]); prev.style.display='block'; }
@@ -4119,7 +4120,7 @@ async function submitBizReg(){
   btn.disabled=false; btn.textContent='Simpan';
 }
 
-function openSvcForm(){ try{ migInit('Svc',[]); }catch(_e){} const m=document.getElementById('svcRegModal'); if(m) m.classList.add('open'); }
+function openSvcForm(){ if(!state.user){ showLogin(); return; } try{ migInit('Svc',[]); }catch(_e){} const m=document.getElementById('svcRegModal'); if(m) m.classList.add('open'); }
 function closeSvcForm(){
   const m=document.getElementById('svcRegModal'); if(m) m.classList.remove('open');
   ['svcNama','svcContact','svcWeb','svcLokasi','svcDesc'].forEach(id=>{const e=document.getElementById(id); if(e) e.value='';});
@@ -5059,6 +5060,7 @@ async function markFound(id,btn){
   toast('Alhamdulillah, ditanda sudah dijumpai. 🤍');
 }
 async function reportLost(){
+  if(!state.user){ showLogin(); return; }
   const nm=(document.getElementById('lostName').value||'').trim();
   if(!nm){toast('Sila isi nama orang hilang.');return;}
   const desc=(document.getElementById('lostDesc').value||'').trim();
